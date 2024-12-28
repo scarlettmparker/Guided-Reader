@@ -1,0 +1,32 @@
+.alt_text {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  white-space: nowrap;
+  overflow: hidden;
+
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  padding: 5px 20px;
+  border-radius: 10px;
+  background-color: #252525;
+  color: white;
+
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+.alt_text.visible {
+  opacity: 1;
+}
+
+.alt_image {
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -35%);
+}

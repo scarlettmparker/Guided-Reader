@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.login_container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  /* container styling */
+  z-index: 1;
+  width: 640px;
+  height: 420px;
+  padding: 70px 90px 70px 80px;
+
+  border-radius: 20px;
+  background-color: #fbfbfb;
+  font-family: "Inter";
+  font-weight: 300;
+
+  /* shadow and blur styling */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.welcome_text {
+  font-size: 40px;
+  font-weight: 450;
+  color: #252525;
+  margin-bottom: 5px;
+}
+
+.input_form {
+  position: relative;
+  height: 52px;
+  width: calc(100% - 20px);
+  padding-left: 20px;
+  border-radius: 20px;
+
+  /* background and outline */
+  outline: none;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #C0C0C0;
+}
+
+.password_form {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.show_password {
+  z-index: 2;
+  top: calc(50% - 3px);
+  right: 3%;
+  position: absolute;
+  transform: translateY(-50%);
+}
+
+.password_button {
+  background: none;
+  border: none;
+  padding: 0;
+  height: fit-content;
+
+  /* hover styling */
+  user-select: none;
+  cursor: pointer;
+  transition: filter 0.15s ease-in-out;
+}
+
+.password_button:hover {
+  filter: brightness(0) saturate(100%) invert(53%) sepia(7%) saturate(7414%) hue-rotate(307deg) brightness(76%) contrast(121%);
+}
+
+.form_button {
+  position: relative;
+  margin: auto;
+
+  margin-bottom: 0.75em;
+  margin-top: 0.75em;
+
+  width: 90%;
+  height: 62px;
+
+  /* background, outline, other */
+  border-radius: 25px;
+  border: 1px solid #C0C0C0;
+  background-color: rgba(255, 255, 255, 0.4);
+  user-select: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.form_button:hover {
+  background-color: #252525;
+  color: rgb(235, 235, 235);
+}
+
+.login_form {
+  margin-top: 2.25em;
+}
+
+.input_text,
+.input_text::placeholder {
+  font-family: "Inter";
+  font-size: 1.35rem;
+  font-weight: 300;
+  color: rgba(81, 69, 68, 0.6);
+  user-select: none;
+}
+
+.body_text {
+  font-size: 1.2rem;
+  color: #252525;
+}
+
+.input_text {
+  color: #252525;
+}
+
+.forgot_form {
+  position: relative;
+  margin-bottom: 1.5em;
+}
+
+.forgot_text {
+  position: absolute;
+  right: 0;
+}
+
+.error_text {
+  position: absolute;
+  color: #FA3D66;
+}
+
+.highlight_text {
+  color: #CF3A5F;
+  text-decoration: underline dotted rgba(37, 37, 37, 0.4);
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out;
+}
+
+.highlight_text:hover {
+  color: rgb(148, 86, 15);
+}
+
+.button_text {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #252525;
+}
+
+.no_account_text {
+  position: relative;
+  align-self: center;
+}

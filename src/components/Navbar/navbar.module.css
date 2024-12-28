@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+
+.navbar {
+  position: absolute;
+  left: 50%;
+  width: 460px;
+  height: 54px;
+
+  gap: 12px;
+  padding: 0 20px;
+  z-index: 1000;
+  transform: translateX(-50%);
+
+  display: flex;
+  justify-content: row;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+
+  font-family: 'Inter';
+  color: #272121;
+  background-color: #fbfbfb;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+
+}
+
+.navbar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(0, 0, 0, .1);
+  border-top: none;
+  border-radius: 0 0 20px 20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.navbar:hover {
+  .hide_button_container {
+    opacity: 1;
+  }
+}
+
+.navbar_hidden {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 184px;
+  height: 4px;
+  z-index: 1000;
+
+  background-color: #c0c0c0;
+  border-radius: 0px 0px 20px 20px;
+  cursor: pointer;
+}
+
+.hide_button_container, .show_button_container {
+  position: absolute;
+  opacity: 0;
+  width: 40%;
+  height: 4px;
+
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+
+  border-radius: 20px 20px 0px 0px;
+  background-color: #c0c0c0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.hide_button_container::before, .show_button_container::before {
+  content: '';
+  position: absolute;
+  pointer-events: auto;
+
+  /* create invisible border to increase clickable area */
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border-radius: 30px;
+}
+
+.show_button_container {
+  top: 0;
+  width: 184px;
+  opacity: 1;
+  font-family: 'Inter';
+  cursor: pointer;
+  border-radius: 0px 0px 20px 20px;
+}
+
+.profile_picture {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.login_button, .user_button {
+  padding: 5px 10px;
+  border-radius: 10px;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.login_button {
+  margin-left: auto;
+}
+
+.login_button:hover, .user_button:hover {
+  background-color: #ececec;
+  color: #CF3A5F;
+}
+
+.alt_text {
+  position: relative;
+  width: fit-content;
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
+
+  padding: 5px 20px;
+  border-radius: 10px;
+  background-color: #252525;
+  color: white;
+
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+.alt_text.visible {
+  opacity: 1;
+}
+
+.body_text {
+  width: fit-content;
+  font-size: 1.2rem;
+}
