@@ -3,6 +3,8 @@
 using namespace postgres;
 class LastModifiedHandler : public RequestHandler {
   private:
+  ConnectionPool & pool;
+
   static std::string build_query(const std::string& table_name) {
     return "SELECT last_modified FROM public.\"" + table_name + "\" ORDER BY last_modified DESC LIMIT 1";
   }
@@ -17,19 +19,16 @@ class LastModifiedHandler : public RequestHandler {
   {
     try
     {
-      auto& pool = get_connection_pool();
-      auto c = pool.acquire();
-      pqxx::work txn(*c);
-      std::string last_modified = txn.query_value<std::string>(build_query(table_name));
-      txn.commit();
-      pool.release(c);
-      
-      if (last_modified.empty())
+      pqxx::result r = request::execute_query(pool, "SELECT last_modified FROM public.\"" 
+        + table_name + "\" ORDER BY last_modified DESC LIMIT 1", {});
+
+      if (r.empty())
       {
         verbose && std::cerr << "Table " << table_name << " not found" << std::endl;
         return "";
       }
-      return last_modified;
+      
+      return r[0][0].c_str();
     }
     catch (const std::exception &e)
     {
@@ -39,6 +38,8 @@ class LastModifiedHandler : public RequestHandler {
   }
 
   public:
+  LastModifiedHandler(ConnectionPool& connection_pool) : pool(connection_pool) {}
+
   std::string get_endpoint() const override
   {
     return "/last_modified";
@@ -54,17 +55,27 @@ class LastModifiedHandler : public RequestHandler {
     if (req.method() == http::verb::get)
     {
       /**
-       * -------------- GET LAST MODIFIED --------------
+       * GET last modified.
        */
 
-      std::optional<std::string> table_opt = request::parse_from_request(req, "table_name");
-      if (!table_opt.has_value())
+      nlohmann::json json_request;
+      try
       {
-        return request::make_bad_request_response("Invalid parameters", req);
+        json_request = nlohmann::json::parse(req.body());
       }
-      auto& table = table_opt.value();
+      catch (const nlohmann::json::parse_error &e)
+      {
+        return request::make_bad_request_response("Invalid JSON", req);
+      }
 
+      if (!json_request.contains("table"))
+      {
+        return request::make_bad_request_response("Invalid request: Missing required field (table).", req);
+      }
+
+      std::string table = json_request["table"].get<std::string>();
       std::string last_modified = select_last_modified(table, 0);
+
       if (last_modified.empty())
       {
         return request::make_bad_request_response("Table not found", req);
@@ -84,5 +95,5 @@ class LastModifiedHandler : public RequestHandler {
 
 extern "C" RequestHandler* create_last_modified_handler()
 {
-  return new LastModifiedHandler();
+  return new LastModifiedHandler(get_connection_pool());
 }

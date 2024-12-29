@@ -9,6 +9,8 @@ using namespace postgres;
 class UserHandler : public RequestHandler
 {
   private:
+  ConnectionPool & pool;
+
   struct UserData
   {
     std::string username;
@@ -71,11 +73,11 @@ class UserHandler : public RequestHandler
    * @param verbose Whether to print messages to stdout.
    * @return true if the session ID was set, false otherwise.
    */
-  bool set_session_id(std::string session_id, int user_id, std::string username, int duration, std::string ip_address, bool verbose)
+  bool set_session_id(std::string session_id, int user_id, int duration, std::string ip_address, bool verbose)
   {
     try
     {
-      auto & redis = Redis::get_instance();
+      sw::redis::Redis & redis = Redis::get_instance();
       auto now = std::chrono::system_clock::now();
 
       std::time_t created_at = std::chrono::system_clock::to_time_t(now);
@@ -136,7 +138,7 @@ class UserHandler : public RequestHandler
     {
       pqxx::result r = request::execute_query
       (
-        "SELECT id FROM public.\"User\" WHERE username = $1 LIMIT 1;", {{"$1", username}}
+        pool, "SELECT id FROM public.\"User\" WHERE username = $1 LIMIT 1;", {{"$1", username}}
       );
       if (r.empty())
       {
@@ -167,7 +169,7 @@ class UserHandler : public RequestHandler
     {
       pqxx::result r = request::execute_query
       (
-        "SELECT username, discord_id, avatar, nickname FROM public.\"User\" WHERE id = $1 LIMIT 1;", 
+        pool, "SELECT username, discord_id, avatar, nickname FROM public.\"User\" WHERE id = $1 LIMIT 1;", 
         {{"$1", std::to_string(id)}}
       );
 
@@ -207,7 +209,7 @@ class UserHandler : public RequestHandler
     {
       pqxx::result r = request::execute_query
       (
-        "SELECT username FROM public.\"User\" WHERE id = $1 LIMIT 1;", {{"$1", std::to_string(id)}}
+        pool, "SELECT username FROM public.\"User\" WHERE id = $1 LIMIT 1;", {{"$1", std::to_string(id)}}
       );
       if (r.empty())
       {
@@ -240,7 +242,7 @@ class UserHandler : public RequestHandler
     {
       pqxx::result r = request::execute_query
       (
-        "SELECT password FROM public.\"User\" WHERE username = $1 LIMIT 1;", {{"$1", username}}
+        pool, "SELECT password FROM public.\"User\" WHERE username = $1 LIMIT 1;", {{"$1", username}}
       );
       if (r.empty())
       {
@@ -283,6 +285,7 @@ class UserHandler : public RequestHandler
 
       pqxx::result r = request::execute_query
       (
+        pool,
         "INSERT INTO public.\"User\" ("
         "username, password, levels, discord_id, account_creation_date, "
         "avatar, nickname, access_token"
@@ -324,12 +327,14 @@ class UserHandler : public RequestHandler
   }
 
   public:
+  UserHandler(ConnectionPool& connection_pool) : pool(connection_pool) {}
+
   std::string get_endpoint() const override
   {
     return "/user";
   }
 
-  http::response<http::string_body> handle_request(http::request<http::string_body> const& req, const std::string& ip_address)
+  http::response<http::string_body> handle_request(http::request<http::string_body> const & req, const std::string & ip_address)
   {
     if (req.method() == http::verb::get)
     {
@@ -354,7 +359,7 @@ class UserHandler : public RequestHandler
         return request::make_bad_request_response("User not found", req);
       }
 
-      UserData user_data = select_user_data_from_id(user_id, true);
+      UserData user_data = select_user_data_from_id(user_id, false);
       if (user_data.username.empty())
       {
         return request::make_bad_request_response("User not found", req);
@@ -369,7 +374,7 @@ class UserHandler : public RequestHandler
         {"nickname", user_data.nickname}
       };
 
-      return request::make_user_request_response(user_info, req);
+      return request::make_json_request_response(user_info, req);
     }
     else if (req.method() == http::verb::post)
     {
@@ -413,7 +418,7 @@ class UserHandler : public RequestHandler
       }
 
       int expires_in = 86400;
-      if (!set_session_id(session_id, user_id, username, expires_in, ip_address, false))
+      if (!set_session_id(session_id, user_id, expires_in, ip_address, false))
       {
         return request::make_bad_request_response("Failed to set session ID", req);
       }
@@ -459,7 +464,7 @@ class UserHandler : public RequestHandler
         return request::make_bad_request_response("Failed to hash password", req);
       }
 
-      if (!register_user(username, hashed_password, true))
+      if (!register_user(username, hashed_password, false))
       {
         return request::make_bad_request_response("Failed to register user", req);
       }
@@ -487,5 +492,5 @@ class UserHandler : public RequestHandler
 
 extern "C" RequestHandler* create_user_handler()
 {
-  return new UserHandler();
+  return new UserHandler(get_connection_pool());
 }

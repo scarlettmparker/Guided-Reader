@@ -30,7 +30,7 @@ namespace request
       : key(std::move(k)), value(std::move(v)), max_size(ms) {}
   };
 
-  pqxx::result execute_query(const std::string & query, const std::vector<QueryParameter> & params);
+  pqxx::result execute_query(postgres::ConnectionPool & pool, const std::string & query, const std::vector<QueryParameter> & params);
   
   std::string_view get_session_id_from_cookie(const http::request<http::string_body>& req);
   int get_user_id_from_session(std::string session_id, bool verbose);
@@ -45,6 +45,6 @@ namespace request
   http::response<http::string_body> make_bad_request_response(const std::string& message, const http::request<http::string_body>& req);
   http::response<http::string_body> make_too_many_requests_response(const std::string& message, const http::request<http::string_body>& req);
   http::response<http::string_body> make_ok_request_response(const std::string& message, const http::request<http::string_body>& req);
-  http::response<http::string_body> make_user_request_response(const nlohmann::json& user_info, const http::request<http::string_body>& req);
+  http::response<http::string_body> make_json_request_response(const nlohmann::json& json_info, const http::request<http::string_body>& req);
 }
 #endif

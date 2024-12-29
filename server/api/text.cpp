@@ -1,0 +1,187 @@
+#include "api.hpp"
+
+using namespace postgres;
+class TextHandler : public RequestHandler
+{
+  private:
+  ConnectionPool & pool;
+
+  /**
+   * Select annotation positions for a text. This will return the start and end
+   * positions of each annotation in the text along with its ID.
+   *
+   * @param text_id ID of the text to select annotations for.
+   * @param verbose Whether to print messages to stdout.
+   */
+  nlohmann::json select_annotations(int text_id, bool verbose)
+  {
+    nlohmann::json text_data = nlohmann::json::array();
+
+    try
+    {
+      const std::string query =
+        "SELECT array_to_json(array_agg(row_to_json(t))) "
+        "FROM ("
+        "  SELECT id::integer,"
+        "         start::integer,"
+        "         \"end\"::integer"
+        "  FROM public.\"Annotation\" "
+        "  WHERE text_id = $1"
+        ") t";
+
+      pqxx::result r = request::execute_query(
+        pool, query,
+        {{"$1", std::to_string(text_id)}}
+      );
+
+      if (r.empty())
+      {
+        verbose && std::cout << "No annotations found for text with ID " << text_id << std::endl;
+        return text_data;
+      }
+
+      text_data = nlohmann::json::parse(r[0][0].as<std::string>());
+    }
+    catch (const std::exception &e)
+    {
+      verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+      verbose && std::cerr << "Unknown error while executing query" << std::endl;
+    }
+    return text_data;
+  }
+
+  /**
+   * Select text data from the database. This will return the text and language of a text object.
+   * @param text_id ID of the text to select.
+   * @param verbose Whether to print messages to stdout.
+   * @return JSON of text data.
+   */
+  nlohmann::json select_text_data(int text_id, std::string language, bool verbose)
+  {
+    nlohmann::json text_data = nlohmann::json::array();
+
+    std::string cache_key = "text:" + std::to_string(text_id) + ":" + language;
+    sw::redis::Redis& redis = Redis::get_instance();
+
+    try
+    {
+      std::optional<std::string> cache_result = redis.get(cache_key);
+
+      if (cache_result)
+      {
+        verbose && std::cout << "Cache hit for " << cache_key << std::endl;
+        return nlohmann::json::parse(*cache_result);
+      }
+
+      const std::string query =
+        "SELECT array_to_json(array_agg(row_to_json(t))) "
+        "FROM ("
+        "  SELECT id::integer,"
+        "         text::text,"
+        "         language::text,"
+        "         text_object_id::integer"
+        "  FROM public.\"Text\" "
+        "  WHERE text_object_id = $1"
+        "  AND language = $2"
+        ") t";
+
+      pqxx::result r = request::execute_query(
+        pool, query,
+        {{"$1", std::to_string(text_id)}, {"$2", language}}
+      );
+
+      if (r.empty())
+      {
+        verbose && std::cout << "Text with ID " << text_id << " not found" << std::endl;
+        return text_data;
+      }
+
+      text_data = nlohmann::json::parse(r[0][0].as<std::string>());
+      redis.set(cache_key, text_data.dump(), std::chrono::seconds(300)); // 5 minutes
+    }
+    catch (const std::exception &e)
+    {
+      verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+      verbose && std::cerr << "Unknown error while executing query" << std::endl;
+    }
+    return text_data;
+  }
+
+  public:
+  TextHandler(ConnectionPool& connection_pool) : pool(connection_pool) {}
+
+  std::string get_endpoint() const override
+  {
+    return "/text";
+  }
+
+  http::response<http::string_body> handle_request(http::request<http::string_body> const & req, const std::string & ip_address)
+  {
+    if (req.method() == http::verb::get)
+    {
+      /**
+       * GET text details.
+       */
+      std::optional<std::string> text_id_param = request::parse_from_request(req, "text_id");
+      std::optional<std::string> annotation_param = request::parse_from_request(req, "annotation");
+
+      if (!text_id_param)
+      {
+        return request::make_bad_request_response("Missing text_id parameter", req);
+      }
+
+      int text_id;
+      
+      try
+      {
+        text_id = std::stoi(text_id_param.value());
+      }
+      catch (const std::invalid_argument&)
+      {
+        return request::make_bad_request_response("Invalid numeric value for text_id", req);
+      }
+      catch (const std::out_of_range&)
+      {
+        return request::make_bad_request_response("Number out of range for text_id", req);
+      }
+      
+      // ... return annotation positions and ids for the text ...
+      if (annotation_param && *annotation_param == "true")
+      {
+        nlohmann::json text_data = select_annotations(text_id, true);
+        return request::make_json_request_response(text_data, req);
+      }
+
+      std::optional<std::string> language_param = request::parse_from_request(req, "language");
+      if (!language_param)
+      {
+        return request::make_bad_request_response("Missing language parameter", req);
+      }
+
+      std::string language = *language_param;
+
+      nlohmann::json text_info = select_text_data(text_id, language, false);
+      if (text_info.empty())
+      {
+        return request::make_bad_request_response("No text found", req);
+      }
+
+      return request::make_json_request_response(text_info, req);
+    }
+    else
+    {
+      return request::make_bad_request_response("Invalid request method", req);
+    }
+  }
+};
+
+extern "C" RequestHandler* create_text_handler()
+{
+  return new TextHandler(get_connection_pool());
+}

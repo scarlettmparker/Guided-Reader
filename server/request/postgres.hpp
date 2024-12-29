@@ -12,6 +12,12 @@
 
 namespace postgres
 {
+  struct ConnectionMetadata {
+    std::chrono::time_point<std::chrono::steady_clock> last_used;
+    std::chrono::time_point<std::chrono::steady_clock> last_checked;
+    bool is_healthy;
+  };
+
   class ConnectionPool
   {
   private:
@@ -26,15 +32,16 @@ namespace postgres
     explicit ConnectionPool(int size);
     ~ConnectionPool();
 
-    ConnectionPool(const ConnectionPool&) = delete;
-    ConnectionPool& operator=(const ConnectionPool&) = delete;
+    ConnectionPool(const ConnectionPool &) = delete;
+    ConnectionPool & operator=(const ConnectionPool &) = delete;
 
     pqxx::connection* acquire();
     void release(pqxx::connection* c);
   };
 
+  extern std::unordered_map<pqxx::connection*, ConnectionMetadata> connection_metadata;
   void init_connection();
-  ConnectionPool& get_connection_pool();
+  ConnectionPool & get_connection_pool();
 }
 
 #endif

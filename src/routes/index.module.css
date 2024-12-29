@@ -73,13 +73,27 @@
   overflow-y: auto;
 }
 
+.loading_buffer {
+  height: 900px; /* 10 text items */
+  width: 100%;
+}
+
 .text_display {
-  width: 750px;
-  height: 600px;
+  width: 690px;
+  height: 560px;
+  padding: 25px 25px 15px 35px;
 
   border-radius: 0px 0px 15px 0px;
   border-left: none;
   border-top: none;
+  font-size: 1.2rem;
+}
+
+.text_content {
+  position: relative;
+  overflow-y: auto;
+  height: 100%;
+  padding-right: 10px;
 }
 
 .text_list_item,

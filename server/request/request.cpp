@@ -3,15 +3,22 @@
 using namespace postgres;
 namespace request
 {
+  thread_local std::shared_ptr<pqxx::connection> cached_connection;
+  thread_local std::chrono::steady_clock::time_point last_used;
+
   /**
-   * Execute a query with the given parameters.
+   * Execute a query with the given parameters. This function will acquire a connection from the pool,
+   * execute the query, and return the result. If the query fails, the connection will be released and
+   * an exception will be thrown. If the connection is not used for more than 1 minute, it will be released.
+   *
+   * @param pool Connection pool to use.
    * @param query Query to execute.
    * @param params Parameters to use in the query.
    * @return Result of the query.
    */
-  pqxx::result execute_query(const std::string & query, const std::vector<QueryParameter> & params)
+  pqxx::result execute_query(postgres::ConnectionPool & pool, const std::string & query, const std::vector<QueryParameter> & params)
   {
-    for (const auto & param : params)
+    for (const QueryParameter & param : params)
     {
       if (param.value.empty())
       {
@@ -23,27 +30,42 @@ namespace request
       }
     }
 
-    auto & pool = get_connection_pool();
-    auto c = pool.acquire();
+    auto start = std::chrono::steady_clock::now();
+    
+    // ... acquire a connection from the pool ...
+    if (!cached_connection || 
+      std::chrono::duration_cast<std::chrono::minutes>(start - last_used).count() > 1)
+    {
+      cached_connection.reset(pool.acquire(), [&pool](pqxx::connection* c) {
+          pool.release(c);
+      });
+      last_used = start;
+    }
 
     try
     {
-      pqxx::work txn(*c);
+      pqxx::work txn(*cached_connection);
+      std::string sanitize_query = query;
 
-      pqxx::params sql_params;
       for (size_t i = 0; i < params.size(); ++i)
       {
-        sql_params.append(params[i].value);
+        // ... parameter validation and sanitization ...
+        std::string placeholder = "$" + std::to_string(i + 1);
+        size_t pos = sanitize_query.find(placeholder);
+        if (pos != std::string::npos)
+        {
+          sanitize_query.replace(pos, placeholder.size(), txn.quote(params[i].value));
+        }
       }
 
-      pqxx::result r = txn.exec_params(query, sql_params);
+      pqxx::result r = txn.exec(sanitize_query);
       txn.commit();
-      pool.release(c);
       return r;
     }
+
     catch (const std::exception & e)
     {
-      pool.release(c);
+      cached_connection.reset();
       throw std::runtime_error(std::string("Query execution failed: ") + e.what());
     }
   }
@@ -385,26 +407,26 @@ namespace request
   }
 
   /**
-   * Create a response with user information.
-   * @param user_info User information to include in the response.
+   * Create a response with JSON information.
+   * @param json_info JSON information to include in the response.
    * @param req Request to send the response for.
-   * @return Response with the user information.
+   * @return Response with the JSON information.
    */
-  http::response<http::string_body> make_user_request_response(
-    const nlohmann::json& user_info, const http::request<http::string_body>& req
+  http::response<http::string_body> make_json_request_response(
+    const nlohmann::json& json_info, const http::request<http::string_body>& req
   )
   {
     http::response<http::string_body> res{http::status::ok, req.version()};
     res.set(http::field::server, "Beast");
     res.set(http::field::content_type, "application/json");
 
-    nlohmann::json user_response =
+    nlohmann::json json_response =
     {
       {"status", "ok"},
-      {"message", user_info}
+      {"message", json_info}
     };
 
-    res.body() = user_response.dump();
+    res.body() = json_response.dump();
     res.keep_alive(req.keep_alive());
     res.prepare_payload();
 

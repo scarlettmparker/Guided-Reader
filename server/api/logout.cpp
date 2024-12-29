@@ -9,15 +9,15 @@ class LogoutHandler : public RequestHandler
     return "/logout";
   }
 
-  http::response<http::string_body> handle_request(http::request<http::string_body> const& req, const std::string& ip_address)
+  http::response<http::string_body> handle_request(http::request<http::string_body> const & req, const std::string & ip_address)
   {
     if (req.method() == http::verb::post)
     {
       /**
-       * -------------- LOGOUT USER --------------
+       * Logout user.
        */
 
-      auto json_request = nlohmann::json::object();
+      nlohmann::json json_request;
       try
       {
         json_request = nlohmann::json::parse(req.body());

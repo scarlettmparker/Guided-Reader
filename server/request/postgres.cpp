@@ -3,7 +3,7 @@
 namespace postgres
 {
   static ConnectionPool* global_pool = nullptr;
-  std::unordered_map<pqxx::connection*, std::chrono::time_point<std::chrono::steady_clock>> last_used;
+  std::unordered_map<pqxx::connection*, ConnectionMetadata> connection_metadata;
 
   /**
    * Create a new connection for the connection pool.
@@ -67,10 +67,7 @@ namespace postgres
   {
     try
     {
-      pqxx::work txn(*c);
-      txn.exec("SELECT 1");
-      txn.commit();
-      return true;
+      return c->is_open();
     } catch (...)
     {
       return false;
@@ -78,31 +75,44 @@ namespace postgres
   }
 
   /**
-   * Acquire a connection from the pool.
+   * Acquire a connection from the pool. This function will block until a connection is available.
+   * If a connection is not used for more than 1 minute, it will be released.
+   *
    * @return Connection from the pool.
    */
   pqxx::connection* ConnectionPool::acquire()
   {
-    std::unique_lock<std::mutex> lock(pool_mutex);
-    pool_cv.wait(lock, [this] { return !pool.empty(); });
-
-    auto c = pool.front();
-    pool.pop();
-
+    pqxx::connection* c = nullptr;
     auto now = std::chrono::steady_clock::now();
 
-    // check if the connection is still valid every minute
-    if (last_used.find(c) == last_used.end() || 
-      std::chrono::duration_cast<std::chrono::minutes>(now - last_used[c]).count() > 1)
-      {
-      if (!validate_connection(c))
+    {
+      std::unique_lock<std::mutex> lock(pool_mutex);
+      pool_cv.wait(lock, [this] { return !pool.empty(); });
+      c = pool.front();
+      pool.pop();
+    }
+
+    ConnectionMetadata & metadata = connection_metadata[c];
+    const auto connection_age = std::chrono::duration_cast<std::chrono::minutes>(
+      now - metadata.last_used).count();
+    const auto last_health_check = std::chrono::duration_cast<std::chrono::seconds>(
+      now - metadata.last_checked).count();
+
+    if (connection_age > 1 || last_health_check > 30)
+    {
+      metadata.is_healthy = validate_connection(c);
+      metadata.last_checked = now;
+      
+      if (!metadata.is_healthy)
       {
         delete c;
         c = create_new_connection();
+        connection_metadata[c] = {now, now, true};
+        return c;
       }
     }
 
-    last_used[c] = now;
+    metadata.last_used = now;
     return c;
   }
 
@@ -112,9 +122,28 @@ namespace postgres
    */
   void ConnectionPool::release(pqxx::connection* c)
   {
-    std::lock_guard<std::mutex> lock(pool_mutex);
-    pool.push(c);
-    pool_cv.notify_one();
+    if (connection_metadata[c].is_healthy)
+    {
+      std::lock_guard<std::mutex> lock(pool_mutex);
+      pool.push(c);
+      pool_cv.notify_one();
+    }
+    else
+    {
+      // ... replace unhealthy connection ...
+      delete c;
+
+      pqxx::connection* new_c = create_new_connection();
+      connection_metadata[new_c] = {
+        std::chrono::steady_clock::now(),
+        std::chrono::steady_clock::now(),
+        true
+      };
+
+      std::lock_guard<std::mutex> lock(pool_mutex);
+      pool.push(new_c);
+      pool_cv.notify_one();
+    }
   }
 
   /**
