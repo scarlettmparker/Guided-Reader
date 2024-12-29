@@ -1,0 +1,13 @@
+.annotated_text {
+  z-index: 1;
+  display: inline;
+  background-color: #a7ced6;
+  width: fit-content;
+  padding: 1px 0px 2px 0px;
+  transition: background-color 0.2s;
+}
+
+.annotated_text:hover {
+  background-color: #7ea5d6;
+  cursor: pointer;
+}

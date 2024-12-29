@@ -24,7 +24,8 @@ class TextHandler : public RequestHandler
         "FROM ("
         "  SELECT id::integer,"
         "         start::integer,"
-        "         \"end\"::integer"
+        "         \"end\"::integer,"
+        "         text_id::integer"
         "  FROM public.\"Annotation\" "
         "  WHERE text_id = $1"
         ") t";
@@ -40,7 +41,14 @@ class TextHandler : public RequestHandler
         return text_data;
       }
 
-      text_data = nlohmann::json::parse(r[0][0].as<std::string>());
+      if (r[0][0].is_null())
+      {
+        verbose && std::cout << "No annotations found for text with ID " << text_id << std::endl;
+      }
+      else
+      {
+        text_data = nlohmann::json::parse(r[0][0].as<std::string>());
+      }
     }
     catch (const std::exception &e)
     {
@@ -154,7 +162,7 @@ class TextHandler : public RequestHandler
       // ... return annotation positions and ids for the text ...
       if (annotation_param && *annotation_param == "true")
       {
-        nlohmann::json text_data = select_annotations(text_id, true);
+        nlohmann::json text_data = select_annotations(text_id, false);
         return request::make_json_request_response(text_data, req);
       }
 
