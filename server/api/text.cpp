@@ -13,27 +13,32 @@ class TextHandler : public RequestHandler
    * @param text_id ID of the text to select annotations for.
    * @param verbose Whether to print messages to stdout.
    */
-  nlohmann::json select_annotations(int text_id, bool verbose)
+  nlohmann::json select_annotations(int text_id, std::string language, bool verbose)
   {
     nlohmann::json text_data = nlohmann::json::array();
 
     try
     {
-      const std::string query =
-        "SELECT array_to_json(array_agg(row_to_json(t))) "
-        "FROM ("
-        "  SELECT id::integer,"
-        "         start::integer,"
-        "         \"end\"::integer,"
-        "         text_id::integer"
-        "  FROM public.\"Annotation\" "
-        "  WHERE text_id = $1"
-        ") t";
-
-      pqxx::result r = request::execute_query(
-        pool, query,
-        {{"$1", std::to_string(text_id)}}
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result text_id_result = txn.exec_prepared(
+        "select_text_id",
+        std::to_string(text_id), language
       );
+
+      if (text_id_result.empty())
+      {
+        verbose && std::cout << "Text with ID " << text_id << " not found" << std::endl;
+        txn.abort();
+        return text_data;
+      }
+
+      text_id = text_id_result[0][0].as<int>();
+
+      pqxx::result r = txn.exec_prepared(
+        "select_annotations",
+        std::to_string(text_id)
+      );
+      txn.commit();
 
       if (r.empty())
       {
@@ -70,7 +75,6 @@ class TextHandler : public RequestHandler
   nlohmann::json select_text_data(int text_id, std::string language, bool verbose)
   {
     nlohmann::json text_data = nlohmann::json::array();
-
     std::string cache_key = "text:" + std::to_string(text_id) + ":" + language;
     sw::redis::Redis& redis = Redis::get_instance();
 
@@ -84,22 +88,12 @@ class TextHandler : public RequestHandler
         return nlohmann::json::parse(*cache_result);
       }
 
-      const std::string query =
-        "SELECT array_to_json(array_agg(row_to_json(t))) "
-        "FROM ("
-        "  SELECT id::integer,"
-        "         text::text,"
-        "         language::text,"
-        "         text_object_id::integer"
-        "  FROM public.\"Text\" "
-        "  WHERE text_object_id = $1"
-        "  AND language = $2"
-        ") t";
-
-      pqxx::result r = request::execute_query(
-        pool, query,
-        {{"$1", std::to_string(text_id)}, {"$2", language}}
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_text_details",
+        std::to_string(text_id), language
       );
+      txn.commit();
 
       if (r.empty())
       {
@@ -137,7 +131,6 @@ class TextHandler : public RequestHandler
        * GET text details.
        */
       std::optional<std::string> text_id_param = request::parse_from_request(req, "text_id");
-      std::optional<std::string> annotation_param = request::parse_from_request(req, "annotation");
 
       if (!text_id_param)
       {
@@ -158,13 +151,6 @@ class TextHandler : public RequestHandler
       {
         return request::make_bad_request_response("Number out of range for text_id", req);
       }
-      
-      // ... return annotation positions and ids for the text ...
-      if (annotation_param && *annotation_param == "true")
-      {
-        nlohmann::json text_data = select_annotations(text_id, false);
-        return request::make_json_request_response(text_data, req);
-      }
 
       std::optional<std::string> language_param = request::parse_from_request(req, "language");
       if (!language_param)
@@ -173,11 +159,24 @@ class TextHandler : public RequestHandler
       }
 
       std::string language = *language_param;
+      std::optional<std::string> type_param = request::parse_from_request(req, "type");
 
+      if (type_param && *type_param == "annotations")
+      {
+        nlohmann::json annotation_data = select_annotations(text_id, language, false);
+        return request::make_json_request_response(annotation_data, req); 
+      }
+      
       nlohmann::json text_info = select_text_data(text_id, language, false);
       if (text_info.empty())
       {
         return request::make_bad_request_response("No text found", req);
+      }
+      
+      if (type_param && *type_param == "all")
+      {
+        nlohmann::json annotations = select_annotations(text_id, language, false);
+        text_info[0]["annotations"] = annotations;
       }
 
       return request::make_json_request_response(text_info, req);

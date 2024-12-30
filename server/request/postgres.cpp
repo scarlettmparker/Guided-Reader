@@ -30,7 +30,83 @@ namespace postgres
 
     pqxx::work txn(*c);
 
-    /* Prepared statements go here */
+    // ... text queries ...
+    txn.conn().prepare("select_text_id",
+      "SELECT id "
+      "FROM public.\"Text\" "
+      "WHERE text_object_id = $1 "
+      "AND language = $2");
+
+    txn.conn().prepare("select_annotations",
+      "SELECT array_to_json(array_agg(row_to_json(t))) "
+      "FROM ("
+      "  SELECT id::integer,"
+      "         start::integer,"
+      "         \"end\"::integer,"
+      "         text_id::integer"
+      "  FROM public.\"Annotation\" "
+      "  WHERE text_id = $1"
+      ") t");
+      
+    txn.conn().prepare("select_text_details",
+      "SELECT array_to_json(array_agg(row_to_json(t))) "
+      "FROM ("
+      "  SELECT id::integer,"
+      "         text::text,"
+      "         language::text,"
+      "         text_object_id::integer"
+      "  FROM public.\"Text\" "
+      "  WHERE text_object_id = $1"
+      "  AND language = $2"
+      ") t");
+
+    // ... title queries ...
+    txn.conn().prepare("select_titles",
+      "SELECT array_to_json(array_agg(row_to_json(t))) "
+      "FROM ("
+      "  SELECT id::integer,"
+      "         title::text,"
+      "         level::text,"
+      "         group_id::integer "
+      "  FROM public.\"TextObject\" "
+      "  WHERE id > $2 " 
+      "  ORDER BY id "
+      "  LIMIT $1"
+      ") t");
+
+    // ... user queries ...
+    txn.conn().prepare("select_user_id",
+      "SELECT id "
+      "FROM public.\"User\" "
+      "WHERE username = $1 "
+      "LIMIT 1");
+
+    txn.conn().prepare("select_user_data_by_id",
+      "SELECT username, discord_id, avatar, nickname "
+      "FROM public.\"User\" "
+      "WHERE id = $1 "
+      "LIMIT 1");
+
+    txn.conn().prepare("select_username_by_id",
+      "SELECT username "
+      "FROM public.\"User\" "
+      "WHERE id = $1 "
+      "LIMIT 1");
+
+    txn.conn().prepare("select_user_password",
+      "SELECT password "
+      "FROM public.\"User\" "
+      "WHERE username = $1 "
+      "LIMIT 1");
+
+    txn.conn().prepare("insert_user",
+      "INSERT INTO public.\"User\" ("
+      "username, password, levels, discord_id, account_creation_date, "
+      "avatar, nickname, access_token"
+      ") VALUES ("
+      "$1, $2, '{-1}', '-1', $3, '-1', $1, '-1'"
+      ")");
+
     txn.commit();
     return c;
   }

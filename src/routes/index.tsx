@@ -46,18 +46,20 @@ async function get_titles(
 
 /**
  * Fetches a text from the server given a text ID and language.
+ * This will return the text data itself, the text data + annotations, or just annotations.
+ * Data types: "all", "annotations".
  * 
  * @param id Text ID to fetch.
  * @param language Language of the text to fetch.
  * @returns Text object.
  */
-async function get_text(id: number, language: string): Promise<Text> {
+async function get_text(id: number, language: string, data_type: string): Promise<Text | Annotation[]> {
   const controller = new AbortController();
   const timeout_id = setTimeout(() => controller.abort(), 5000);
 
   try {
     const response = await fetch(
-      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/text?text_id=${id}&language=${language}`,
+      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/text?text_id=${id}&language=${language}&type=${data_type}`,
       {
         signal: controller.signal,
       }
@@ -68,7 +70,9 @@ async function get_text(id: number, language: string): Promise<Text> {
     }
 
     const data = await response.json();
-    if (data.status === 'ok' && data.message?.[0]) {
+    if (data_type == "annotations") {
+      return data.message;
+    } else if (data.status === 'ok' && data.message?.[0]) {
       const result = data.message[0];
       return result;
     }
@@ -76,44 +80,7 @@ async function get_text(id: number, language: string): Promise<Text> {
     throw new Error('Invalid response format');
   } catch (error) {
     console.error(`Failed to fetch text ${id}:`, error);
-    return { id: -1, text: '', language: '', text_object_id: -1 };
-  } finally {
-    clearTimeout(timeout_id);
-  }
-}
-
-/**
- * Fetches a list of annotations from the server given a text ID.
- * 
- * @param id Text ID to fetch annotations for.
- * @returns List of annotations.
- */
-async function get_annotations(id: number): Promise<Annotation[]> {
-  const controller = new AbortController();
-  const timeout_id = setTimeout(() => controller.abort(), 5000);
-
-  try {
-    const response = await fetch(
-      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/text?text_id=${id}&annotation=true`,
-      {
-        signal: controller.signal,
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (data.status === 'ok') {
-      const result = data.message;
-      return result;
-    }
-
-    throw new Error('Invalid response format');
-  } catch (error) {
-    console.error(`Failed to annotations for text ${id}:`, error);
-    return [];
+    return { annotations: [], id: -1, text: '', language: '', text_object_id: -1 };
   } finally {
     clearTimeout(timeout_id);
   }
@@ -130,6 +97,7 @@ const Reader: Component = () => {
 
   // ... state for loading texts and annotations ...
   const [loading_texts, set_loading_texts] = createSignal<Set<number>>(new Set());
+  const [loading_annotations, set_loading_annotations] = createSignal<Set<number>>(new Set());
   const [error, set_error] = createSignal<string>('');
 
   // .. state for text and text data (titles, texts, annotations) ...
@@ -148,6 +116,10 @@ const Reader: Component = () => {
     }
   });
 
+  const existing_text = (id: number, language: string) => {
+    return texts().find(text => text.text_object_id === id && text.language === language);
+  };
+
   const get_current_text = createMemo(() => {
     return texts().find(text => text.text_object_id === current_text());
   });
@@ -156,22 +128,25 @@ const Reader: Component = () => {
     return render_annotated_text(text, annotations);
   };
 
+  const load_text_with_annotations = async (id: number, language: string) => {
+    await load_text(id, language);
+    if (!annotations_map().has(id)) {
+      await load_annotations(id, language);
+    }
+  }
+
   // ... loads a text to the list of texts to display ...
   const load_text = async (id: number, language: string) => {
     if (loading_texts().has(id)) return;
 
-    const existing_text = texts().find(
-      text => text.text_object_id === id && text.language === language
-    );
-
-    if (existing_text) {
-      await load_annotations(id);
+    if (existing_text(id, language)) {
       return;
     }
+
     set_loading_texts(prev => new Set([...prev, id]));
 
     try {
-      const new_text = await get_text(id, language);
+      const new_text = await get_text(id, language, "all") as Text;
       if (!new_text) throw new Error('Text not found');
       set_texts(prev => [...prev, new_text]);
     } catch (err) {
@@ -186,27 +161,41 @@ const Reader: Component = () => {
   }
 
   // ... loads annotations for a text ...
-  const load_annotations = async (id: number) => {
+  const load_annotations = async (id: number, language: string) => {
+    if (loading_annotations().has(id)) return;
+
+    set_loading_annotations(prev => new Set([...prev, id]));
     try {
-      const new_annotations = await get_annotations(id);
+      const new_annotations = await get_text(id, language, "annotations") as Annotation[];
       if (new_annotations) {
         set_annotations_map(prev => {
           const next = new Map(prev);
           next.set(id, new_annotations);
           return next;
-        })
+        });
       }
     } catch (err) {
       set_error(`Failed to load annotations for text ${id}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      set_loading_annotations(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
   }
 
   /* ... sets the current text to display and
          reloads annotations if necessary ... */
-  const set_inner_text = async (id: number) => {
+  const set_inner_text = async (id: number, language: string) => {
+    if (!existing_text(id, language)) {
+      await load_text(id, language);
+    }
+
     set_current_text(id);
-    if (!annotations_map().has(id)) {
-      await load_annotations(id);
+
+    if (!loading_annotations().has(id)) {
+      load_annotations(id, language);
     }
   }
 
@@ -220,7 +209,8 @@ const Reader: Component = () => {
         <TextList items={titles} page={page} set_page={set_page}>
           {
             (text) => <TextListItem text={text} class={() => current_text() == text.id ? styles.text_list_item_selected
-              : styles.text_list_item} onclick={async () => await set_inner_text(text.id)} onmouseenter={() => load_text(text.id, "GR")} />
+              : styles.text_list_item} onclick={async () => await set_inner_text(text.id, "GR")}
+              onmouseenter={async () => load_text_with_annotations(text.id, "GR")} />
           }
         </TextList>
       </div>

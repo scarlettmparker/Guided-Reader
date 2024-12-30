@@ -21,6 +21,7 @@ namespace postgres
   class ConnectionPool
   {
   private:
+    std::unordered_map<std::string, std::string> prepared_statements;
     std::queue<pqxx::connection*> pool;
     std::mutex pool_mutex;
     std::condition_variable pool_cv;

@@ -20,18 +20,7 @@ namespace http = boost::beast::http;
 
 namespace request
 {
-  struct QueryParameter
-  {
-    std::string key;
-    std::string value;
-    size_t max_size = 255;
-    
-    QueryParameter(std::string k, std::string v, size_t ms = 255) 
-      : key(std::move(k)), value(std::move(v)), max_size(ms) {}
-  };
-
-  pqxx::result execute_query(postgres::ConnectionPool & pool, const std::string & query, const std::vector<QueryParameter> & params);
-  
+  pqxx::work & begin_transaction(postgres::ConnectionPool & pool);
   std::string_view get_session_id_from_cookie(const http::request<http::string_body>& req);
   int get_user_id_from_session(std::string session_id, bool verbose);
   bool invalidate_session(std::string session_id, bool verbose);

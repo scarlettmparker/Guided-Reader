@@ -6,6 +6,7 @@ export type TextTitle = {
 }
 
 export type Text = {
+  annotations: Annotation[];
   id: number;
   text: string;
   language: string;

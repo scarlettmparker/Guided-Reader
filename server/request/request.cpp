@@ -5,69 +5,32 @@ namespace request
 {
   thread_local std::shared_ptr<pqxx::connection> cached_connection;
   thread_local std::chrono::steady_clock::time_point last_used;
+  thread_local std::unique_ptr<pqxx::work> current_txn;
 
   /**
-   * Execute a query with the given parameters. This function will acquire a connection from the pool,
-   * execute the query, and return the result. If the query fails, the connection will be released and
-   * an exception will be thrown. If the connection is not used for more than 1 minute, it will be released.
-   *
-   * @param pool Connection pool to use.
-   * @param query Query to execute.
-   * @param params Parameters to use in the query.
-   * @return Result of the query.
+   * Begin a transaction with the database.
+   * This function will create a new connection if one does not exist or if the current connection is stale.
+   * @param pool Connection pool to get a connection from.
+   * @return Transaction object for the database.
    */
-  pqxx::result execute_query(postgres::ConnectionPool & pool, const std::string & query, const std::vector<QueryParameter> & params)
-  {
-    for (const QueryParameter & param : params)
-    {
-      if (param.value.empty())
-      {
-        throw std::invalid_argument("Parameter " + param.key + " cannot be empty");
-      }
-      if (param.value.length() > param.max_size)
-      {
-        throw std::invalid_argument("Parameter " + param.key + " exceeds maximum length");
-      }
-    }
-
+  pqxx::work & begin_transaction(postgres::ConnectionPool & pool) {
     auto start = std::chrono::steady_clock::now();
     
-    // ... acquire a connection from the pool ...
+    if (cached_connection && !cached_connection->is_open()) {
+      cached_connection.reset();
+    }
+
     if (!cached_connection || 
       std::chrono::duration_cast<std::chrono::minutes>(start - last_used).count() > 1)
     {
       cached_connection.reset(pool.acquire(), [&pool](pqxx::connection* c) {
-          pool.release(c);
+        pool.release(c);
       });
-      last_used = start;
+      last_used = start;  
     }
 
-    try
-    {
-      pqxx::work txn(*cached_connection);
-      std::string sanitize_query = query;
-
-      for (size_t i = 0; i < params.size(); ++i)
-      {
-        // ... parameter validation and sanitization ...
-        std::string placeholder = "$" + std::to_string(i + 1);
-        size_t pos = sanitize_query.find(placeholder);
-        if (pos != std::string::npos)
-        {
-          sanitize_query.replace(pos, placeholder.size(), txn.quote(params[i].value));
-        }
-      }
-
-      pqxx::result r = txn.exec(sanitize_query);
-      txn.commit();
-      return r;
-    }
-
-    catch (const std::exception & e)
-    {
-      cached_connection.reset();
-      throw std::runtime_error(std::string("Query execution failed: ") + e.what());
-    }
+    current_txn = std::make_unique<pqxx::work>(*cached_connection);
+    return *current_txn;
   }
 
   /**

@@ -41,23 +41,12 @@ class TitlesHandler : public RequestHandler
         return nlohmann::json::parse(*cache_result);
       }
 
-      const std::string query =
-        "SELECT array_to_json(array_agg(row_to_json(t))) "
-        "FROM ("
-        "  SELECT id::integer,"
-        "         title::text,"
-        "         level::text,"
-        "         group_id::integer "
-        "  FROM public.\"TextObject\" "
-        "  WHERE id > $2 " 
-        "  ORDER BY id "
-        "  LIMIT $1"
-        ") t";
-
-      pqxx::result r = request::execute_query(
-        pool, query,
-        {{"$1", std::to_string(page_size)}, {"$2", std::to_string(page * page_size)}}
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_titles",
+        std::to_string(page_size), std::to_string(page * page_size)
       );
+      txn.commit();
 
       if (r.empty() || r[0][0].is_null())
       {

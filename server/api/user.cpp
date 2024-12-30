@@ -136,10 +136,12 @@ class UserHandler : public RequestHandler
   {
     try
     {
-      pqxx::result r = request::execute_query
-      (
-        pool, "SELECT id FROM public.\"User\" WHERE username = $1 LIMIT 1;", {{"$1", username}}
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_user_id", username
       );
+      txn.commit();
+
       if (r.empty())
       {
         verbose && std::cout << "User with username " << username << " not found" << std::endl;
@@ -163,15 +165,15 @@ class UserHandler : public RequestHandler
    * @param verbose Whether to print messages to stdout.
    * @return UserData struct with the user data if found, otherwise an object of empty strings.
    */
-  UserData select_user_data_from_id(int id, bool verbose)
+  UserData select_user_data_by_id(int id, bool verbose)
   {
     try
     {
-      pqxx::result r = request::execute_query
-      (
-        pool, "SELECT username, discord_id, avatar, nickname FROM public.\"User\" WHERE id = $1 LIMIT 1;", 
-        {{"$1", std::to_string(id)}}
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_user_data_by_id", id
       );
+      txn.commit();
 
       if (r.empty())
       {
@@ -203,14 +205,16 @@ class UserHandler : public RequestHandler
    * @param verbose Whether to print messages to stdout.
    * @return Username of the user if found, NULL otherwise.
    */
-  std::string select_username_from_id(int id, bool verbose)
+  std::string select_username_by_id(int id, bool verbose)
   {
     try
     {
-      pqxx::result r = request::execute_query
-      (
-        pool, "SELECT username FROM public.\"User\" WHERE id = $1 LIMIT 1;", {{"$1", std::to_string(id)}}
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_username_by_id", id
       );
+      txn.commit();
+
       if (r.empty())
       {
         verbose && std::cout << "User with ID " << id << " not found" << std::endl;
@@ -240,10 +244,12 @@ class UserHandler : public RequestHandler
   {
     try
     {
-      pqxx::result r = request::execute_query
-      (
-        pool, "SELECT password FROM public.\"User\" WHERE username = $1 LIMIT 1;", {{"$1", username}}
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_user_password", username
       );
+      txn.commit();
+
       if (r.empty())
       {
         verbose && std::cout << "User with username " << username << " not found" << std::endl;
@@ -277,23 +283,13 @@ class UserHandler : public RequestHandler
     try
     {
       int current_time = static_cast<int>(std::time(0));   
-      std::vector<request::QueryParameter> params;
-
-      params.push_back({"$1", username, 255});
-      params.push_back({"$2", hashed_password, 1024});
-      params.push_back({"$3", std::to_string(current_time), 32});
-
-      pqxx::result r = request::execute_query
-      (
-        pool,
-        "INSERT INTO public.\"User\" ("
-        "username, password, levels, discord_id, account_creation_date, "
-        "avatar, nickname, access_token"
-        ") VALUES ("
-        "$1, $2, '{-1}', '-1', $3, '-1', $1, '-1'"
-        ");",
-        params
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "insert_user",
+        username, hashed_password, current_time
       );
+      txn.commit();
+      
       return true;
     }
     catch (const std::exception &e)
@@ -348,18 +344,18 @@ class UserHandler : public RequestHandler
         return request::make_unauthorized_response("Session ID not found", req);
       }
  
-      if (!request::validate_session(std::string(session_id), false))
+      if (!request::validate_session(std::string(session_id), true))
       {
         return request::make_unauthorized_response("Invalid session ID", req);
       }
 
-      int user_id = request::get_user_id_from_session(std::string(session_id), false);
+      int user_id = request::get_user_id_from_session(std::string(session_id), true);
       if (user_id == -1)
       {
         return request::make_bad_request_response("User not found", req);
       }
 
-      UserData user_data = select_user_data_from_id(user_id, false);
+      UserData user_data = select_user_data_by_id(user_id, true);
       if (user_data.username.empty())
       {
         return request::make_bad_request_response("User not found", req);
