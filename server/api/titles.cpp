@@ -69,7 +69,7 @@ class TitlesHandler : public RequestHandler
   }
 
   public:
-  TitlesHandler(ConnectionPool& connection_pool) : pool(connection_pool) {}
+  TitlesHandler(ConnectionPool & connection_pool) : pool(connection_pool) {}
 
   std::string get_endpoint() const override
   {
@@ -128,7 +128,7 @@ class TitlesHandler : public RequestHandler
   }
 };
 
-extern "C" RequestHandler *create_titles_handler()
+extern "C" RequestHandler* create_titles_handler()
 {
   return new TitlesHandler(get_connection_pool());
 }

@@ -19,3 +19,12 @@ export type Annotation = {
   end: number;
   text_id: number;
 }
+
+export type AnnotationData = {
+  id: number;
+  description: string;
+  dislikes: number;
+  likes: number;
+  creation_date: number;
+  user_id: number;
+}

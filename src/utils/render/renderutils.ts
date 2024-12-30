@@ -7,7 +7,7 @@ import { Annotation } from "~/types";
  * 
  * @param raw_text The raw text to sanitize.
  * @param trim Whether to trim the text after sanitizing.
- * @returns The sanitized text.
+ * @return The sanitized text.
  */
 function sanitize_text(raw_text: string, trim: boolean = true): string {
   let sanitized_text = raw_text
@@ -49,21 +49,21 @@ function filter_annotations(annotations: Annotation[], annotation_map: Record<st
  * @param annotations - Array of Annotation objects defining ranges and styles to apply
  * @param text_node - The text content to process and annotate
  * @param start_offset - Starting character offset of this text node in the overall text
- * @returns The ending position (last_index + length of processed text)
+ * @return Ending position (last_index + length of processed text)
  * 
  * @example
  * const parts = [];
  * const annotations = [{start: 5, end: 10}];
  * process_text_node(0, parts, annotations, "Hello world", 0);
  * // ... parts will contain: ["<span id="plain-text-0">Hello</span>", ...
- * // ...                    "<span id="annotated-text-0"> worl</span>", ...
+ * // ...                    "<span id="annotated-text-0">, worl</span>" ...
  * // ...                    "<span id="plain-text-1">d</span>"] ...
  */
 function process_text_node(
   last_index: number, parts: string[], annotations: Annotation[], text_node: string, start_offset: number
 ) {
   let current_offset = start_offset;
-  let last_annotated_index = 0, annotation_counter = 0, plain_text_counter = 0;
+  let last_annotated_index = 0, plain_text_counter = 0;
 
   annotations.forEach(annotation => {
     // ... check if the annotation overlaps with the current text node ...
@@ -78,7 +78,7 @@ function process_text_node(
 
       const annotated_text = text_node.slice(overlap_start - current_offset, overlap_end - current_offset);
       if (annotated_text) {
-        parts.push(`<span id="annotated-text-${annotation_counter++}" class="${styles.annotated_text}">${annotated_text}</span>`);
+        parts.push(`<span id="annotated-text-${annotation.id}" class="${styles.annotated_text}">${annotated_text}</span>`);
       }
 
       last_annotated_index = overlap_end - current_offset;
@@ -99,7 +99,7 @@ function process_text_node(
  * Helper function to get the attributes of an HTML element as a string.
  * 
  * @param element HTML element to get the attributes of.
- * @returns Attributes of the HTML element as a string.
+ * @return Attributes of the HTML element as a string.
  */
 function get_attributes(element: HTMLElement): string {
   return Array.from(element.attributes).reduce((attrs, attr) => `${attrs} ${attr.name}="${attr.value}"`, '');
@@ -114,7 +114,7 @@ function get_attributes(element: HTMLElement): string {
  * @param parts - Array to collect HTML string fragments during processing
  * @param annotations - Array of Annotation objects defining ranges and styles to apply
  * @param node - DOM Node to process (either text node or element node)
- * @returns Updated last_index after processing the node and its children
+ * @return Updated last_index after processing the node and its children
  */
 function process_node(last_index: number, parts: string[], annotations: Annotation[], node: Node): number {
   if (node.nodeType === Node.TEXT_NODE) {

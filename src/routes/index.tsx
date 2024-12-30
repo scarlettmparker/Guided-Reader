@@ -1,9 +1,10 @@
 import { Title } from '@solidjs/meta';
 import { Accessor, createEffect, createMemo, createSignal, For, JSX, onCleanup, onMount, Show, type Component } from 'solid-js';
 import { ENV } from '~/const';
-import styles from './index.module.css';
-import { TextTitle, Text, Annotation } from '~/types';
+import { TextTitle, Text, Annotation, AnnotationData } from '~/types';
 import { render_annotated_text } from '~/utils/render/renderutils';
+import styles from './index.module.css';
+import { SolidMarkdown } from "solid-markdown";
 
 const Index: Component = () => {
   return (
@@ -14,6 +15,7 @@ const Index: Component = () => {
   );
 };
 
+const DEFAULT_LANGUAGE = "GR";
 const PAGE_SIZE = 335;
 const SORT = 0;
 
@@ -53,13 +55,13 @@ async function get_titles(
  * @param language Language of the text to fetch.
  * @returns Text object.
  */
-async function get_text(id: number, language: string, data_type: string): Promise<Text | Annotation[]> {
+async function get_text_data(id: number, language: string, data_type: string): Promise<Text | Annotation[]> {
   const controller = new AbortController();
   const timeout_id = setTimeout(() => controller.abort(), 5000);
 
   try {
     const response = await fetch(
-      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/text?text_id=${id}&language=${language}&type=${data_type}`,
+      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/text?text_object_id=${id}&language=${language}&type=${data_type}`,
       {
         signal: controller.signal,
       }
@@ -70,21 +72,72 @@ async function get_text(id: number, language: string, data_type: string): Promis
     }
 
     const data = await response.json();
+
     if (data_type == "annotations") {
       return data.message;
     } else if (data.status === 'ok' && data.message?.[0]) {
-      const result = data.message[0];
-      return result;
+      return data.message[0];
     }
 
     throw new Error('Invalid response format');
   } catch (error) {
-    console.error(`Failed to fetch text ${id}:`, error);
     return { annotations: [], id: -1, text: '', language: '', text_object_id: -1 };
   } finally {
     clearTimeout(timeout_id);
   }
 }
+
+/**
+ * Fetches annotation data from the server given a text ID and a range of text indices.
+ * Annotation data includes the annotation description, likes, dislikes, creation date, and user ID.
+ * See back-end API for more details (documentation and doc-strings in code).
+ * 
+ * @param id Text ID to fetch annotations for.
+ * @param start Start index of the text range to fetch annotations for.
+ * @param end End index of the text range to fetch annotations for.
+ * @returns List of annotation data.
+ */
+async function get_annotation_data(id: number, start: number, end: number): Promise<AnnotationData[]> {
+  const controller = new AbortController();
+  const timeout_id = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(
+      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation?text_id=${id}&start=${start}&end=${end}`,
+      {
+        signal: controller.signal,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.status === 'ok') {
+      return data.message;
+    }
+
+    throw new Error('Invalid response format');
+  } catch (error) {
+    return [];
+  } finally {
+    clearTimeout(timeout_id);
+  }
+}
+
+/**
+ * Handles a click event on the document. This function is used to detect clicks on annotated text.
+ * @param event Click event.
+ * @param set_current_annotation Function to set the current annotation.
+ */
+const handle_click = (event: Event, set_current_annotation: (annotation: number) => void) => {
+  const target = event.target as HTMLElement;
+  if (target.id.startsWith("annotated-text-")) {
+    const annotation_id = parseInt(target.id.split("-")[2], 10);
+    set_current_annotation(annotation_id);
+  }
+};
 
 /**
  * Main component for the Guided Reader.
@@ -105,6 +158,10 @@ const Reader: Component = () => {
   const [texts, set_texts] = createSignal<Text[]>([]);
   const [annotations_map, set_annotations_map] = createSignal<Map<number, Annotation[]>>(new Map());
 
+  // ... state for annotations and annotation data ...
+  const [current_annotation, set_current_annotation] = createSignal(-1);
+  const [annotation_data, set_annotation_data] = createSignal<AnnotationData[]>([]);
+
   const [page, set_page] = createSignal(0);
   const [reached_end, set_reached_end] = createSignal(false);
 
@@ -114,7 +171,21 @@ const Reader: Component = () => {
         set_titles(prev => [...prev, ...new_titles]);
       });
     }
+    document.addEventListener("click", (e) => handle_click(e, set_current_annotation));
+    onCleanup(() => {
+      document.removeEventListener("click", (e) => handle_click(e, set_current_annotation));
+    });
   });
+
+  // ... fetches annotation data when clicking on an annotation ...
+  createEffect(async () => {
+    if (current_annotation() != -1) {
+      const annotation = annotations_map().get(current_text())?.find(ann => ann.id === current_annotation());
+      set_annotation_data(await get_annotation_data(current_text(), annotation!.start, annotation!.end));
+    } else {
+      set_annotation_data([]);
+    }
+  })
 
   const existing_text = (id: number, language: string) => {
     return texts().find(text => text.text_object_id === id && text.language === language);
@@ -144,9 +215,10 @@ const Reader: Component = () => {
     }
 
     set_loading_texts(prev => new Set([...prev, id]));
+    set_current_annotation(-1);
 
     try {
-      const new_text = await get_text(id, language, "all") as Text;
+      const new_text = await get_text_data(id, language, "all") as Text;
       if (!new_text) throw new Error('Text not found');
       set_texts(prev => [...prev, new_text]);
     } catch (err) {
@@ -166,7 +238,7 @@ const Reader: Component = () => {
 
     set_loading_annotations(prev => new Set([...prev, id]));
     try {
-      const new_annotations = await get_text(id, language, "annotations") as Annotation[];
+      const new_annotations = await get_text_data(id, language, "annotations") as Annotation[];
       if (new_annotations) {
         set_annotations_map(prev => {
           const next = new Map(prev);
@@ -209,8 +281,8 @@ const Reader: Component = () => {
         <TextList items={titles} page={page} set_page={set_page}>
           {
             (text) => <TextListItem text={text} class={() => current_text() == text.id ? styles.text_list_item_selected
-              : styles.text_list_item} onclick={async () => await set_inner_text(text.id, "GR")}
-              onmouseenter={async () => load_text_with_annotations(text.id, "GR")} />
+              : styles.text_list_item} onclick={async () => await set_inner_text(text.id, DEFAULT_LANGUAGE)}
+              onmouseenter={async () => load_text_with_annotations(text.id, DEFAULT_LANGUAGE)} />
           }
         </TextList>
       </div>
@@ -232,9 +304,59 @@ const Reader: Component = () => {
           </Show>
         </div>
       </div>
+      {current_annotation() !== -1 &&
+        <AnnotationModal set_current_annotation={set_current_annotation} current_annotation_data={annotation_data} />}
     </div>
   );
 };
+
+interface AnnotationProps {
+  set_current_annotation: (annotation: number) => void;
+  current_annotation_data: Accessor<AnnotationData[]>;
+}
+
+/**
+ * Component for displaying an annotation modal. This modal will display the annotation data.
+ * It will also allow the user to interact with the annotation, e.g. like or dislike or provide a correction.
+ * 
+ * @param set_current_annotation Function to set the current annotation.
+ * @param current_annotation_data Current annotation data.
+ * @returns JSX Element for the annotation modal.
+ */
+const AnnotationModal: Component<AnnotationProps> = ({ set_current_annotation, current_annotation_data }) => {
+  return (
+    <div class={styles.annotation_modal}>
+      <div class={styles.annotation_modal_header}>
+        <span>Annotation</span>
+        <span class={styles.close} onclick={() => set_current_annotation(-1)}>X</span>
+      </div>
+      <div class={styles.annotation_modal_content}>
+        {current_annotation_data().map(annotation => (
+          <AnnotationItem annotation={annotation} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+interface AnnotationItemProps {
+  annotation: AnnotationData;
+}
+
+/**
+ * Component for displaying an individual annotation item.
+ * Annotation items include the annotation description, likes, dislikes, creation date, and username.
+ * 
+ * @param annotation Annotation data to display.
+ * @returns JSX Element for the annotation item.
+ */
+const AnnotationItem: Component<AnnotationItemProps> = ({ annotation }) => {
+  return (
+    <div class={styles.annotation_item}>
+      <SolidMarkdown children={annotation.description} />
+    </div>
+  )
+}
 
 interface TextListProps<T extends TextTitle> {
   items: Accessor<T[]>;

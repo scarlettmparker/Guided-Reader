@@ -107,6 +107,22 @@ namespace postgres
       "$1, $2, '{-1}', '-1', $3, '-1', $1, '-1'"
       ")");
 
+    // ... annotation queries ...
+    txn.conn().prepare("select_annotation_data",
+      "SELECT array_to_json(array_agg(row_to_json(t))) "
+      "FROM ("
+      "  SELECT id::integer,"
+      "         description::text,"
+      "         dislikes::integer,"
+      "         likes::integer,"
+      "         created_at::integer,"
+      "         user_id::integer"
+      "  FROM public.\"Annotation\" "
+      "  WHERE text_id = $1 "
+      "  AND start >= $2 "
+      "  AND \"end\" <= $3"
+      ") t");
+
     txn.commit();
     return c;
   }
