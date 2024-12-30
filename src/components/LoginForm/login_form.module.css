@@ -139,14 +139,15 @@
 
 .highlight_text {
   color: #CF3A5F;
-  text-decoration: underline dotted rgba(37, 37, 37, 0.4);
+  text-decoration: underline dotted rgb(37, 37, 37, 0.4);
   text-underline-offset: 4px;
   cursor: pointer;
-  transition: color 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
 }
 
 .highlight_text:hover {
-  color: rgb(148, 86, 15);
+  color: rgb(124, 16, 49);
+  text-decoration: underline dotted rgba(80, 27, 40, 0.6);
 }
 
 .button_text {

@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { Component, onMount } from "solid-js";
-import { CACHE_KEY } from "~/const";
+import { CACHE_KEY } from "~/utils/const";
 import { useUser } from "~/usercontext";
 import { logout } from "~/utils/userutils";
 import Index from "..";

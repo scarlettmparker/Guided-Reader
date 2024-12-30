@@ -1,7 +1,7 @@
 import { Component, createSignal, onMount } from "solid-js";
+import { ENV } from "~/utils/const";
 import ButtonWithAlt from "~/components/ButtonWithAlt";
 import styles from "./login_form.module.css";
-import { ENV } from "~/const";
 
 /**
  * Logs in the user with the given username and password.

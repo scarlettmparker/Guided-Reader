@@ -1,4 +1,4 @@
-import { UserData, MAX_RETRIES, ENV, BASE_DELAY, CacheData } from "~/const";
+import { UserData, MAX_RETRIES, ENV, BASE_DELAY, CacheData } from "./const";
 
 /**
  * Delay the execution of a function.

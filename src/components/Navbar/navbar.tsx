@@ -1,6 +1,6 @@
-import { Accessor, Component, createSignal, onMount, Show } from "solid-js";
+import { Component, createSignal, onMount, Show } from "solid-js";
 import { useUser } from "~/usercontext";
-import { UserData, CACHE_DURATION, CACHE_KEY } from "~/const";
+import { UserData, CACHE_DURATION, CACHE_KEY } from "~/utils/const";
 import { get_user_data_from_session } from "~/utils/userutils";
 import styles from './navbar.module.css';
 
@@ -32,6 +32,10 @@ async function set_user_status() {
   }
 }
 
+export function build_avatar_string(discord_id: string, avatar: string): string {
+  return "https://cdn.discordapp.com/avatars/" + discord_id + "/" + avatar + ".png";
+}
+
 /**
  * Navbar component that displays the login button and a hide button.
  * Displays on every page.
@@ -48,7 +52,7 @@ const Navbar: Component = () => {
   onMount(async () => {
     await set_user_status();
     if (avatar() !== "-1" && discord_id() !== "-1") {
-      set_avatar_url("https://cdn.discordapp.com/avatars/" + discord_id() + "/" + avatar() + ".png");
+      set_avatar_url(build_avatar_string(discord_id(), avatar()));
     }
     if (username().length > MAX_USERNAME_LENGTH) {
       set_username(username().substring(0, MAX_USERNAME_LENGTH) + "...");

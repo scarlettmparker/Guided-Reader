@@ -1,0 +1,82 @@
+.annotation_item {
+  width: calc(100% - 33px);
+  background-color: #FBFBFB;
+  border-radius: 10px;
+  padding: 10px 14px 15px 14px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.annotation_item p {
+  margin: 0;
+}
+
+.annotation_item_header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.annotation_profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+  gap: 2px;
+}
+
+.annotation_profile_name {
+  font-weight: 600;
+  padding: 4px 8px;
+  background-color: #FBFBFB;
+  border-radius: 10px;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.annotation_profile_name:hover {
+  background-color: #ececec;
+  color: #CF3A5F;
+}
+
+.annotation_profile_avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.annotation_item_description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  line-height: 1.5;
+}
+
+.annotation_item_description img {
+  margin-top: 0.75rem;
+  max-width: 400px;
+}
+
+.annotation_item_description a {
+  color: rgb(207, 58, 95);
+  text-decoration: underline dotted rgba(37, 37, 37, 0.4);
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+}
+
+.annotation_item_description a:hover {
+  color: rgb(124, 16, 49);
+  text-decoration: underline dotted rgba(80, 27, 40, 0.6);
+}
+
+.annotation_item_footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+}

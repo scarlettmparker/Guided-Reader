@@ -25,6 +25,13 @@ export type AnnotationData = {
   description: string;
   dislikes: number;
   likes: number;
-  creation_date: number;
+  created_at: number;
+  author: Author;
+}
+
+export type Author = {
   user_id: number;
+  username: string;
+  discord_id: string;
+  avatar: string;
 }

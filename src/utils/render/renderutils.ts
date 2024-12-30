@@ -158,3 +158,16 @@ export function render_annotated_text(text: string, annotations: Annotation[]) {
   process_node(last_index, parts, filtered_annotations, temp_div);
   return parts.join('').replace(/<br\s*\/?>/g, '');
 }
+
+/**
+ * Handles a click event on the document. This function is used to detect clicks on annotated text.
+ * @param event Click event.
+ * @param set_current_annotation Function to set the current annotation.
+ */
+export const handle_annotation_click = (event: Event, set_current_annotation: (annotation: number) => void) => {
+  const target = event.target as HTMLElement;
+  if (target.id.startsWith("annotated-text-")) {
+    const annotation_id = parseInt(target.id.split("-")[2], 10);
+    set_current_annotation(annotation_id);
+  }
+};

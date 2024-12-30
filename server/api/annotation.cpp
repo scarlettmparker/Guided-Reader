@@ -44,10 +44,13 @@ class AnnotationHandler : public RequestHandler
     try
     {
       pqxx::work & txn = request::begin_transaction(pool);
+
       pqxx::result r = txn.exec_prepared(
         "select_annotation_data",
         std::to_string(text_id), std::to_string(start), std::to_string(end)
       );
+
+      
       txn.commit();
 
       if (r.empty())
