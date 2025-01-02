@@ -49,7 +49,6 @@ class AnnotationHandler : public RequestHandler
         "select_annotation_data",
         std::to_string(text_id), std::to_string(start), std::to_string(end)
       );
-
       
       txn.commit();
 
@@ -230,7 +229,7 @@ class AnnotationHandler : public RequestHandler
     return "/annotation";
   }
 
-  http::response<http::string_body> handle_request(http::request<http::string_body> const & req, const std::string & ip_address)
+  http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
     if (req.method() == http::verb::get)
     {

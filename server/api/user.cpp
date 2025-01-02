@@ -48,15 +48,15 @@ class UserHandler : public RequestHandler
    * - SameSite=None: The cookie is sent with cross-site requests.
    * - Max-Age=86400: The cookie expires after 24 hours.
    *
-   * @param session_id Session ID to set in the cookie.
+   * @param signed_session_id Session ID to set in the cookie.
    * @return HTTP response with the session cookie set.
    */
-  http::response<http::string_body> set_session_cookie(const std::string & session_id)
+  http::response<http::string_body> set_session_cookie(const std::string & signed_session_id)
   {
     http::response<http::string_body> res{http::status::ok, 11};
 
     res.set(http::field::content_type, "application/json");
-    res.set(http::field::set_cookie, "sessionId=" + session_id + "; HttpOnly; Secure; SameSite=None; Max-Age=86400");
+    res.set(http::field::set_cookie, "sessionId=" + signed_session_id + "; HttpOnly; Secure; SameSite=None; Max-Age=86400");
     res.body() = R"({"message": "Login successful", "status": "ok"})";
     res.prepare_payload();
 
@@ -65,7 +65,7 @@ class UserHandler : public RequestHandler
 
   /**
    * Set a session ID for a user.
-   * @param session_id Session ID to set.
+   * @param signed_session_id Session ID to set.
    * @param user_id ID of the user to set the session ID for.
    * @param username Username of the user to set the session ID for.
    * @param duration Duration of the session in seconds.
@@ -73,7 +73,7 @@ class UserHandler : public RequestHandler
    * @param verbose Whether to print messages to stdout.
    * @return true if the session ID was set, false otherwise.
    */
-  bool set_session_id(std::string session_id, int user_id, int duration, std::string ip_address, bool verbose)
+  bool set_session_id(std::string signed_session_id, int user_id, int duration, std::string ip_address, bool verbose)
   {
     try
     {
@@ -90,8 +90,8 @@ class UserHandler : public RequestHandler
         {"expires_at", std::to_string(expires_at)},
         {"ip_address", ip_address}
       };
-      
-      std::string key = "session:" + session_id;
+
+      std::string key = "session:" + signed_session_id;
 
       try {
         redis.hmset(key, session_data.begin(), session_data.end());
@@ -100,13 +100,13 @@ class UserHandler : public RequestHandler
         return false;
       }
 
-      if (!redis.expire("session:" + session_id, duration))
+      if (!redis.expire(key, duration))
       {
         verbose && std::cerr << "Failed to set session expiration in Redis" << std::endl;
         return false;
       }
 
-      if (!redis.sadd("user:" + std::to_string(user_id) + ":sessions", session_id))
+      if (!redis.sadd("user:" + std::to_string(user_id) + ":sessions", signed_session_id))
       {
         verbose && std::cerr << "Failed to add session ID to user sessions set in Redis" << std::endl;
         return false;
@@ -330,7 +330,7 @@ class UserHandler : public RequestHandler
     return "/user";
   }
 
-  http::response<http::string_body> handle_request(http::request<http::string_body> const & req, const std::string & ip_address)
+  http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
     if (req.method() == http::verb::get)
     {
@@ -406,6 +406,7 @@ class UserHandler : public RequestHandler
       }
 
       std::string session_id = generate_session_id(false);
+      std::string signed_session_id = session_id + "." + request::generate_hmac(session_id, READER_SECRET_KEY);
       int user_id = select_user_id(username, false);
 
       if (user_id == -1)
@@ -414,12 +415,12 @@ class UserHandler : public RequestHandler
       }
 
       int expires_in = 86400;
-      if (!set_session_id(session_id, user_id, expires_in, ip_address, false))
+      if (!set_session_id(signed_session_id, user_id, expires_in, ip_address, false))
       {
         return request::make_bad_request_response("Failed to set session ID", req);
       }
 
-      return set_session_cookie(session_id);
+      return set_session_cookie(signed_session_id);
     }
     else if (req.method() == http::verb::put)
     {

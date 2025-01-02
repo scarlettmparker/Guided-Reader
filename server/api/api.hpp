@@ -5,6 +5,7 @@
 #include "../request/request.hpp"
 #include "../request/postgres.hpp"
 #include "../request/middleware.hpp"
+#include "config.h"
 
 #include <boost/beast/http.hpp>
 #include <nlohmann/json.hpp>

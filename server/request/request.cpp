@@ -103,6 +103,107 @@ namespace request
     }
     return -1;
   }
+  
+  /**
+   * Helper function to convert a byte string to a hex string.
+   * This is used to prevent issues with encoding differences as the HMAC output is raw binary data,
+   * possibly containing null bytes/special characters, and should therefore be encoded to hex.
+   *
+   * @param bytes Byte string to convert to hex.
+   * @return Hex string.
+   */
+  std::string bytes_to_hex(const std::string & bytes)
+  {
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (unsigned char c : bytes)
+    {
+      ss << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
+    }
+    return ss.str();
+  }
+
+  /**
+   * Generate an HMAC for a given data string using a key. This is used to sign session IDs.
+   * This works by using the OpenSSL EVP_MAC functions to generate an HMAC.
+   *
+   * @param data Data to generate the HMAC for.
+   * @param key Key to use for the HMAC.
+   * @return HMAC for the data.
+   */
+  std::string generate_hmac(const std::string& data, const std::string& key) 
+  {
+    EVP_MAC *mac = EVP_MAC_fetch(NULL, "HMAC", NULL);
+    if (!mac) {
+        throw std::runtime_error("Failed to create MAC");
+    }
+
+    EVP_MAC_CTX *ctx = EVP_MAC_CTX_new(mac);
+    if (!ctx)
+    {
+      EVP_MAC_free(mac);
+      throw std::runtime_error("Failed to create MAC context");
+    }
+
+    OSSL_PARAM params[2];
+
+    // ... set the digest to SHA256 ...
+    params[0] = OSSL_PARAM_construct_utf8_string("digest", const_cast<char*>("SHA256"), 6);
+    params[1] = OSSL_PARAM_construct_end();
+
+    if (!EVP_MAC_init(ctx, reinterpret_cast<const unsigned char*>(key.c_str()), key.length(), params))
+    {
+      EVP_MAC_CTX_free(ctx);
+      EVP_MAC_free(mac);
+      throw std::runtime_error("Failed to initialize MAC");
+    }
+
+    if (!EVP_MAC_update(ctx, reinterpret_cast<const unsigned char*>(data.c_str()), data.length()))
+    {
+      EVP_MAC_CTX_free(ctx);
+      EVP_MAC_free(mac);
+      throw std::runtime_error("Failed to update MAC");
+    }
+
+    size_t out_len;
+    if (!EVP_MAC_final(ctx, nullptr, &out_len, 0))
+    {
+      EVP_MAC_CTX_free(ctx);
+      EVP_MAC_free(mac);
+      throw std::runtime_error("Failed to get MAC length");
+    }
+
+    std::vector<unsigned char> result(out_len);
+    if (!EVP_MAC_final(ctx, result.data(), &out_len, result.size()))
+    {
+      EVP_MAC_CTX_free(ctx);
+      EVP_MAC_free(mac);
+      throw std::runtime_error("Failed to get MAC");
+    }
+
+    EVP_MAC_CTX_free(ctx);
+    EVP_MAC_free(mac);
+
+    return bytes_to_hex(std::string(reinterpret_cast<char*>(result.data()), out_len));
+  }
+  
+  /**
+   * Split a session ID into the session ID and the signature.
+   *
+   * @param signed_session_id Session ID to split.
+   * @param session_id Session ID extracted from the signed session ID.
+   * @param signature Signature extracted from the signed session ID.
+   * @return true if the session ID was split, false otherwise.
+   */
+  bool split_session_id(const std::string & signed_session_id, std::string & session_id, std::string & signature)
+  {
+    std::istringstream iss(signed_session_id);
+    if (std::getline(iss, session_id, '.') && std::getline(iss, signature))
+    {
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Invalidate a session ID. This removes the session ID from Redis.
@@ -151,10 +252,27 @@ namespace request
    * @param verbose Whether to print messages to stdout.
    * @return true if the session is valid, false otherwise.
    */
-  bool validate_session(std::string session_id, bool verbose)
+  bool validate_session(std::string signed_session_id, bool verbose)
   {
+    std::string session_id, signature;
+    if (!split_session_id(signed_session_id, session_id, signature))
+    {
+      verbose && std::cerr << "Invalid session ID format" << std::endl;
+      return false;
+    }
+
+    // ... check if the session ID is signed ...
+    std::string secret_key = READER_SECRET_KEY;
+    std::string expected_signature = generate_hmac(session_id, secret_key);
+
+    if (signature != expected_signature)
+    {
+      verbose && std::cerr << "Invalid session ID signature" << std::endl;
+      return false;
+    }
+
     auto & redis = Redis::get_instance();
-    std::string key = "session:" + session_id;
+    std::string key = "session:" + signed_session_id;
     
     if (!redis.exists(key))
     {
@@ -182,8 +300,7 @@ namespace request
       return false;
     }
 
-    /* check if the session has expired */
-
+    // ... check if the session has expired ...
     if (session_data.find("expires_at") != session_data.end())
     {
       auto expires_at = std::stoll(session_data["expires_at"]);

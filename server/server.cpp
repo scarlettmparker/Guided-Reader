@@ -14,7 +14,7 @@ namespace server
   {
     std::vector<std::unique_ptr<RequestHandler>> handlers;
 
-    for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+    for (std::filesystem::directory_entry const& entry : std::filesystem::directory_iterator(directory)) {
       if (entry.path().extension() == ".so") {
         void* lib_handle = dlopen(entry.path().c_str(), RTLD_LAZY);
         if (!lib_handle) {
@@ -23,10 +23,13 @@ namespace server
 
         std::string filename = entry.path().stem().string();
         if (filename.rfind("lib", 0) == 0)
+        {
           filename = filename.substr(3);
+        }
         std::string function_name = "create_" + filename + "_handler";
-        auto create_handler = reinterpret_cast<RequestHandler* (*)()>(dlsym(lib_handle, function_name.c_str()));
-        if (!create_handler) {
+        RequestHandler* (*create_handler)() = reinterpret_cast<RequestHandler* (*)()>(dlsym(lib_handle, function_name.c_str()));
+        if (!create_handler)
+        {
           dlclose(lib_handle);
           throw std::runtime_error("Failed to find " + function_name + " function in: " + entry.path().string());
         }
@@ -46,7 +49,7 @@ namespace server
     */
   http::response<http::string_body> handle_request(http::request<http::string_body> const& req, const std::string& ip_address)
   {
-    static auto handlers = load_handlers(".");
+    static std::vector<std::unique_ptr<RequestHandler>> handlers = load_handlers(".");
     http::response<http::string_body> res;
     std::string allowed_methods = "DELETE, GET, OPTIONS, PATCH, POST, PUT";
 
@@ -61,7 +64,7 @@ namespace server
       return res;
     }
 
-    for (const auto& handler : handlers)
+    for (const auto & handler : handlers)
     {
       if (req.target().starts_with(handler->get_endpoint()))
       {
@@ -103,7 +106,7 @@ namespace server
       {
         boost::asio::ip::address ip_address = socket_.remote_endpoint().address();
         std::string ip_str = ip_address.to_string();
-        auto res = handle_request(req_, ip_str);
+        http::response<http::string_body> res = handle_request(req_, ip_str);
         do_write(std::move(res));
       }
     });

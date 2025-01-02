@@ -118,8 +118,8 @@ namespace postgres
       "           'text_id', a.text_id"
       "         ) as annotation,"
       "         a.description::text,"
-      "         a.dislikes::integer,"
-      "         a.likes::integer,"
+      "         COALESCE(SUM(CASE WHEN uai.type = 'LIKE' THEN 1 ELSE 0 END), 0) AS likes,"
+      "         COALESCE(SUM(CASE WHEN uai.type = 'DISLIKE' THEN 1 ELSE 0 END), 0) AS dislikes,"
       "         a.created_at::integer,"
       "         json_build_object("
       "           'id', u.id,"
@@ -127,11 +127,14 @@ namespace postgres
       "           'discord_id', u.discord_id,"
       "           'avatar', u.avatar"
       "         ) as author "
-      "  FROM public.\"Annotation\" a "
-      "  LEFT JOIN public.\"User\" u ON a.user_id = u.id "
+      "  FROM public.\"Annotation\" a"
+      "  LEFT JOIN public.\"User\" u ON a.user_id = u.id"
+      "  LEFT JOIN public.\"UserAnnotationInteraction\" uai ON a.id = uai.annotation_id"
       "  WHERE a.text_id = $1 "
       "  AND a.start >= $2 "
       "  AND a.\"end\" <= $3"
+      "  GROUP BY a.id, a.start, a.\"end\", a.text_id, a.description,"
+      "  a.created_at, u.id, u.username, u.discord_id, u.avatar"
       ") t");
 
     txn.conn().prepare("select_author_id_by_annotation",

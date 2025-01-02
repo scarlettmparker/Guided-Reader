@@ -126,7 +126,7 @@ class TextHandler : public RequestHandler
     return "/text";
   }
 
-  http::response<http::string_body> handle_request(http::request<http::string_body> const & req, const std::string & ip_address)
+  http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
     if (req.method() == http::verb::get)
     {

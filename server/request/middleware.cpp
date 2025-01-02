@@ -60,7 +60,8 @@ namespace middleware
       return false;
     }
 
-    if (std::chrono::duration_cast<std::chrono::seconds>(now - data.last_request).count() == 0) {
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - data.last_request).count() == 0)
+    {
       if (data.request_count > MAX_REQUESTS_PER_SECOND)
       {
         return true;
