@@ -1,8 +1,8 @@
 .annotation_item {
-  width: calc(100% - 33px);
+  width: calc(100% - 36px);
   background-color: #FBFBFB;
   border-radius: 10px;
-  padding: 10px 14px 15px 14px;
+  padding: 10px 20px 15px 16px;
 
   display: flex;
   flex-direction: column;
@@ -61,7 +61,7 @@
   max-width: 400px;
 }
 
-.annotation_item_description a {
+.annotation_item a {
   color: rgb(207, 58, 95);
   text-decoration: underline dotted rgba(37, 37, 37, 0.4);
   text-underline-offset: 4px;
@@ -69,14 +69,36 @@
   transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
 }
 
-.annotation_item_description a:hover {
+.annotation_item a:hover {
   color: rgb(124, 16, 49);
   text-decoration: underline dotted rgba(80, 27, 40, 0.6);
 }
 
-.annotation_item_footer {
+.annotation_footer {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 2px;
+  gap: 0.5rem;
+}
+
+.annotation_footer_votes {
+  margin-right: 1rem;
+}
+
+.annotation_footer_icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.annotation_footer_icon_dislike {
+  transform: rotate(180deg);
+}
+
+.annotation_footer_icon:hover {
+  background-color: #ececec;
+}
+
+.annotation_footer_edit {
+  margin-left: auto;
 }

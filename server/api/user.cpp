@@ -314,7 +314,7 @@ class UserHandler : public RequestHandler
    */
   bool login(std::string username, std::string password)
   {
-    std::string stored_password = select_password(username, 1);
+    std::string stored_password = select_password(username, false);
     if (stored_password.empty())
     {
       return false;
@@ -344,18 +344,18 @@ class UserHandler : public RequestHandler
         return request::make_unauthorized_response("Session ID not found", req);
       }
  
-      if (!request::validate_session(std::string(session_id), true))
+      if (!request::validate_session(std::string(session_id), false))
       {
         return request::make_unauthorized_response("Invalid session ID", req);
       }
 
-      int user_id = request::get_user_id_from_session(std::string(session_id), true);
+      int user_id = request::get_user_id_from_session(std::string(session_id), false);
       if (user_id == -1)
       {
         return request::make_bad_request_response("User not found", req);
       }
 
-      UserData user_data = select_user_data_by_id(user_id, true);
+      UserData user_data = select_user_data_by_id(user_id, false);
       if (user_data.username.empty())
       {
         return request::make_bad_request_response("User not found", req);

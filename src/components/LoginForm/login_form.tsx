@@ -39,8 +39,10 @@ const LoginForm: Component = () => {
   const [show_password, set_show_password] = createSignal(true);
   const [error, set_error] = createSignal("");
 
+  const icon_path = "./assets/login/icons";
+
   const EYE_SIZE = 32;
-  const EYE_SOURCE = () => show_password() ? './assets/eye.png' : './assets/eye_closed.png';
+  const EYE_SOURCE = () => show_password() ? `${icon_path}/eye.png` : `${icon_path}/eye_closed.png`;
   const ALT_TEXT = () => show_password() ? 'Show password' : 'Hide password';
   const ALT_ONCLICK = () => set_show_password(!show_password());
 

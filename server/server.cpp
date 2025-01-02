@@ -48,13 +48,14 @@ namespace server
   {
     static auto handlers = load_handlers(".");
     http::response<http::string_body> res;
+    std::string allowed_methods = "DELETE, GET, OPTIONS, PATCH, POST, PUT";
 
     // handle CORS preflight request
     if (req.method() == http::verb::options)
     {
       res = {http::status::no_content, req.version()};
       res.set(http::field::access_control_allow_origin, req["Origin"].to_string());
-      res.set(http::field::access_control_allow_methods, "GET, POST, PUT, DELETE, OPTIONS");
+      res.set(http::field::access_control_allow_methods, allowed_methods);
       res.set(http::field::access_control_allow_headers, "Content-Type, Authorization, Access-Control-Allow-Origin");
       res.set(http::field::access_control_allow_credentials, "true");
       return res;
@@ -77,7 +78,7 @@ namespace server
 
     // set CORS headers
     res.set(http::field::access_control_allow_origin, req["Origin"].to_string());
-    res.set(http::field::access_control_allow_methods, "GET, POST, PUT, DELETE, OPTIONS");
+    res.set(http::field::access_control_allow_methods, allowed_methods);
     res.set(http::field::access_control_allow_headers, "Content-Type, Authorization");
     res.set(http::field::access_control_allow_credentials, "true");
     

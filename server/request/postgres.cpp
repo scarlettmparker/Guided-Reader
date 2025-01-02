@@ -111,7 +111,12 @@ namespace postgres
     txn.conn().prepare("select_annotation_data",
       "SELECT array_to_json(array_agg(row_to_json(t))) "
       "FROM ("
-      "  SELECT a.id::integer,"
+      "  SELECT json_build_object("
+      "           'id', a.id::integer,"
+      "           'start', a.start,"
+      "           'end', a.\"end\","
+      "           'text_id', a.text_id"
+      "         ) as annotation,"
       "         a.description::text,"
       "         a.dislikes::integer,"
       "         a.likes::integer,"
@@ -128,6 +133,20 @@ namespace postgres
       "  AND a.start >= $2 "
       "  AND a.\"end\" <= $3"
       ") t");
+
+    txn.conn().prepare("select_author_id_by_annotation",
+      "SELECT user_id "
+      "FROM public.\"Annotation\" "
+      "WHERE id = $1");
+    
+    txn.conn().prepare("update_annotation",
+      "UPDATE public.\"Annotation\" "
+      "SET description = $1 "
+      "WHERE id = $2");
+
+    txn.conn().prepare("delete_annotation",
+      "DELETE FROM public.\"Annotation\" "
+      "WHERE id = $1");
 
     txn.commit();
     return c;

@@ -49,25 +49,58 @@
   gap: 10px;
   height: 90%;
   overflow-y: auto;
+  word-wrap: break-word;
 }
 
-.response {
-  position: absolute;
-  bottom: 20px;
-  background-color: #252525;
+.annotation_textarea {
+  width: 95%;
+  height: 95%;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
 
-  padding: 8px 20px;
-  border-radius: 15px;
+  resize: none;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
+}
+
+.annotation_textarea:focus {
+  outline: none;
   border: 1px solid #272121;
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
 
-  color: white;
+.annotation_modal_footer {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.annotation_modal_button {
+  border: 1px solid #c0c0c0;
+  padding: 5px 15px;
+  border-radius: 10px;
+  background-color: #FBFBFB;
   cursor: pointer;
+  user-select: none;
+
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
   transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
-.response:hover {
-  border: 1px solid #CF3A5F;
-  background-color: #ECECEC;
-  color: #CF3A5F;
+.preview_button {
+  margin-left: auto;
+  width: 91px;
+}
+
+.cancel_button {
+  margin-right: auto;
+}
+
+.annotation_modal_button:hover {
+  background-color: #272121;
+  color: white;
 }

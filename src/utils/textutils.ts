@@ -1,5 +1,6 @@
-import { ENV } from "./const";
+import { BASE_DELAY, ENV, MAX_RETRIES } from "./const";
 import { TextTitle, Text, Annotation, AnnotationData } from "./types";
+import { delay } from "./userutils";
 
 /**
  * Fetches a list of text titles from the server given a page number, page size, and sort order.
@@ -106,4 +107,90 @@ export async function get_annotation_data(id: number, start: number, end: number
   } finally {
     clearTimeout(timeout_id);
   }
+}
+
+
+/**
+ * Submit the edited annotation. Takes an annotation data object and sends a PATCH request to the server.
+ * The annotation data object is constructed from the current annotation data and the new description.
+ * 
+ * @param annotation_data Annotation data object to submit.
+ * @returns Indication of the status of the submission (e.g. Annotation submitted).
+ */
+export async function submit_annotation_edit(annotation_data: AnnotationData): Promise<string> {
+  const REQUEST_TIMEOUT = 1000;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+      const response = await fetch(`http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Connection": "keep-alive"
+          },
+          credentials: "include",
+          signal: controller.signal,
+          body: JSON.stringify(annotation_data)
+        }
+      );
+      if (response.status == 401) {
+        return "Unauthorized";
+      }
+      const data = await response.json();
+      return data.message;
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error);
+      if (attempt < MAX_RETRIES) {
+        const backoff_delay = BASE_DELAY * Math.pow(2, attempt);
+        await delay(backoff_delay);
+      }
+    } finally {
+      clearTimeout(timeout_id);
+    }
+  }
+  return "Error";
+}
+
+export async function delete_annotation(annotation_data: AnnotationData): Promise<string> {
+  const REQUEST_TIMEOUT = 1000;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+      const response = await fetch(`http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Connection": "keep-alive"
+          },
+          credentials: "include",
+          signal: controller.signal,
+          body: JSON.stringify(annotation_data)
+        }
+      );
+      if (response.status == 401) {
+        return "Unauthorized";
+      }
+      const data = await response.json();
+      return data.message;
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error);
+      if (attempt < MAX_RETRIES) {
+        const backoff_delay = BASE_DELAY * Math.pow(2, attempt);
+        await delay(backoff_delay);
+      }
+    } finally {
+      clearTimeout(timeout_id);
+    }
+  }
+  return "Error";
 }

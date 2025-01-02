@@ -3,7 +3,7 @@ import { UserData, MAX_RETRIES, ENV, BASE_DELAY, CacheData } from "./const";
 /**
  * Delay the execution of a function.
  */
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Get the user data from the session.

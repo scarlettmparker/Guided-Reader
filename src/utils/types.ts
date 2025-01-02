@@ -21,7 +21,7 @@ export type Annotation = {
 }
 
 export type AnnotationData = {
-  id: number;
+  annotation: Annotation;
   description: string;
   dislikes: number;
   likes: number;
