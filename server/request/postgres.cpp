@@ -142,6 +142,13 @@ namespace postgres
       "FROM public.\"Annotation\" "
       "WHERE id = $1");
     
+    txn.conn().prepare("insert_annotation",
+      "INSERT INTO public.\"Annotation\" ("
+      "text_id, user_id, start, \"end\", description, created_at"
+      ") VALUES ("
+      "$1, $2, $3, $4, $5, $6"
+      ")");
+    
     txn.conn().prepare("update_annotation",
       "UPDATE public.\"Annotation\" "
       "SET description = $1 "

@@ -1,5 +1,5 @@
 import styles from "./renderutils.module.css";
-import { Annotation } from "~/types";
+import { Annotation } from "~/utils/types";
 
 /**
  * Helper function for rendering HTML content.
@@ -153,6 +153,7 @@ export function render_annotated_text(text: string, annotations: Annotation[]) {
 
   const filtered_annotations = filter_annotations(annotations, annotation_map);
   const temp_div = document.createElement('div');
+  temp_div.id = "text_content";
   temp_div.innerHTML = text;
 
   process_node(last_index, parts, filtered_annotations, temp_div);

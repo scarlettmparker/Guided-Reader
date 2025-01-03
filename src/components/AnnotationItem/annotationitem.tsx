@@ -1,10 +1,10 @@
-import { Component, createEffect, createSignal, onMount } from "solid-js";
+import { Component, createSignal, onMount } from "solid-js";
 import { marked } from 'marked';
-import AnnotationItemProps from "./annotationitemprops";
-import styles from "./annotationitem.module.css";
 import { build_avatar_string } from "../Navbar/navbar";
 import { AnnotationData } from "~/utils/types";
 import { delete_annotation } from "~/utils/textutils";
+import AnnotationItemProps from "./annotationitemprops";
+import styles from "./annotationitem.module.css";
 
 /**
  * Calculate the time ago from a given timestamp.

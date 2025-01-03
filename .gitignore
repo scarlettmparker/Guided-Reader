@@ -11,6 +11,8 @@ app.config.timestamp_*.js
 # build
 /server/env
 /server/build
+/server/key
+/src/key
 
 .env
 .env*.local

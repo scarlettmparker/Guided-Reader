@@ -1,5 +1,5 @@
 import { BASE_DELAY, ENV, MAX_RETRIES } from "./const";
-import { TextTitle, Text, Annotation, AnnotationData } from "./types";
+import { TextTitle, Text, Annotation, AnnotationData, NewAnnotation } from "./types";
 import { delay } from "./userutils";
 
 /**
@@ -15,7 +15,7 @@ export async function get_titles(
   PAGE: number, PAGE_SIZE: number, SORT: number, set_reached_end: (reached_end: boolean) => void
 ): Promise<TextTitle[]> {
   const response = await fetch(
-    `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/titles?sort=${SORT}&page=${PAGE}&page_size=${PAGE_SIZE}`
+    `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/titles?sort=${SORT}&page=${PAGE}&page_size=${PAGE_SIZE}`
   );
 
   const data = await response.json();
@@ -44,7 +44,7 @@ export async function get_text_data(id: number, language: string, data_type: str
 
   try {
     const response = await fetch(
-      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/text?text_object_id=${id}&language=${language}&type=${data_type}`,
+      `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/text?text_object_id=${id}&language=${language}&type=${data_type}`,
       {
         signal: controller.signal,
       }
@@ -85,8 +85,9 @@ export async function get_annotation_data(id: number, start: number, end: number
   const timeout_id = setTimeout(() => controller.abort(), 5000);
 
   try {
+    console.time('fetch annotations');
     const response = await fetch(
-      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation?text_id=${id}&start=${start}&end=${end}`,
+      `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation?text_id=${id}&start=${start}&end=${end}`,
       {
         signal: controller.signal,
       }
@@ -97,6 +98,7 @@ export async function get_annotation_data(id: number, start: number, end: number
     }
 
     const data = await response.json();
+    console.timeEnd('fetch annotations');
     if (data.status === 'ok') {
       return data.message;
     }
@@ -125,7 +127,7 @@ export async function submit_annotation_edit(annotation_data: AnnotationData): P
     const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
     try {
-      const response = await fetch(`http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
+      const response = await fetch(`https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
         {
           method: "PATCH",
           headers: {
@@ -156,6 +158,59 @@ export async function submit_annotation_edit(annotation_data: AnnotationData): P
   return "Error";
 }
 
+/**
+ * Submit a new annotation. Takes an annotation data object and sends a PUT request to the server.
+ * The annotation data object is constructed from the current annotation data and the new description.
+ * 
+ * @param annotation_data Annotation data object to submit.
+ * @returns Indication of the status of the submission (e.g. Annotation submitted).
+ */
+export async function submit_new_annotation(annotation_data: NewAnnotation): Promise<string> {
+  const REQUEST_TIMEOUT = 1000;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+      const response = await fetch(`https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Connection": "keep-alive"
+          },
+          credentials: "include",
+          signal: controller.signal,
+          body: JSON.stringify(annotation_data),
+        }
+      );
+      if (response.status == 401) {
+        return "Unauthorized";
+      }
+      const data = await response.json();
+      return data.message;
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error);
+      if (attempt < MAX_RETRIES) {
+        const backoff_delay = BASE_DELAY * Math.pow(2, attempt);
+        await delay(backoff_delay);
+      }
+    } finally {
+      clearTimeout(timeout_id);
+    }
+  }
+  return "Error";
+}
+
+/**
+ * Delete an annotation. Takes an annotation data object and sends a DELETE request to the server.
+ * The annotation data object is constructed from the current annotation data.
+ * 
+ * @param annotation_data Annotation data object to delete.
+ * @returns Indication of the status of the deletion (e.g. Annotation deleted).
+ */
 export async function delete_annotation(annotation_data: AnnotationData): Promise<string> {
   const REQUEST_TIMEOUT = 1000;
 
@@ -164,7 +219,7 @@ export async function delete_annotation(annotation_data: AnnotationData): Promis
     const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
     try {
-      const response = await fetch(`http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
+      const response = await fetch(`https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
         {
           method: "DELETE",
           headers: {

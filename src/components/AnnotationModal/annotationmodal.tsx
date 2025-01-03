@@ -31,7 +31,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
   createEffect(async () => {
     const annotation = first_annotation();
     if (SUCCESS_MESSAGES  .includes(props.update_response()) && annotation != null) {
-      /* re-load the annotation data */
+      // ... re-load the annotation data ...
       props.set_annotation_data(await get_annotation_data(
         annotation.text_id, annotation.start, annotation.end
       ));

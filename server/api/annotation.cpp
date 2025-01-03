@@ -146,6 +146,36 @@ class AnnotationHandler : public RequestHandler
     return false;
   }
 
+  bool insert_annotation(int text_id, int user_id, int start, int end, std::string description, bool verbose)
+  {
+    std::time_t created_at = std::time(nullptr);
+    try
+    {
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "insert_annotation",
+        text_id, user_id, start, end, description, created_at
+      );
+      txn.commit();
+
+      if (r.affected_rows() == 0)
+      {
+        verbose && std::cout << "Failed to insert annotation" << std::endl;
+        return false;
+      }
+      return true;
+    }
+    catch (const std::exception &e)
+    {
+      verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+      verbose && std::cerr << "Unknown error while executing query" << std::endl;
+    }
+    return false;
+  }
+
   /**
    * Delete an annotation by its ID.
    *
@@ -193,29 +223,29 @@ class AnnotationHandler : public RequestHandler
    */
   http::response<http::string_body> validate_annotation_author(const http::request<http::string_body>& req, int annotation_id, int author_id) {
     // ... validate annotation author ...
-    int real_author_id = select_author_id_by_annotation(annotation_id, false);
+    int real_author_id = select_author_id_by_annotation(annotation_id, true);
     if (real_author_id == -1) {
-        return request::make_bad_request_response("Annotation not found", req);
+      return request::make_bad_request_response("Annotation not found", req);
     }
     if (real_author_id != author_id) {
-        return request::make_bad_request_response("Author ID mismatch. This incident has been reported", req);
+      return request::make_bad_request_response("Author ID mismatch. This incident has been reported", req);
     }
 
     // ... validate session and user
     std::string_view session_id = request::get_session_id_from_cookie(req);
     if (session_id.empty()) {
-        return request::make_unauthorized_response("Session ID not found", req);
+      return request::make_unauthorized_response("Session ID not found", req);
     }
-    if (!request::validate_session(std::string(session_id), false)) {
-        return request::make_unauthorized_response("Invalid session ID", req);
+    if (!request::validate_session(std::string(session_id), true)) {
+      return request::make_unauthorized_response("Invalid session ID", req);
     }
 
-    int user_id = request::get_user_id_from_session(std::string(session_id), false);
+    int user_id = request::get_user_id_from_session(std::string(session_id), true);
     if (user_id == -1) {
-        return request::make_bad_request_response("User not found", req);
+      return request::make_bad_request_response("User not found", req);
     }
     if (user_id != real_author_id) {
-        return request::make_bad_request_response("Author ID mismatch. This incident has been reported", req);
+      return request::make_bad_request_response("Author ID mismatch. This incident has been reported", req);
     }
 
     return http::response<http::string_body>{http::status::ok, req.version()};
@@ -318,7 +348,7 @@ class AnnotationHandler : public RequestHandler
       }
       else if (description.length() < 15)
       {
-        return request::make_bad_request_response("Description too short. Max 15 characters", req);
+        return request::make_bad_request_response("Description too short. Min 15 characters", req);
       }
 
       http::response<http::string_body> validation_response = validate_annotation_author(req, annotation_id, author_id);
@@ -334,6 +364,85 @@ class AnnotationHandler : public RequestHandler
 
       return request::make_json_request_response("Annotation updated", req);
     }
+    else if (req.method() == http::verb::put)
+    {
+      /**
+       * PUT a new annotation.
+       */
+
+      if (!request::verify_client_certificate(READER_WEBSITE_URL))
+      {
+        return request::make_unauthorized_response("Invalid client certificate", req);
+      }
+      
+      nlohmann::json json_request;
+      try
+      {
+        json_request = nlohmann::json::parse(req.body());
+      } catch (const nlohmann::json::parse_error &e)
+      {
+        return request::make_bad_request_response("Invalid JSON", req);
+      }
+
+      int text_id;
+      int user_id;
+      int start;
+      int end;
+      std::string description;
+
+      try
+      {
+        text_id = json_request["text_id"].get<int>();
+        user_id = json_request["user_id"].get<int>();
+        start = json_request["start"].get<int>();
+        end = json_request["end"].get<int>();
+        description = json_request["description"].get<std::string>();
+      }
+      catch (const nlohmann::json::exception &e)
+      {
+        return request::make_bad_request_response("Missing text_id | user_id | start | end | description", req);
+      }
+      catch (const std::invalid_argument&)
+      {
+        return request::make_bad_request_response("Invalid numeric value for text_id | user_id | start | end", req);
+      }
+      catch (const std::out_of_range&)
+      {
+        return request::make_bad_request_response("Number out of range for text_id | user_id | start | end", req);
+      }
+
+      if (start > end)
+      {
+        return request::make_bad_request_response("Start position cannot be greater than end position", req);
+      }
+      if (description.empty())
+      {
+        return request::make_bad_request_response("Missing description", req);
+      }
+      if (description.length() > 4000)
+      {
+        return request::make_bad_request_response("Description too long. Max 4,000 characters", req);
+      }
+      else if (description.length() < 15)
+      {
+        return request::make_bad_request_response("Description too short. Min 15 characters", req);
+      }
+
+      std::string_view session_id = request::get_session_id_from_cookie(req);
+      if (session_id.empty()) {
+        return request::make_unauthorized_response("Session ID not found", req);
+      }
+      if (!request::validate_session(std::string(session_id), false)) {
+        return request::make_unauthorized_response("Invalid session ID", req);
+      }
+
+      if (!insert_annotation(text_id, user_id, start, end, description, true))
+      {
+        return request::make_bad_request_response("Failed to insert annotation", req);
+      }
+
+      return request::make_json_request_response("Annotation created", req);
+    }
     else if (req.method() == http::verb::delete_)
     {
       /**
@@ -344,6 +453,7 @@ class AnnotationHandler : public RequestHandler
       try
       {
         json_request = nlohmann::json::parse(req.body());
+        std::cout << json_request.dump(2) << std::endl;
       } catch (const nlohmann::json::parse_error &e)
       {
         return request::make_bad_request_response("Invalid JSON", req);
@@ -376,7 +486,7 @@ class AnnotationHandler : public RequestHandler
         return validation_response;
       }
 
-      if (!delete_annotation(annotation_id, false))
+      if (!delete_annotation(annotation_id, true))
       {
         return request::make_bad_request_response("Failed to delete annotation", req);
       }

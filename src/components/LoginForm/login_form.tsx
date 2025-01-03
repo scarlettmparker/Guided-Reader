@@ -1,5 +1,6 @@
 import { Component, createSignal, onMount } from "solid-js";
 import { ENV } from "~/utils/const";
+
 import ButtonWithAlt from "~/components/ButtonWithAlt";
 import styles from "./login_form.module.css";
 
@@ -12,7 +13,7 @@ import styles from "./login_form.module.css";
  * @returns Redirects to the home page if the login is successful.
  */
 async function login(username: string, password: string, set_error: (error: string) => void) {
-  const response = await fetch(`http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/user`, {
+  const fetch_options: RequestInit = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -22,6 +23,10 @@ async function login(username: string, password: string, set_error: (error: stri
     body: JSON.stringify({
       username: username, password: password
     })
+  }
+  
+  const response = await fetch(`https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/user`, {
+    ...fetch_options
   });
 
   const data = await response.json();

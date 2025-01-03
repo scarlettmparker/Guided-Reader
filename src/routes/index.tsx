@@ -1,6 +1,6 @@
 import { Title } from '@solidjs/meta';
 import { createEffect, createMemo, createSignal, onCleanup, onMount, type Component } from 'solid-js';
-import { TextTitle, Text, Annotation, AnnotationData } from '~/utils/types';
+import { TextTitle, Text, Annotation, AnnotationData, SelectedData } from '~/utils/types';
 import { handle_annotation_click } from '~/utils/render/renderutils';
 import { get_titles, get_annotation_data, get_text_data } from '~/utils/textutils';
 
@@ -11,6 +11,7 @@ import TextDisplay from '~/components/TextDisplay';
 import AnnotationModal from '~/components/AnnotationModal';
 import EditingAnnotationModal from '~/components/EditingAnnotationModal';
 import styles from './index.module.css';
+import CreatingAnnotationModal from '~/components/CreatingAnnotationModal';
 
 const DEFAULT_LANGUAGE = "GR";
 const PAGE_SIZE = 335;
@@ -29,12 +30,15 @@ const Index: Component = () => {
     current_annotation_id: () => -1,
     set_current_annotation_id: () => { },
     annotation_data: () => [],
-    set_annotation_data: () => { }
+    set_annotation_data: () => { },
   });
 
   const callbacks = createMemo(() => reader_callbacks());
+
   const [current_annotation_data, set_current_annotation_data] = createSignal<AnnotationData | null>(null);
   const [update_response, set_update_response] = createSignal("");
+  const [selected_data, set_selected_data] = createSignal<SelectedData | null>(null);
+  const [new_selected_data, set_new_selected_data] = createSignal<SelectedData | null>(null);
 
   onMount(() => {
     const handle_edit_annotation = (e: CustomEvent) => {
@@ -45,15 +49,22 @@ const Index: Component = () => {
       set_update_response(e.detail.response);
     }
 
+    const handle_select_text = (e: CustomEvent) => {
+      set_selected_data(e.detail);
+    }
+
+
     // ... listeners for modifying annotations ...
     document.addEventListener("edit-annotation", handle_edit_annotation as EventListener);
     document.addEventListener("update-annotation", handle_update_annotation as EventListener);
     document.addEventListener("delete-annotation", handle_update_annotation as EventListener);
+    document.addEventListener("select-text", handle_select_text as EventListener);
 
     onCleanup(() => {
       document.removeEventListener("edit-annotation", handle_edit_annotation as EventListener);
       document.removeEventListener("update-annotation", handle_update_annotation as EventListener);
       document.removeEventListener("delete-annotation", handle_update_annotation as EventListener);
+      document.removeEventListener("select-text", handle_select_text as EventListener);
     });
   })
 
@@ -67,11 +78,32 @@ const Index: Component = () => {
             set_current_annotation_data={set_current_annotation_data} />
           :
           <AnnotationModal set_current_annotation={callbacks().set_current_annotation_id}
-            annotation_data={() => callbacks().annotation_data()} 
-            set_annotation_data={callbacks().set_annotation_data} 
+            annotation_data={() => callbacks().annotation_data()}
+            set_annotation_data={callbacks().set_annotation_data}
             update_response={update_response} />
         )
       }
+      {(callbacks().current_annotation_id() == -2) && new_selected_data() &&
+        <CreatingAnnotationModal set_current_annotation_id={callbacks().set_current_annotation_id} 
+          new_selected_data={new_selected_data} />
+      }
+      {(() => {
+        const data = selected_data();
+        return data && data.position ? (
+          <button class={styles.annotate_button}
+            style={{
+              left: `${data.position.x}px`,
+              top: `${data.position.y}px`
+            }}
+            onclick={() => {
+              callbacks().set_current_annotation_id(-2);
+              set_selected_data(null);
+              set_new_selected_data(data);
+            }}>
+            Annotate
+          </button>
+        ) : null;
+      })()}
     </>
   );
 };
@@ -131,7 +163,7 @@ const Reader: Component<ReaderProps> = (props) => {
 
   // ... fetches annotation data when clicking on an annotation ...
   createEffect(async () => {
-    if (current_annotation_id() != -1) {
+    if (current_annotation_id() >= 0) {
       const annotation = annotations_map().get(current_text())?.find(ann => ann.id === current_annotation_id());
       set_annotation_data(await get_annotation_data(current_text(), annotation!.start, annotation!.end));
     } else {

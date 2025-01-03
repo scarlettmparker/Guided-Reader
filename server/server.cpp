@@ -3,6 +3,196 @@
 namespace server
 {
   /**
+   * Initialize the SSL context for the server.
+   * This is used to set up the server's SSL context with the appropriate certificates and keys.
+   * Currently it's mainly used to check the source of a request to prevent CSRF attacks with annotations.
+   *
+   * @return SSL context for the server.
+   */
+  ssl::context init_ssl_context()
+  {
+    ssl::context ctx(ssl::context::tlsv12_server);
+
+    // ... enable session caching ...
+    SSL_CTX_set_session_cache_mode(ctx.native_handle(), 
+      SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR);
+
+    SSL_CTX_set_session_id_context(ctx.native_handle(), 
+      (const unsigned char*)"guided_reader", strlen("guided_reader"));
+    SSL_CTX_sess_set_cache_size(ctx.native_handle(), 10000);
+
+    SSL_CTX_set_timeout(ctx.native_handle(), 3600); // 1 hour
+    SSL_CTX_clear_options(ctx.native_handle(), SSL_OP_NO_TICKET);
+
+    SSL_CTX_set_cipher_list(ctx.native_handle(),
+      "ECDHE-ECDSA-CHACHA20-POLY1305:"
+      "ECDHE-RSA-CHACHA20-POLY1305:"
+      "ECDHE-ECDSA-AES128-GCM-SHA256:"
+      "ECDHE-RSA-AES128-GCM-SHA256");
+
+
+    ctx.set_options(
+      ssl::context::default_workarounds |
+      ssl::context::no_sslv2 |
+      ssl::context::no_sslv3 |
+      ssl::context::single_dh_use |
+      ssl::context::no_compression
+    );
+
+    ctx.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
+    ctx.set_verify_depth(4);
+    
+    try
+    {
+      // ... load certificates and keys ...
+      ctx.use_certificate_chain_file("../key/cert.pem");
+      ctx.use_private_key_file("../key/key.pem", ssl::context::pem);
+      ctx.use_tmp_dh_file("../key/dhparam.pem");
+      ctx.load_verify_file("../key/ca-chain.pem");
+
+      ctx.set_verify_callback(
+        [](bool preverified, ssl::verify_context& ctx)
+        {
+          X509_STORE_CTX* cts = ctx.native_handle();
+          if (!preverified)
+          {
+            int depth = X509_STORE_CTX_get_error_depth(cts);
+            int err = X509_STORE_CTX_get_error(cts);
+            
+            if (depth == 0 &&  (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT ||
+                 err == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN) && READER_LOCAL_HOST == "true")
+            {
+              std::cerr << "Accepting self-signed certificate (localhost)" << std::endl;
+              return true;
+            }
+            
+            std::cerr << "Certificate verification failed: " 
+                     << X509_verify_cert_error_string(err) << std::endl;
+          }
+          return preverified;
+        });
+        
+      if (!SSL_CTX_check_private_key(ctx.native_handle()))
+      {
+        throw std::runtime_error("Private key check failed");
+      }
+    }
+    catch (const std::exception & e)
+    {
+      std::cerr << "SSL error: " << e.what() << std::endl;
+      throw;
+    }
+
+    return ctx;
+  }
+
+  SSLSession::SSLSession(tcp::socket socket, ssl::context & ctx)
+    : stream_(std::move(socket), ctx) { }
+
+  void SSLSession::run()
+  {
+    do_handshake();
+  }
+
+  /**
+   * Perform the SSL handshake with the client.
+   */
+  void SSLSession::do_handshake()
+  {
+    auto self = shared_from_this();
+    stream_.async_handshake(ssl::stream_base::server,
+      [this, self](beast::error_code ec)
+      {
+        if (!ec)
+        {
+          do_read();
+        }
+      });
+  }
+
+  /**
+   * Read a request from the client.
+   */
+  void SSLSession::do_read()
+  {
+    auto self = shared_from_this();
+    
+    // Clear the buffer and request before new read
+    buffer_.consume(buffer_.size());
+    req_ = {};
+    
+    // Create proper shared pointer for SSL stream
+    auto stream_ptr = std::shared_ptr<ssl::stream<tcp::socket>>(
+      &stream_,
+      [](ssl::stream<tcp::socket>*) {} // null deleter since stream_ is managed by SSLSession
+    );
+    sslstream::SSLStreamWrapper::set_current_stream(stream_ptr);
+
+    http::async_read(stream_, buffer_, req_,
+      [this, self](beast::error_code ec, std::size_t bytes_transferred)
+      {
+        if (ec == http::error::end_of_stream)
+        {
+            // Client closed connection normally
+          return do_close();
+        }
+        
+        if (ec)
+        {
+            // Handle other errors
+          std::cerr << "Read error: " << ec.message() << std::endl;
+          return do_close();
+        }
+
+        // Process the request
+        auto ip_address = stream_.next_layer().remote_endpoint().address();
+        auto res = handle_request(req_, ip_address.to_string());
+        do_write(std::move(res));
+      });
+  }
+
+  /**
+   * Write a response to the client.
+   * @param res Response to write.
+   */
+  void SSLSession::do_write(http::response<http::string_body> res)
+  {
+    auto self = shared_from_this();
+
+    
+    auto sp = std::make_shared<http::response<http::string_body>>(std::move(res));
+
+    http::async_write(stream_, *sp,
+    [this, self, sp](beast::error_code ec, std::size_t bytes_transferred)
+    {
+      if (!ec)
+      {
+        do_read();
+      }
+      else
+      {
+        do_close();
+      }
+    });
+  }
+
+  /**
+   * Close the connection with the client.
+   */
+  void SSLSession::do_close()
+  {
+    auto self = shared_from_this();
+    stream_.async_shutdown(
+    [this, self](beast::error_code ec)
+    {
+      if (ec == net::error::eof)
+      {
+        ec = {};
+      }
+    });
+  }
+
+  /**
     * Load all request handlers from the specified directory.
     * This function loads all shared objects (.so files) from the specified directory and
     * looks for a function named create_<handler_name>_handler in each of them.
@@ -125,8 +315,9 @@ namespace server
       socket_.shutdown(tcp::socket::shutdown_send, ec);
     });
   }
-
-  Listener::Listener(net::io_context& ioc, tcp::endpoint endpoint) : ioc_(ioc), acceptor_(net::make_strand(ioc))
+  
+  Listener::Listener(net::io_context& ioc, tcp::endpoint endpoint) : ioc_(ioc),
+    acceptor_(net::make_strand(ioc)), ctx_(init_ssl_context())
   {
     beast::error_code ec;
 
@@ -170,7 +361,8 @@ namespace server
     {
       if (!ec)
       {
-        std::make_shared<Session>(std::move(socket))->run();
+        // std::make_shared<Session>(std::move(socket))->run();
+        std::make_shared<SSLSession>(std::move(socket), ctx_)->run();
       }
       do_accept();
     });

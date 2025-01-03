@@ -7,6 +7,7 @@ export const BASE_DELAY = 1000;
 export const ENV = {
   VITE_SERVER_HOST: import.meta.env.VITE_SERVER_HOST,
   VITE_SERVER_PORT: import.meta.env.VITE_SERVER_PORT,
+  VITE_SERVER_DEV: import.meta.env.VITE_SERVER_DEV,
 };
 
 export type UserData = {

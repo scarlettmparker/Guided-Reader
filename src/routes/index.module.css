@@ -82,3 +82,30 @@
   background-color: #252525;
   color: white;
 }
+
+.annotate_button {
+  z-index: 3;
+  bottom: 20px;
+  background-color: #252525;
+
+  position: absolute;
+  height: fit-content;
+  font-family: 'Open Sans', sans-serif;
+
+  padding: 6px 12px;
+  border-radius: 15px;
+  border: 1px solid #272121;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+  font-size: 1rem;
+  user-select: none;
+}
+
+.annotate_button:hover {
+  border: 1px solid #CF3A5F;
+  background-color: #ECECEC;
+  color: #CF3A5F;
+}

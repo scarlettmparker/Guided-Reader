@@ -2,13 +2,17 @@
 #define REQUEST_HPP
 
 #include <boost/beast/http.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/beast/ssl.hpp>
 #include <pqxx/pqxx>
 #include <nlohmann/json.hpp>
+
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 #include <openssl/core_names.h>
 #include <openssl/param_build.h>
 #include <sstream>
+
 #include <string>
 #include <string_view>
 #include <map>
@@ -17,6 +21,7 @@
 #include <chrono>
 #include <unordered_map>
 
+#include "../sslstream.hpp"
 #include "postgres.hpp"
 #include "redis.hpp"
 #include "config.h"
@@ -29,6 +34,8 @@ namespace request
   std::string_view get_session_id_from_cookie(const http::request<http::string_body>& req);
   int get_user_id_from_session(std::string session_id, bool verbose);
 
+  bool verify_client_certificate(const std::string & expected_domain);
+  std::string bytes_to_hex(const std::string & bytes);
   std::string generate_hmac(const std::string & data, const std::string & key);
   bool split_session_id(const std::string & signed_session_id, std::string & session_id, std::string & signature);
   bool invalidate_session(std::string session_id, bool verbose);

@@ -62,6 +62,10 @@ target_precompile_headers(pch PRIVATE ${PCH_HEADER})
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
+# <------------- add openssl packages ------------->
+
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 # <------------- add libpq ------------->
 
@@ -102,19 +106,19 @@ file(GLOB API_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/api/*.cpp")
 foreach(SOURCE_FILE ${API_SOURCES})
   get_filename_component(LIB_NAME ${SOURCE_FILE} NAME_WE)
   add_library(${LIB_NAME} SHARED ${SOURCE_FILE}
-    server.cpp request/redis.cpp request/postgres.cpp request/request.cpp request/middleware.cpp
+    server.cpp sslstream.cpp request/redis.cpp request/postgres.cpp request/request.cpp request/middleware.cpp
   )
   set_target_properties(${LIB_NAME} PROPERTIES OUTPUT_NAME ${LIB_NAME} LIBRARY_OUTPUT_DIRECTORY ".")
   target_link_libraries(
-    ${LIB_NAME} ${Boost_LIBRARIES} ${LIBPQXX_LIB} ${LIBPQ_LIBRARIES}
-    ${BCRYPT_LIB} ${HIREDIS_LIB} ${REDIS_PLUS_PLUS_LIB} pch
+    ${LIB_NAME} ${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto pthread dl
+    ${LIBPQXX_LIB} ${LIBPQ_LIBRARIES} ${BCRYPT_LIB} ${HIREDIS_LIB} ${REDIS_PLUS_PLUS_LIB} pch
   )
 endforeach()
 
-add_executable(ReaderServer main.cpp server.cpp request/redis.cpp request/postgres.cpp)
+add_executable(ReaderServer main.cpp server.cpp sslstream.cpp request/redis.cpp request/postgres.cpp)
 target_link_libraries(
-  ReaderServer ${Boost_LIBRARIES} ${LIBPQXX_LIB}
-  ${LIBPQ_LIBRARIES} ${HIREDIS_LIB} ${REDIS_PLUS_PLUS_LIB} pch
+  ReaderServer ${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto pthread dl
+  ${LIBPQXX_LIB} ${LIBPQ_LIBRARIES} ${HIREDIS_LIB} ${REDIS_PLUS_PLUS_LIB} pch
 )
 
 # <------------- link api libraries to server executable ------------->

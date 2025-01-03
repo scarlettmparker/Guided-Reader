@@ -31,20 +31,25 @@ function get_cached_user_data(CACHE_DURATION: number, CACHE_KEY: string): UserDa
 async function fetch_user_data(CACHE_KEY: string): Promise<UserData | null> {
   const REQUEST_TIMEOUT = 1000;
 
+  const fetch_options: RequestInit = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Connection': 'keep-alive',
+    },
+    credentials: 'include',
+  };
+
+
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     const controller = new AbortController();
     const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
     try {
       const response = await fetch(
-        `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/user`,
+        `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/user`,
         {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Connection': 'keep-alive',
-          },
-          credentials: 'include',
+          ...fetch_options,
           signal: controller.signal,
         }
       );
@@ -89,10 +94,9 @@ export async function get_user_data_from_session(CACHE_DURATION: number, CACHE_K
 }
 
 export async function logout(CACHE_KEY: string, user_id: number) {
-  console.log('Logging out:', user_id);
   try {
     const response = await fetch(
-      `http://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/logout`,
+      `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/logout`,
       {
         method: 'POST',
         headers: {
@@ -110,11 +114,9 @@ export async function logout(CACHE_KEY: string, user_id: number) {
     }
 
     const data = await response.json();
-    console.log(data);
     if (data.status === 'ok') {
       localStorage.setItem('logged_in', 'false');
       localStorage.removeItem(CACHE_KEY);
-      console.log(CACHE_KEY);
 
       document.cookie.split(";").forEach(cookie => {
         document.cookie = cookie.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");

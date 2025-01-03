@@ -103,6 +103,80 @@ namespace request
     }
     return -1;
   }
+
+  /**
+   * Verify the client certificate for a request.
+   * This function will extract the client certificate from the request and verify it.
+   * The expected domain is used to check if the certificate is valid for the domain.
+   *
+   * @param expected_domain Expected domain for the certificate.
+   * @return true if the certificate is valid, false otherwise.
+   */
+    bool verify_client_certificate(const std::string & expected_domain)
+  {
+      std::cout << "Verifying certificate for domain: " << expected_domain << std::endl;
+      
+      auto ssl_stream = sslstream::SSLStreamWrapper::get_current_stream();
+      if (!ssl_stream)
+      {
+          std::cerr << "Error: No SSL stream available" << std::endl;
+          return false;
+      }
+  
+      X509 * cert = SSL_get_peer_certificate(ssl_stream->native_handle());
+      if (!cert)
+      {
+          std::cerr << "Error: No peer certificate found" << std::endl;
+          return false;
+      }
+      std::cout << "Found peer certificate" << std::endl;
+
+      BIO *bio_out = BIO_new_fp(stdout, BIO_NOCLOSE);
+      if (bio_out) {
+        X509_print(bio_out, cert);
+        BIO_free(bio_out);
+      } else {
+        std::cerr << "Error: Failed to create BIO for certificate printing" << std::endl;
+      }
+  
+      GENERAL_NAMES * san_names = static_cast<GENERAL_NAMES *>(
+          X509_get_ext_d2i(cert, NID_subject_alt_name, nullptr, nullptr)
+      );
+  
+      if (san_names)
+      {
+          int num_names = sk_GENERAL_NAME_num(san_names);
+          std::cout << "Found " << num_names << " SAN entries" << std::endl;
+          
+          for (int i = 0; i < num_names; i++)
+          {
+              GENERAL_NAME * name = sk_GENERAL_NAME_value(san_names, i);
+              if (name->type == GEN_DNS)
+              {
+                  std::string domain(reinterpret_cast<char *>(ASN1_STRING_data(name->d.dNSName)),
+                      ASN1_STRING_length(name->d.dNSName));
+                  std::cout << "Checking SAN domain: " << domain << std::endl;
+                  
+                  if (domain == expected_domain)
+                  {
+                      std::cout << "Domain match found!" << std::endl;
+                      GENERAL_NAMES_free(san_names);
+                      X509_free(cert);
+                      return true;
+                  }
+              }
+          }
+          GENERAL_NAMES_free(san_names);
+      }
+      else
+      {
+          std::cout << "No SAN entries found in certificate" << std::endl;
+      }
+  
+      X509_free(cert);
+      std::cout << "No matching domain found, verification failed" << std::endl;
+      return false;
+  }
   
   /**
    * Helper function to convert a byte string to a hex string.

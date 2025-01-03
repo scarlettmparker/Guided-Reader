@@ -17,7 +17,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
   const [response, set_response] = createSignal("");
   const [preview, set_preview] = createSignal(false);
   const [annotation_description, set_annotation_description] = createSignal(
-    props.current_annotation_data()!.description
+    props.current_annotation_data()?.description ?? ""
   );
 
   // ... update the annotation and send the response ...
@@ -72,7 +72,9 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
           onclick={() => set_preview(!preview())}>{!preview() ? "Preview" : "Edit"}</button>
         <button class={`${styles.annotation_modal_button} ${styles.cancel_button}`}
           onclick={() => props.set_current_annotation_data(null)}>Cancel</button>
-        <button class={styles.annotation_modal_button} onclick={async() => await update_annotation()}>Submit</button>
+        <button class={styles.annotation_modal_button} onclick={
+          async() => await update_annotation()
+        }>Submit</button>
       </div>
     </div>
   )
