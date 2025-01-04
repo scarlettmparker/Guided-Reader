@@ -137,6 +137,12 @@ namespace postgres
       "  a.created_at, u.id, u.username, u.discord_id, u.avatar"
       ") t");
 
+    txn.conn().prepare("select_annotation_ranges",
+      "SELECT UNNEST(array_agg(start::integer)) as range_start, "
+      "UNNEST(array_agg(\"end\"::integer)) as range_end "
+      "FROM public.\"Annotation\" "
+      "WHERE text_id = $1");
+
     txn.conn().prepare("select_author_id_by_annotation",
       "SELECT user_id "
       "FROM public.\"Annotation\" "

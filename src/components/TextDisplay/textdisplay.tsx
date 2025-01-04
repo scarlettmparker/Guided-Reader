@@ -1,8 +1,11 @@
 import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import { render_annotated_text } from "~/utils/render/renderutils";
-import { SelectedText, Position } from "~/utils/types";
+import { SelectedText, Position, Annotation } from "~/utils/types";
 import TextDisplayProps from "./textdisplayprops";
 import styles from "./textdisplay.module.css";
+import { get_text_data } from "~/utils/textutils";
+
+const SELECTION_LIMIT = 90;
 
 /**
  * Validate the selection to ensure it is not empty and not too long.
@@ -13,7 +16,7 @@ import styles from "./textdisplay.module.css";
 function validate_selection(selection: Selection | null): boolean {
   if (!selection) return false;
   const trimmed = selection.toString().trim();
-  return trimmed.length > 0 && trimmed.length <= 90;
+  return trimmed.length > 0 && trimmed.length <= SELECTION_LIMIT;
 }
 
 /**
@@ -163,6 +166,28 @@ function get_character_index(start_div: Element, start_container: Node, start_of
 }
 
 /**
+ * Check if the selection is within the text content.
+ * Used to determine if the annotate button should be displayed.
+ * 
+ * @param selection Selection to check.
+ * @returns True if the selection is within the text content, false otherwise.
+ */
+function selection_in_text_content(selection: Selection): boolean {   
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+
+    const start_element = range!.startContainer.parentElement;
+    const start_div = start_element?.closest('div');
+    const parent_div = start_div?.parentElement;
+
+    if (parent_div && parent_div.id == "text_content") {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Text display component for the Guided Reader.
  * This component displays the text content and any annotations that have been made on the text.
  * 
@@ -182,11 +207,20 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
 
   const handle_mouse_up = () => {
     const selection = window.getSelection();
-    if (selection && selection.toString().length > 0 && selected_text() !== last_selected_text()) {
+    if (!selection_in_text_content(selection!)) {
+      set_selected_text(null);
+      set_button_position(null);
+    }
+
+    if (selection && selection.toString().length > 0 && selection.toString() !== last_selected_text()!.text) {
       set_button_position(handle_text_selection(
         props.get_current_text()?.text!, props.current_text(), set_selected_text
       ));
-      set_last_selected_text(selected_text());
+
+      // ... user went over selection limit ... 
+      if (selected_text()!.text!.length > 0) {
+        set_last_selected_text(selected_text());
+      }
     } else if (selected_text() !== last_selected_text() || selection!.toString().length === 0) {
       set_last_selected_text(empty_text_data);
       set_selected_text(null);
@@ -194,14 +228,26 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
     }
   };
 
+  // ... reload annotations for when every annotation entry is deleted ...
+  const reload_annotations = async () => {
+    const current_text = props.get_current_text();
+    const new_annotations = await get_text_data(current_text!.id, current_text!.language, "annotations") as Annotation[];
+    props.set_annotations_map(new Map(props.annotations_map().set(current_text!.id, new_annotations)));
+  }
+
   onMount(() => {
     window.addEventListener('mouseup', handle_mouse_up);
+    window.addEventListener('create-annotation', reload_annotations);
+    window.addEventListener('delete-no-annotations', reload_annotations);
     return () => {
       window.removeEventListener('mouseup', handle_mouse_up);
+      window.removeEventListener('create-annotation', reload_annotations);
+      window.removeEventListener('delete-no-annotations', reload_annotations);
     }
   })
 
   createEffect(() => {
+    // ... dispatch the selected text event ...
     const event = new CustomEvent('select-text', {
       bubbles: true,
       detail: { text: selected_text(), position: button_position() }
@@ -219,7 +265,7 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
         <Show when={!props.loading_texts().has(props.current_text())}
           fallback={<div>Loading...</div>}>
           <>
-            <div class={styles.text_content} innerHTML={
+            <div id="text_content" class={styles.text_content} innerHTML={
               render_annotated_text(props.get_current_text()?.text!,
                 props.annotations_map().get(props.current_text()) || [])
             } />

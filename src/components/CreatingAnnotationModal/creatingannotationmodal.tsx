@@ -1,17 +1,19 @@
 import { Component, createEffect, createSignal } from "solid-js";
 import { Annotation, Author } from "~/utils/types";
 import { useUser } from "~/usercontext";
+import { submit_new_annotation } from "~/utils/textutils";
 
 import AnnotationModalProps from "./creatingannotationmodalprops";
-import styles from "./creatingannotationmodal.module.css";
 import AnnotationItem from "../AnnotationItem";
-import { submit_new_annotation } from "~/utils/textutils";
+import AnnotationModalHeader from "../AnnotationModalHeader";
+import styles from "./creatingannotationmodal.module.css";
 
 /**
  * Component for displaying an annotation modal. This modal will display the annotation data.
  * It will also allow the user to interact with the annotation, e.g. like or dislike or provide a correction.
  * This component specifically is for the creation of new annotations.
  * 
+ * @param current_annotation_id Current annotation ID.
  * @param set_current_annotation_id Function to set the current annotation.
  * @param new_selected_data Accessor for the new selected data (where the user is looking to submit a new annotation).
  * @returns JSX Element for the annotation modal.
@@ -74,10 +76,9 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
 
   return (
     <div class={styles.annotation_modal}>
-      <div class={styles.annotation_modal_header}>
-        <span class={styles.close} onclick={() => props.set_current_annotation_id(-1)}>{"<"}</span>
-        <span class={styles.header_text}>Edit Annotation</span>
-      </div>
+      <AnnotationModalHeader title="Create Annotation" current_annotation_id={props.current_annotation_id}
+        set_current_annotation_id={props.set_current_annotation_id} />
+      {!preview() && <span class={styles.selected_text}>{props.new_selected_data()!.text.text}</span>}
       <div class={styles.annotation_modal_content}>
         {!preview() ?
           <textarea rows={12} class={styles.annotation_textarea}
@@ -86,7 +87,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
           <div class={styles.annotation_preview}>
             <AnnotationItem annotation={{
               ...annotation_data,
-              description: annotation_description()
+              description: annotation_description().length > 0 ? annotation_description() : "Empty annotation"
             }} editing={true} />
           </div>
         }

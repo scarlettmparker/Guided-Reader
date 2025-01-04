@@ -6,6 +6,12 @@ class AnnotationHandler : public RequestHandler
   private:
   ConnectionPool & pool;
 
+  struct RangeOccupancies
+  {
+    int * ranges;
+    size_t size;
+  };
+
   /**
    * Select annotation data from the database. This will return the annotation ID,
    * annotation description, dislikes, likes, creation date and author ID of the annotations
@@ -147,6 +153,73 @@ class AnnotationHandler : public RequestHandler
   }
 
   /**
+   * Select all annotation ranges for a given text ID. This is used to determine
+   * which parts of the text are already annotated. If the user tries to submit an
+   * annotation that overlaps with an existing annotation, it will be rejected.
+   *
+   * @param text_id ID of the text to select annotation ranges from.
+   * @return Array of integers representing the start and end positions of annotations.
+   */
+  RangeOccupancies select_annotation_ranges(int text_id)
+  {
+    try
+    {
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_annotation_ranges",
+        text_id
+      );
+      txn.commit();
+
+      if (r.empty())
+      {
+        return {nullptr, 0};
+      }
+
+      int * ranges = new int[r.size() * 2];
+      for (int i = 0; i < r.size(); i++)
+      {
+        ranges[i * 2] = r[i][0].as<int>();
+        ranges[i * 2 + 1] = r[i][1].as<int>();
+      }
+      return {ranges, r.size() * 2};
+    }
+    catch (const std::exception &e)
+    {
+      std::cerr << "Error executing query: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+      std::cerr << "Unknown error while executing query" << std::endl;
+    }
+  }
+
+  /**
+   * Check if a given start and end position overlaps with any existing annotation ranges.
+   * However, if the start and end exactly match an existing annotation, it is considered valid.
+   *
+   * @param ranges Array of integers representing the start and end positions of annotations.
+   * @param start Start position of the annotation to check.
+   * @param end End position of the annotation to check.
+   * @return true if the annotation overlaps with an existing annotation, false otherwise.
+   */
+  bool check_valid_ranges(int * ranges, size_t size, int start, int end)
+  {
+    for (size_t i = 0; i < size; i += 2)
+    {
+      if (ranges[i] == start && ranges[i + 1] == end)
+      {
+        return true;
+      }
+      if (!(end < ranges[i] || start > ranges[i + 1]))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Insert a new annotation into the database.
    *
    * @param text_id ID of the text to insert the annotation into.
@@ -234,7 +307,7 @@ class AnnotationHandler : public RequestHandler
    */
   http::response<http::string_body> validate_annotation_author(const http::request<http::string_body>& req, int annotation_id, int author_id) {
     // ... validate annotation author ...
-    int real_author_id = select_author_id_by_annotation(annotation_id, true);
+    int real_author_id = select_author_id_by_annotation(annotation_id, false);
     if (real_author_id == -1) {
       return request::make_bad_request_response("Annotation not found", req);
     }
@@ -248,11 +321,11 @@ class AnnotationHandler : public RequestHandler
     if (session_id.empty()) {
       return request::make_unauthorized_response("Session ID not found", req);
     }
-    if (!request::validate_session(std::string(session_id), true)) {
+    if (!request::validate_session(std::string(session_id), false)) {
       return request::make_unauthorized_response("Invalid session ID", req);
     }
 
-    int user_id = request::get_user_id_from_session(std::string(session_id), true);
+    int user_id = request::get_user_id_from_session(std::string(session_id), false);
     if (user_id == -1) {
       return request::make_bad_request_response("User not found", req);
     }
@@ -386,12 +459,16 @@ class AnnotationHandler : public RequestHandler
       /**
        * PUT a new annotation.
        */
+      if (middleware::rate_limited(ip_address, "/annotation_put", 1))
+      {
+        return request::make_too_many_requests_response("You may only submit an annotation once every 30 seconds", req);
+      }
 
       if (!request::verify_client_certificate(READER_EXPECTED_DOMAIN))
       {
         return request::make_unauthorized_response("Invalid client certificate", req);
       }
-      
+
       nlohmann::json json_request;
       try
       {
@@ -428,6 +505,12 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for text_id | user_id | start | end", req);
       }
 
+      RangeOccupancies ranges = select_annotation_ranges(text_id);
+      if (!check_valid_ranges(ranges.ranges, ranges.size, start, end))
+      {
+        return request::make_bad_request_response("Annotation overlaps with existing annotation", req);
+      }
+
       if (start > end)
       {
         return request::make_bad_request_response("Start position cannot be greater than end position", req);
@@ -453,7 +536,7 @@ class AnnotationHandler : public RequestHandler
         return request::make_unauthorized_response("Invalid session ID", req);
       }
 
-      if (!insert_annotation(text_id, user_id, start, end, description, true))
+      if (!insert_annotation(text_id, user_id, start, end, description, false))
       {
         return request::make_bad_request_response("Failed to insert annotation", req);
       }
@@ -502,7 +585,7 @@ class AnnotationHandler : public RequestHandler
         return validation_response;
       }
 
-      if (!delete_annotation(annotation_id, true))
+      if (!delete_annotation(annotation_id, false))
       {
         return request::make_bad_request_response("Failed to delete annotation", req);
       }

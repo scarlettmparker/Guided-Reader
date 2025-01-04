@@ -120,7 +120,7 @@ const AnnotationFooter: Component<AnnotationFooterProps> = (props) => {
     if (response() == "Annotation deleted") {
       const event = new CustomEvent("delete-annotation", {
         bubbles: true,
-        detail: { response: response() }
+        detail: { response: response() + ` [ID: ${props.annotation.annotation.id}]` }
       });
 
       document.dispatchEvent(event);

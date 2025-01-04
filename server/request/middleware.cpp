@@ -2,10 +2,8 @@
 
 namespace middleware
 {
-  /* rate limiting */
-  int MAX_REQUESTS_PER_SECOND = 5;
   std::mutex rate_limit_mutex;
-  std::unordered_map<std::string, RateLimitData> rate_limit_cache;
+  std::unordered_map<CacheKey, RateLimitData> rate_limit_cache;
 
   /**
    * Check if a user has the required permissions.
@@ -40,39 +38,35 @@ namespace middleware
 
   /**
    * Check if a user is being rate limited.
-   * This works by checking the number of requests made by the user in the last second.
-   * If the user has made more than MAX_REQUESTS_PER_SECOND requests, they are rate limited.
+   * This works by checking if enough milliseconds have passed since the last request.
    *
    * @param ip_address IP address of the user to check.
+   * @param endpoint The API endpoint being accessed
+   * @param window_ms Time window in milliseconds between allowed requests
    * @return true if the user is rate limited, false otherwise.
    */
-  bool rate_limited(const std::string& ip_address)
+  bool rate_limited(const std::string & ip_address, const std::string & endpoint, int window_ms)
   {
     std::lock_guard<std::mutex> guard(rate_limit_mutex);
     auto now = std::chrono::system_clock::now();
-    auto& data = rate_limit_cache[ip_address];
+    CacheKey key{ip_address, endpoint};
+    auto& data = rate_limit_cache[key];
 
-    if (data.last_request.time_since_epoch().count() == 0 ||
-      std::chrono::duration_cast<std::chrono::seconds>(now - data.last_request).count() > 1)
+    if (data.last_request.time_since_epoch().count() == 0)
     {
-      data.request_count = 1;
       data.last_request = now;
       return false;
     }
 
-    if (std::chrono::duration_cast<std::chrono::seconds>(now - data.last_request).count() == 0)
+    // ... check that enough time has passed since last requests ...
+    auto seconds_since_last = std::chrono::duration_cast<std::chrono::milliseconds>
+      (now - data.last_request).count();    
+    if (seconds_since_last < window_ms)
     {
-      if (data.request_count > MAX_REQUESTS_PER_SECOND)
-      {
-        return true;
-      }
-      data.request_count++;
-    } 
-    else 
-    {
-      data.request_count = 1;
-      data.last_request = now;
+      return true;
     }
-    return true;
+
+    data.last_request = now;
+    return false;
   }
 }

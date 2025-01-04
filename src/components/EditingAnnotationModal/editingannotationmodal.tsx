@@ -2,8 +2,9 @@ import { Component, createEffect, createSignal } from "solid-js";
 import { submit_annotation_edit } from "~/utils/textutils";
 
 import AnnotationModalProps from "./editingannotationmodalprops";
-import styles from "./editingannotationmodal.module.css";
 import AnnotationItem from "../AnnotationItem";
+import AnnotationModalHeader from "../AnnotationModalHeader";
+import styles from "./editingannotationmodal.module.css";
 
 /**
  * Component for displaying an annotation modal. This modal will display the annotation data.
@@ -47,10 +48,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
 
   return (
     <div class={styles.annotation_modal}>
-      <div class={styles.annotation_modal_header}>
-        <span class={styles.close} onclick={() => props.set_current_annotation_data(null)}>{"<"}</span>
-        <span class={styles.header_text}>Edit Annotation</span>
-      </div>
+      <AnnotationModalHeader title="Edit Annotation" set_current_annotation_data={props.set_current_annotation_data} />
       <div class={styles.annotation_modal_content}>
         {!preview() ?
           <textarea rows={12} class={styles.annotation_textarea}

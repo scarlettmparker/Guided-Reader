@@ -46,7 +46,7 @@ export type Author = {
 
 export type SelectedText = {
   text_id: number;
-  text: string;
+  text?: string;
   start: number;
   end: number;
 }
@@ -58,5 +58,5 @@ export type Position = {
 
 export type SelectedData = {
   text: SelectedText,
-  position: Position
+  position?: Position
 }

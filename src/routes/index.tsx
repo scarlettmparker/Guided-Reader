@@ -53,7 +53,6 @@ const Index: Component = () => {
       set_selected_data(e.detail);
     }
 
-
     // ... listeners for modifying annotations ...
     document.addEventListener("edit-annotation", handle_edit_annotation as EventListener);
     document.addEventListener("update-annotation", handle_update_annotation as EventListener);
@@ -72,20 +71,20 @@ const Index: Component = () => {
     <>
       <Title>Guided Reader</Title>
       <Reader set_callbacks={set_reader_callbacks} />
-      {(callbacks().current_annotation_id() != -1) &&
+      {(callbacks().current_annotation_id() >= 0) &&
         (current_annotation_data() != null ?
           <EditingAnnotationModal current_annotation_data={current_annotation_data}
             set_current_annotation_data={set_current_annotation_data} />
           :
           <AnnotationModal set_current_annotation={callbacks().set_current_annotation_id}
-            annotation_data={() => callbacks().annotation_data()}
-            set_annotation_data={callbacks().set_annotation_data}
-            update_response={update_response} />
+            annotation_data={() => callbacks().annotation_data()} set_annotation_data={callbacks().set_annotation_data}
+            update_response={update_response} set_update_response={set_update_response} set_new_selected_data={set_new_selected_data} />
         )
       }
-      {(callbacks().current_annotation_id() == -2) && new_selected_data() &&
-        <CreatingAnnotationModal set_current_annotation_id={callbacks().set_current_annotation_id} 
-          new_selected_data={new_selected_data} />
+      {(callbacks().current_annotation_id() == -2 || callbacks().current_annotation_id().toString().startsWith('-10'))
+        && new_selected_data() &&
+        <CreatingAnnotationModal current_annotation_id={callbacks().current_annotation_id}
+          set_current_annotation_id={callbacks().set_current_annotation_id} new_selected_data={new_selected_data} />
       }
       {(() => {
         const data = selected_data();
@@ -271,7 +270,7 @@ const Reader: Component<ReaderProps> = (props) => {
         <Header>
         </Header>
         <TextDisplay current_text={current_text} loading_texts={loading_texts} error={error}
-          annotations_map={annotations_map} get_current_text={get_current_text} />
+          annotations_map={annotations_map} set_annotations_map={set_annotations_map} get_current_text={get_current_text} />
       </div>
     </div>
   );

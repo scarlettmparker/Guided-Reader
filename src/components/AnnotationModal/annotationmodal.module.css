@@ -32,10 +32,6 @@
   align-items: center;
 }
 
-.close {
-  margin-right: auto;
-}
-
 .header_text {
   margin-right: auto;
   font-weight: 700;
@@ -49,6 +45,23 @@
   gap: 10px;
   height: 90%;
   overflow-y: auto;
+}
+
+.new_annotation {
+  margin-right: auto;
+}
+
+.new_annotation_button {
+  color: rgb(207, 58, 95);
+  text-decoration: underline dotted rgba(37, 37, 37, 0.4);
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+}
+
+.new_annotation_button:hover {
+  color: rgb(124, 16, 49);
+  text-decoration: underline dotted rgba(80, 27, 40, 0.6);
 }
 
 .response {
