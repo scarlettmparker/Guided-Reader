@@ -14,8 +14,9 @@ import { delay } from "./userutils";
 export async function get_titles(
   PAGE: number, PAGE_SIZE: number, SORT: number, set_reached_end: (reached_end: boolean) => void
 ): Promise<TextTitle[]> {
+  try {
   const response = await fetch(
-    `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/titles?sort=${SORT}&page=${PAGE}&page_size=${PAGE_SIZE}`
+    `/api/titles?sort=${SORT}&page=${PAGE}&page_size=${PAGE_SIZE}`,
   );
 
   const data = await response.json();
@@ -25,6 +26,9 @@ export async function get_titles(
     if (data.message == 'No titles found') {
       set_reached_end(true);
     }
+  }
+  } catch (error) {
+    console.error('Error fetching titles:', error);
   }
   return [];
 }
@@ -44,7 +48,7 @@ export async function get_text_data(id: number, language: string, data_type: str
 
   try {
     const response = await fetch(
-      `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/text?text_object_id=${id}&language=${language}&type=${data_type}`,
+      `/api/text?text_object_id=${id}&language=${language}&type=${data_type}`,
       {
         signal: controller.signal,
       }
@@ -85,9 +89,8 @@ export async function get_annotation_data(id: number, start: number, end: number
   const timeout_id = setTimeout(() => controller.abort(), 5000);
 
   try {
-    console.time('fetch annotations');
     const response = await fetch(
-      `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation?text_id=${id}&start=${start}&end=${end}`,
+      `/api/annotation?text_id=${id}&start=${start}&end=${end}`,
       {
         signal: controller.signal,
       }
@@ -98,7 +101,6 @@ export async function get_annotation_data(id: number, start: number, end: number
     }
 
     const data = await response.json();
-    console.timeEnd('fetch annotations');
     if (data.status === 'ok') {
       return data.message;
     }
@@ -127,7 +129,7 @@ export async function submit_annotation_edit(annotation_data: AnnotationData): P
     const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
     try {
-      const response = await fetch(`https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
+      const response = await fetch(`/api/annotation`,
         {
           method: "PATCH",
           headers: {
@@ -173,7 +175,7 @@ export async function submit_new_annotation(annotation_data: NewAnnotation): Pro
     const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
     try {
-      const response = await fetch(`https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
+      const response = await fetch(`/api/annotation`,
         {
           method: "PUT",
           headers: {
@@ -219,7 +221,7 @@ export async function delete_annotation(annotation_data: AnnotationData): Promis
     const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
     try {
-      const response = await fetch(`https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/annotation`,
+      const response = await fetch(`/api/annotation`,
         {
           method: "DELETE",
           headers: {

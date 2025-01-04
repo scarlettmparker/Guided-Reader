@@ -8,6 +8,7 @@ export const ENV = {
   VITE_SERVER_HOST: import.meta.env.VITE_SERVER_HOST,
   VITE_SERVER_PORT: import.meta.env.VITE_SERVER_PORT,
   VITE_SERVER_DEV: import.meta.env.VITE_SERVER_DEV,
+  VITE_CLIENT_API_KEY: import.meta.env.VITE_CLIENT_API_KEY
 };
 
 export type UserData = {

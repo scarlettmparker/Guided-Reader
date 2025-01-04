@@ -1,42 +1,7 @@
 import { Component, createSignal, onMount } from "solid-js";
-import { ENV } from "~/utils/const";
-
+import { login } from "~/utils/userutils";
 import ButtonWithAlt from "~/components/ButtonWithAlt";
 import styles from "./login_form.module.css";
-
-/**
- * Logs in the user with the given username and password.
- * 
- * @param username Username of the user.
- * @param password Password of the user.
- * @param set_error Function to set the error message.
- * @returns Redirects to the home page if the login is successful.
- */
-async function login(username: string, password: string, set_error: (error: string) => void) {
-  const fetch_options: RequestInit = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    },
-    credentials: 'include',
-    body: JSON.stringify({
-      username: username, password: password
-    })
-  }
-  
-  const response = await fetch(`https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/user`, {
-    ...fetch_options
-  });
-
-  const data = await response.json();
-  if (data.status == 'ok') {
-    localStorage.setItem('logged_in', 'true');
-    window.location.href = '/';
-  } else {
-    set_error(data.message);
-  }
-}
 
 const LoginForm: Component = () => {
   const [username, set_username] = createSignal("");

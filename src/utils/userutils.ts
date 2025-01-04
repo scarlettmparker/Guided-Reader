@@ -1,4 +1,4 @@
-import { UserData, MAX_RETRIES, ENV, BASE_DELAY, CacheData } from "./const";
+import { UserData, MAX_RETRIES, BASE_DELAY, CacheData } from "./const";
 
 /**
  * Delay the execution of a function.
@@ -47,7 +47,7 @@ async function fetch_user_data(CACHE_KEY: string): Promise<UserData | null> {
     const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
     try {
       const response = await fetch(
-        `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/user`,
+        `/api/user`,
         {
           ...fetch_options,
           signal: controller.signal,
@@ -81,6 +81,9 @@ async function fetch_user_data(CACHE_KEY: string): Promise<UserData | null> {
 
 /**
  * Get the user data from the session.
+ * 
+ * @param CACHE_DURATION Duration to cache the user data.
+ * @param CACHE_KEY Cache key to store the user data.
  * @returns UserData object containing username and user ID.
  */
 export async function get_user_data_from_session(CACHE_DURATION: number, CACHE_KEY: string): Promise<UserData> {
@@ -93,10 +96,52 @@ export async function get_user_data_from_session(CACHE_DURATION: number, CACHE_K
   return { id: -1, username: "", avatar: "", discord_id: "", nickname: "" };
 }
 
+
+/**
+ * Logs in the user with the given username and password.
+ * 
+ * @param username Username of the user.
+ * @param password Password of the user.
+ * @param set_error Function to set the error message.
+ * @returns Redirects to the home page if the login is successful.
+ */
+export async function login(username: string, password: string, set_error: (error: string) => void) {
+  const fetch_options: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      username: username, password: password
+    })
+  }
+  
+  const response = await fetch(`/api/user`, {
+    ...fetch_options
+  });
+
+  const data = await response.json();
+  if (data.status == 'ok') {
+    localStorage.setItem('logged_in', 'true');
+    window.location.href = '/';
+  } else {
+    set_error(data.message);
+  }
+}
+
+/**
+ * Logs out the user.
+ * 
+ * @param CACHE_KEY Cache key to store the user data.
+ * @param user_id User ID of the user.
+ * @returns Redirects to the home page if the logout is successful.
+ */
 export async function logout(CACHE_KEY: string, user_id: number) {
   try {
     const response = await fetch(
-      `https://${ENV.VITE_SERVER_HOST}:${ENV.VITE_SERVER_PORT}/logout`,
+      `/api/logout`,
       {
         method: 'POST',
         headers: {

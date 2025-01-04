@@ -56,7 +56,7 @@ class UserHandler : public RequestHandler
     http::response<http::string_body> res{http::status::ok, 11};
 
     res.set(http::field::content_type, "application/json");
-    res.set(http::field::set_cookie, "sessionId=" + signed_session_id + "; HttpOnly; Secure; SameSite=None; Max-Age=86400");
+    res.set(http::field::set_cookie, "sessionId=" + signed_session_id + "; HttpOnly; Secure; SameSite=Strict; Max-Age=86400");
     res.body() = R"({"message": "Login successful", "status": "ok"})";
     res.prepare_payload();
 

@@ -11,7 +11,7 @@ namespace server
    */
   ssl::context init_ssl_context()
   {
-    ssl::context ctx(ssl::context::tlsv12_server);
+    ssl::context ctx(ssl::context::tlsv13_server);
 
     // ... enable session caching ...
     SSL_CTX_set_session_cache_mode(ctx.native_handle(), 
@@ -22,13 +22,11 @@ namespace server
     SSL_CTX_sess_set_cache_size(ctx.native_handle(), 10000);
 
     SSL_CTX_set_timeout(ctx.native_handle(), 3600); // 1 hour
-    SSL_CTX_clear_options(ctx.native_handle(), SSL_OP_NO_TICKET);
 
-    SSL_CTX_set_cipher_list(ctx.native_handle(),
-      "ECDHE-ECDSA-CHACHA20-POLY1305:"
-      "ECDHE-RSA-CHACHA20-POLY1305:"
-      "ECDHE-ECDSA-AES128-GCM-SHA256:"
-      "ECDHE-RSA-AES128-GCM-SHA256");
+    SSL_CTX_set_ciphersuites(ctx.native_handle(),
+      "TLS_AES_256_GCM_SHA384:"
+      "TLS_CHACHA20_POLY1305_SHA256:"
+      "TLS_AES_128_GCM_SHA256");
 
 
     ctx.set_options(
@@ -45,10 +43,10 @@ namespace server
     try
     {
       // ... load certificates and keys ...
-      ctx.use_certificate_chain_file("../key/cert.pem");
-      ctx.use_private_key_file("../key/key.pem", ssl::context::pem);
+      ctx.use_certificate_chain_file("../key/server.crt.pem");
+      ctx.use_private_key_file("../key/server.key.pem", ssl::context::pem);
       ctx.use_tmp_dh_file("../key/dhparam.pem");
-      ctx.load_verify_file("../key/ca-chain.pem");
+      ctx.load_verify_file("../key/server.chain.crt.pem");
 
       ctx.set_verify_callback(
         [](bool preverified, ssl::verify_context& ctx)
@@ -58,18 +56,19 @@ namespace server
           {
             int depth = X509_STORE_CTX_get_error_depth(cts);
             int err = X509_STORE_CTX_get_error(cts);
-            
+                
+            // ... accept self-signed certificates from localhost ...
             if (depth == 0 &&  (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT ||
-                 err == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN) && READER_LOCAL_HOST == "true")
+              err == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN) && READER_LOCAL_HOST == "true")
             {
-              std::cerr << "Accepting self-signed certificate (localhost)" << std::endl;
+              // std::cerr << "Accepting self-signed certificate" << std::endl;
               return true;
             }
-            
+                
             std::cerr << "Certificate verification failed: " 
-                     << X509_verify_cert_error_string(err) << std::endl;
-          }
-          return preverified;
+              << X509_verify_cert_error_string(err) << std::endl;
+            }
+            return preverified;
         });
         
       if (!SSL_CTX_check_private_key(ctx.native_handle()))
@@ -117,14 +116,12 @@ namespace server
   {
     auto self = shared_from_this();
     
-    // Clear the buffer and request before new read
     buffer_.consume(buffer_.size());
     req_ = {};
     
-    // Create proper shared pointer for SSL stream
     auto stream_ptr = std::shared_ptr<ssl::stream<tcp::socket>>(
       &stream_,
-      [](ssl::stream<tcp::socket>*) {} // null deleter since stream_ is managed by SSLSession
+      [](ssl::stream<tcp::socket>*) {}
     );
     sslstream::SSLStreamWrapper::set_current_stream(stream_ptr);
 
@@ -133,18 +130,15 @@ namespace server
       {
         if (ec == http::error::end_of_stream)
         {
-            // Client closed connection normally
+          // ... connection closed correctly ...
           return do_close();
         }
         
         if (ec)
         {
-            // Handle other errors
-          std::cerr << "Read error: " << ec.message() << std::endl;
           return do_close();
         }
 
-        // Process the request
         auto ip_address = stream_.next_layer().remote_endpoint().address();
         auto res = handle_request(req_, ip_address.to_string());
         do_write(std::move(res));

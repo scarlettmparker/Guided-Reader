@@ -146,6 +146,17 @@ class AnnotationHandler : public RequestHandler
     return false;
   }
 
+  /**
+   * Insert a new annotation into the database.
+   *
+   * @param text_id ID of the text to insert the annotation into.
+   * @param user_id ID of the user creating the annotation.
+   * @param start Start position of the annotation.
+   * @param end End position of the annotation.
+   * @param description Description of the annotation.
+   * @param verbose Whether to print messages to stdout.
+   * @return true if the annotation was inserted, false otherwise.
+   */
   bool insert_annotation(int text_id, int user_id, int start, int end, std::string description, bool verbose)
   {
     std::time_t created_at = std::time(nullptr);
@@ -233,6 +244,7 @@ class AnnotationHandler : public RequestHandler
 
     // ... validate session and user
     std::string_view session_id = request::get_session_id_from_cookie(req);
+    
     if (session_id.empty()) {
       return request::make_unauthorized_response("Session ID not found", req);
     }
@@ -266,6 +278,11 @@ class AnnotationHandler : public RequestHandler
       /**
        * GET annotation details.
        */
+
+      if (!request::verify_client_certificate(READER_EXPECTED_DOMAIN))
+      {
+        return request::make_unauthorized_response("Invalid client certificate", req);
+      }
 
       std::optional<std::string> text_id_param = request::parse_from_request(req, "text_id");
       std::optional<std::string> annotation_start_param = request::parse_from_request(req, "start");
@@ -370,7 +387,7 @@ class AnnotationHandler : public RequestHandler
        * PUT a new annotation.
        */
 
-      if (!request::verify_client_certificate(READER_WEBSITE_URL))
+      if (!request::verify_client_certificate(READER_EXPECTED_DOMAIN))
       {
         return request::make_unauthorized_response("Invalid client certificate", req);
       }
@@ -453,7 +470,6 @@ class AnnotationHandler : public RequestHandler
       try
       {
         json_request = nlohmann::json::parse(req.body());
-        std::cout << json_request.dump(2) << std::endl;
       } catch (const nlohmann::json::parse_error &e)
       {
         return request::make_bad_request_response("Invalid JSON", req);

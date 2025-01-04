@@ -127,7 +127,7 @@ namespace request
     }
 
     // ... get the subject alternative names from the certificate ...
-    GENERAL_NAMES * san_names = static_cast<GENERAL_NAMES *>(
+    STACK_OF(GENERAL_NAME) * san_names = static_cast<STACK_OF(GENERAL_NAME) *>(
       X509_get_ext_d2i(cert, NID_subject_alt_name, nullptr, nullptr)
     );
 

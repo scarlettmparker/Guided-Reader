@@ -106,7 +106,8 @@ file(GLOB API_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/api/*.cpp")
 foreach(SOURCE_FILE ${API_SOURCES})
   get_filename_component(LIB_NAME ${SOURCE_FILE} NAME_WE)
   add_library(${LIB_NAME} SHARED ${SOURCE_FILE}
-    server.cpp sslstream.cpp request/redis.cpp request/postgres.cpp request/request.cpp request/middleware.cpp
+    server.cpp sslstream.cpp request/redis.cpp request/postgres.cpp
+    request/apikey.cpp request/request.cpp request/middleware.cpp
   )
   set_target_properties(${LIB_NAME} PROPERTIES OUTPUT_NAME ${LIB_NAME} LIBRARY_OUTPUT_DIRECTORY ".")
   target_link_libraries(
