@@ -83,6 +83,27 @@ function get_selection_indices(
 }
 
 /**
+ * Adjust the selection range to remove trailing spaces.
+ * 
+ * @param selection The current selection.
+ * @param original_range The original range of the selection.
+ * @param original_selection The original selected text.
+ */
+function adjust_selection_range(selection: Selection, original_range: Range, original_selection: string): void {
+  const trimmed_selection = original_selection.trimEnd();
+  if (trimmed_selection !== original_selection) {
+    // ... remove trailing spaces from the selection ...
+    const trailing_spaces = original_selection.length - trimmed_selection.length;
+    const range = document.createRange();
+
+    range.setStart(original_range.startContainer, original_range.startOffset);
+    range.setEnd(original_range.endContainer, original_range.endOffset - trailing_spaces);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+}
+
+/**
  * Handle the text selection event. This is used to determine the selected text and its position,
  * to display the annotate button. This function also checks if the selection is valid and not intersecting
  * with any existing annotations. If the selection is valid, the selected text is stored in local storage.
@@ -103,6 +124,10 @@ function handle_text_selection(
     return null;
   }
 
+  // ... get the range and selection to adjust for trailing spaces ...
+  const original_range = selection!.getRangeAt(0);
+  const original_selection = selection!.toString();
+  adjust_selection_range(selection!, original_range, original_selection);
   save_to_local_storage(selection!);
 
   if (selection!.toString() === text) {
@@ -172,7 +197,7 @@ function get_character_index(start_div: Element, start_container: Node, start_of
  * @param selection Selection to check.
  * @returns True if the selection is within the text content, false otherwise.
  */
-function selection_in_text_content(selection: Selection): boolean {   
+function selection_in_text_content(selection: Selection): boolean {
   if (selection && selection.rangeCount > 0) {
     const range = selection.getRangeAt(0);
 
@@ -205,6 +230,12 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
   const [last_selected_text, set_last_selected_text] = createSignal<SelectedText | null>(empty_text_data);
   const [button_position, set_button_position] = createSignal<Position | null>(null);
 
+  const clear = () => {
+    set_last_selected_text(empty_text_data);
+    set_selected_text(null);
+    set_button_position(null);
+  }
+
   const handle_mouse_up = () => {
     const selection = window.getSelection();
     if (!selection_in_text_content(selection!)) {
@@ -212,19 +243,28 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
       set_button_position(null);
     }
 
-    if (selection && selection.toString().length > 0 && selection.toString() !== last_selected_text()!.text) {
-      set_button_position(handle_text_selection(
+    if (selection && selection.toString().length > 0) {
+      const new_position = handle_text_selection(
         props.get_current_text()?.text!, props.current_text(), set_selected_text
-      ));
+      )
 
-      // ... user went over selection limit ... 
-      if (selected_text()!.text!.length > 0) {
-        set_last_selected_text(selected_text());
+      if (selected_text()) {
+        const current = selected_text()!;
+        const last = last_selected_text()!;
+
+        const same_selection = current.text === last.text
+          && current.start === last.start
+          && current.end == last.end;
+
+        if (!same_selection) {
+          set_button_position(new_position);
+          set_last_selected_text(selected_text());
+        } else {
+          clear();
+        }
       }
-    } else if (selected_text() !== last_selected_text() || selection!.toString().length === 0) {
-      set_last_selected_text(empty_text_data);
-      set_selected_text(null);
-      set_button_position(null);
+    } else {
+      clear();
     }
   };
 

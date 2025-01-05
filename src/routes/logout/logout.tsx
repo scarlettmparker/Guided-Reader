@@ -6,10 +6,19 @@ import { logout } from "~/utils/userutils";
 import Index from "..";
 
 const Logout: Component = () => {
-  const { user_id, set_user_id, set_username, logged_in, set_logged_in } = useUser();
+  const { set_user_id, set_username, logged_in, set_logged_in } = useUser();
   const navigate = useNavigate();
 
+  const handle_storage_change = () => {
+    if (!logged_in()) {
+      navigate("/");
+    }
+  };
+
   onMount(async () => {
+    // ... allow logging out from other tabs ...
+    window.addEventListener("storage", handle_storage_change);
+
     if (!logged_in()) {
       navigate("/");
     }
@@ -22,18 +31,22 @@ const Logout: Component = () => {
       localStorage.removeItem(CACHE_KEY);
     }
 
-    await logout(CACHE_KEY, user_id());
-    
-    set_logged_in(false);
-    set_user_id(-1);
-    set_username("");
+    await logout(CACHE_KEY).then(() => {
+      set_logged_in(false);
+      set_user_id(-1);
+      set_username("");
 
-    navigate("/");
+      // ... update the local storage for all tabs ...
+      localStorage.setItem('logged_in', 'false');
+      localStorage.removeItem(CACHE_KEY);
+
+      navigate("/");
+    });
   });
 
   return (
     <Index />
-  )
-}
+  );
+};
 
 export default Logout;

@@ -276,6 +276,24 @@ namespace request
         return false;
       }
 
+      std::string user_id;
+      try
+      {
+        user_id = redis.hget(key, "user_id").value();
+      }
+      catch (const sw::redis::Error & e)
+      {
+        verbose && std::cerr << "Error getting user_id for session " << session_id << ": " << e.what() << std::endl;
+        return false;
+      }
+
+      std::string user_sessions_key = "user:" + user_id + ":sessions";
+      if (!redis.srem(user_sessions_key, session_id))
+      {
+        verbose && std::cerr << "Failed to remove session ID from user sessions set" << std::endl;
+        return false;
+      }
+
       if (!redis.del(key))
       {
         verbose && std::cerr << "Failed to delete session ID " << session_id << std::endl;

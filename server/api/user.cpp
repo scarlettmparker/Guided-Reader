@@ -95,7 +95,7 @@ class UserHandler : public RequestHandler
 
       try {
         redis.hmset(key, session_data.begin(), session_data.end());
-      } catch (const sw::redis::Error& e) {
+      } catch (const sw::redis::Error & e) {
         verbose && std::cerr << "Failed to set session hash in Redis: " << e.what() << std::endl;
         return false;
       }
@@ -114,7 +114,7 @@ class UserHandler : public RequestHandler
 
       return true;
     }
-    catch (const std::exception &e)
+    catch (const std::exception & e)
     {
       verbose && std::cerr << "Error setting session ID: " << e.what() << std::endl;
       return false;

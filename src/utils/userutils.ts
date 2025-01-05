@@ -138,7 +138,7 @@ export async function login(username: string, password: string, set_error: (erro
  * @param user_id User ID of the user.
  * @returns Redirects to the home page if the logout is successful.
  */
-export async function logout(CACHE_KEY: string, user_id: number) {
+export async function logout(CACHE_KEY: string) {
   try {
     const response = await fetch(
       `/api/logout`,
@@ -146,9 +146,7 @@ export async function logout(CACHE_KEY: string, user_id: number) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
         },
-        body: JSON.stringify({ user_id: user_id }),
         credentials: 'include',
       }
     );

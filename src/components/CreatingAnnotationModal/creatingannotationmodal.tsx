@@ -50,6 +50,17 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
     author: author
   }
 
+  const back = () => {
+    if (props.current_annotation_id().toString().startsWith("-10")) {
+      props.set_current_annotation_id(
+        parseInt(props.current_annotation_id().toString().slice(3)
+      ));
+      /* TODO: Cache the annotation data to prevent an extra API call when returning to annotation modal */
+    } else {
+      props.set_current_annotation_id(-1);
+    }
+  }
+
   const create_annotation = async () => {
     // ... construct new annotation object ...
     set_response(await submit_new_annotation({
@@ -61,7 +72,9 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
     }));
 
     if (response() == "Annotation created") {
-      props.set_current_annotation_id(-1);
+      back();
+    } else {
+      // TODO: handle error
     }
   }
 
@@ -96,7 +109,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
         <button class={`${styles.annotation_modal_button} ${styles.preview_button}`}
           onclick={() => set_preview(!preview())}>{!preview() ? "Preview" : "Edit"}</button>
         <button class={`${styles.annotation_modal_button} ${styles.cancel_button}`}
-          onclick={() => props.set_current_annotation_id(-1)}>Cancel</button>
+          onclick={back}>Cancel</button>
         <button class={styles.annotation_modal_button} onclick={
           async () => await create_annotation()
         }>Submit</button>

@@ -64,8 +64,10 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
     }
   });
 
-  const delete_annotated_data = (updated_data: AnnotationData[]) => {
-    props.set_annotation_data(updated_data);
+  const delete_annotated_data = (updated_data: AnnotationData[], message: string) => {
+    if (message == "Annotation deleted") {
+      props.set_annotation_data(updated_data);
+    }
   }
 
   createEffect(async () => {
@@ -80,7 +82,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
       const updated_data = current_data.filter(a => a.annotation.id !== deleted_id);
 
       if (deleted_id && updated_data.length !== current_data.length) {
-        delete_annotated_data(updated_data);
+        delete_annotated_data(updated_data, props.update_response());
       }
 
       window.update_response_timeout = setTimeout(clear_update_response, 5000);

@@ -112,19 +112,17 @@ const AnnotationFooter: Component<AnnotationFooterProps> = (props) => {
     });
     document.dispatchEvent(event);
   }
-  
+
   // ... delete the annotation ...
   const set_delete_annotation = async () => {
     set_response(await delete_annotation(props.annotation));
 
-    if (response() == "Annotation deleted") {
-      const event = new CustomEvent("delete-annotation", {
-        bubbles: true,
-        detail: { response: response() + ` [ID: ${props.annotation.annotation.id}]` }
-      });
+    const event = new CustomEvent("delete-annotation", {
+      bubbles: true,
+      detail: { response: response() + ` [ID: ${props.annotation.annotation.id}]` }
+    });
 
-      document.dispatchEvent(event);
-    }
+    document.dispatchEvent(event);
   }
 
   return (
