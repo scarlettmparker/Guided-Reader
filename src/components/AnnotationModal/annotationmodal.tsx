@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal } from "solid-js";
 import { get_annotation_data } from "~/utils/textutils";
-import { Annotation } from "~/utils/types";
+import { Annotation, AnnotationData } from "~/utils/types";
 
 import AnnotationModalProps from "./annotationmodalprops";
 import AnnotationItem from "../AnnotationItem";
@@ -22,14 +22,12 @@ import styles from "./annotationmodal.module.css";
 const AnnotationModal: Component<AnnotationModalProps> = (props) => {
   const [first_non_null_annotation, set_first_non_null_annotation] = createSignal<Annotation | null>(null);
   const [new_selected_data, set_new_selected_data] = createSignal({ text: { text_id: -1, start: -1, end: -1 } });
-  const [response_message, set_response_message] = createSignal("");
   const [updating, set_updating] = createSignal(false);
 
   const text_content_div = document.getElementById("text_content");
 
   // ... remove the response message after 5 seconds ...
   const clear_update_response = () => {
-    set_response_message("");
     set_updating(false);
     props.set_update_response("");
   }
@@ -44,6 +42,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
   }
 
   createEffect(async () => {
+    const annotation = first_non_null_annotation();
     if (!updating()) {
       const start = first_non_null_annotation()?.start ?? -1;
       const end = first_non_null_annotation()?.end ?? -1;
@@ -58,44 +57,46 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
           end: end,
         }
       });
+    } else if (annotation) {
+      props.set_annotation_data(await get_annotation_data(
+        annotation.text_id, annotation.start, annotation.end
+      ));
     }
   });
 
-  createEffect(async () => {
-    const annotation = first_non_null_annotation();
-    if (props.update_response() && annotation != null && response_message() == "") {
-      set_updating(true);
+  const delete_annotated_data = (updated_data: AnnotationData[]) => {
+    props.set_annotation_data(updated_data);
+  }
 
+  createEffect(async () => {
+    if (props.update_response().length > 0) {
+      set_updating(true);
+      clearTimeout(window.update_response_timeout);
+      
       // ... extract id from response message ...
       const id_match = props.update_response().match(/\[ID:\s+(\d+)\]/);
       const deleted_id = id_match ? parseInt(id_match[1]) : null;
-      
-      if (deleted_id) {
-        props.set_annotation_data(props.annotation_data().filter(a => a.annotation.id !== deleted_id));
+      const current_data = props.annotation_data();
+      const updated_data = current_data.filter(a => a.annotation.id !== deleted_id);
+
+      if (deleted_id && updated_data.length !== current_data.length) {
+        delete_annotated_data(updated_data);
       }
 
-      // ... if there are no more annotations, close the annotation modal ...
-      if (props.annotation_data().length == 0) {
-        props.set_current_annotation(-1);
+      window.update_response_timeout = setTimeout(clear_update_response, 5000);
+    }
+  })
 
-        const event = new CustomEvent("delete-no-annotations",
-          { bubbles: true }
-        );
-        document.dispatchEvent(event);
-      } else {
-        // ... re-load the annotation data ...
-        if (response_message().includes("deleted")) {
-          props.set_annotation_data(await get_annotation_data(
-            annotation.text_id, annotation.start, annotation.end
-          ));
-        }
-      }
+  createEffect(() => {
+    // ... if there are no more annotations, close the annotation modal ...
+    if (props.annotation_data().length == 0 && props.update_response().length > 0) {
+      props.set_current_annotation(-1);
+      const event = new CustomEvent("delete-no-annotations",
+        { bubbles: true }
+      );
 
-      const response_no_id = props.update_response().replace(/\[ID:\s+\d+\]/, "").trim();
-      set_response_message(response_no_id);
-      setTimeout(() => {
-        clear_update_response();
-      }, 5000); // clear after 5 seconds
+      clear_update_response();
+      document.dispatchEvent(event);
     }
   })
 
@@ -115,9 +116,9 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
         </span>
       </div>
       {
-        response_message() != "" &&
+        props.update_response().length > 0 &&
         <div class={styles.response} onclick={clear_update_response}>
-          {response_message()}
+          {props.update_response()}
         </div>
       }
     </div>

@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal } from "solid-js";
+import { Component, createSignal } from "solid-js";
 import { submit_annotation_edit } from "~/utils/textutils";
 
 import AnnotationModalProps from "./editingannotationmodalprops";
@@ -33,18 +33,15 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
     }));
 
     if (response() == "Annotation updated") {
+      const update_event = new CustomEvent("update-annotation", {
+        bubbles: true,
+        detail: { response: response() }
+      });
+  
+      document.dispatchEvent(update_event);
       props.set_current_annotation_data(null);
     }
   }
-
-  createEffect(() => {
-    const update_event = new CustomEvent("update-annotation", {
-      bubbles: true,
-      detail: { response: response() }
-    });
-
-    document.dispatchEvent(update_event);
-  })
 
   return (
     <div class={styles.annotation_modal}>
