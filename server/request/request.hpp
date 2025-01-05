@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "../sslstream.hpp"
+#include "../auth/session.hpp"
 #include "postgres.hpp"
 #include "redis.hpp"
 #include "config.h"
@@ -35,8 +36,6 @@ namespace request
   int get_user_id_from_session(std::string session_id, bool verbose);
 
   bool verify_client_certificate(const std::string & expected_domain);
-  std::string bytes_to_hex(const std::string & bytes);
-  std::string generate_hmac(const std::string & data, const std::string & key);
   bool split_session_id(const std::string & signed_session_id, std::string & session_id, std::string & signature);
   bool invalidate_session(std::string session_id, bool verbose);
   bool validate_session(std::string session_id, bool verbose);

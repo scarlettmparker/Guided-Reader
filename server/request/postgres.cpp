@@ -102,10 +102,39 @@ namespace postgres
     txn.conn().prepare("insert_user",
       "INSERT INTO public.\"User\" ("
       "username, password, levels, discord_id, account_creation_date, "
-      "avatar, nickname, access_token"
+      "avatar, nickname"
       ") VALUES ("
-      "$1, $2, '{-1}', '-1', $3, '-1', $1, '-1'"
+      "$1, $2, '{-1}', '-1', $3, '-1', $1"
       ")");
+
+    // ... discord user queries ...
+    txn.conn().prepare("select_user_id_by_discord_id",
+      "SELECT id "
+      "FROM public.\"User\" "
+      "WHERE discord_id = $1 "
+      "LIMIT 1");
+
+    txn.conn().prepare("validate_discord_status",
+      "UPDATE public.\"User\" "
+      "SET discord_status = true "
+      "WHERE id = $1"
+    );
+
+    txn.conn().prepare("invalidate_discord_status",
+      "UPDATE public.\"User\" "
+      "SET discord_status = false "
+      "WHERE id = $1"
+    );
+
+    txn.conn().prepare("update_user_roles",
+      "UPDATE public.\"User\" "
+      "SET levels = $2 "
+      "WHERE id = $1");
+
+    txn.conn().prepare("update_user_data",
+      "UPDATE public.\"User\" "
+      "SET avatar = $2, nickname = $3 "
+      "WHERE id = $1");
 
     // ... annotation queries ...
     txn.conn().prepare("select_annotation_data",

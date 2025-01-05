@@ -157,89 +157,6 @@ namespace request
   }
   
   /**
-   * Helper function to convert a byte string to a hex string.
-   * This is used to prevent issues with encoding differences as the HMAC output is raw binary data,
-   * possibly containing null bytes/special characters, and should therefore be encoded to hex.
-   *
-   * @param bytes Byte string to convert to hex.
-   * @return Hex string.
-   */
-  std::string bytes_to_hex(const std::string & bytes)
-  {
-    std::stringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (unsigned char c : bytes)
-    {
-      ss << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
-    }
-    return ss.str();
-  }
-
-  /**
-   * Generate an HMAC for a given data string using a key. This is used to sign session IDs.
-   * This works by using the OpenSSL EVP_MAC functions to generate an HMAC.
-   *
-   * @param data Data to generate the HMAC for.
-   * @param key Key to use for the HMAC.
-   * @return HMAC for the data.
-   */
-  std::string generate_hmac(const std::string& data, const std::string& key) 
-  {
-    EVP_MAC *mac = EVP_MAC_fetch(NULL, "HMAC", NULL);
-    if (!mac) {
-        throw std::runtime_error("Failed to create MAC");
-    }
-
-    EVP_MAC_CTX *ctx = EVP_MAC_CTX_new(mac);
-    if (!ctx)
-    {
-      EVP_MAC_free(mac);
-      throw std::runtime_error("Failed to create MAC context");
-    }
-
-    OSSL_PARAM params[2];
-
-    // ... set the digest to SHA256 ...
-    params[0] = OSSL_PARAM_construct_utf8_string("digest", const_cast<char*>("SHA256"), 6);
-    params[1] = OSSL_PARAM_construct_end();
-
-    if (!EVP_MAC_init(ctx, reinterpret_cast<const unsigned char*>(key.c_str()), key.length(), params))
-    {
-      EVP_MAC_CTX_free(ctx);
-      EVP_MAC_free(mac);
-      throw std::runtime_error("Failed to initialize MAC");
-    }
-
-    if (!EVP_MAC_update(ctx, reinterpret_cast<const unsigned char*>(data.c_str()), data.length()))
-    {
-      EVP_MAC_CTX_free(ctx);
-      EVP_MAC_free(mac);
-      throw std::runtime_error("Failed to update MAC");
-    }
-
-    size_t out_len;
-    if (!EVP_MAC_final(ctx, nullptr, &out_len, 0))
-    {
-      EVP_MAC_CTX_free(ctx);
-      EVP_MAC_free(mac);
-      throw std::runtime_error("Failed to get MAC length");
-    }
-
-    std::vector<unsigned char> result(out_len);
-    if (!EVP_MAC_final(ctx, result.data(), &out_len, result.size()))
-    {
-      EVP_MAC_CTX_free(ctx);
-      EVP_MAC_free(mac);
-      throw std::runtime_error("Failed to get MAC");
-    }
-
-    EVP_MAC_CTX_free(ctx);
-    EVP_MAC_free(mac);
-
-    return bytes_to_hex(std::string(reinterpret_cast<char*>(result.data()), out_len));
-  }
-  
-  /**
    * Split a session ID into the session ID and the signature.
    *
    * @param signed_session_id Session ID to split.
@@ -333,7 +250,7 @@ namespace request
 
     // ... check if the session ID is signed ...
     std::string secret_key = READER_SECRET_KEY;
-    std::string expected_signature = generate_hmac(session_id, secret_key);
+    std::string expected_signature = session::generate_hmac(session_id, secret_key);
 
     if (signature != expected_signature)
     {
@@ -458,8 +375,9 @@ namespace request
    * @return Response with the given message.
    */
   http::response<http::string_body> make_unauthorized_response(
-    const std::string& message, const http::request<http::string_body>& req)
-    {
+    const std::string& message, const http::request<http::string_body>& req
+  )
+  {
     
     http::response<http::string_body> res{http::status::unauthorized, req.version()};
     res.set(http::field::server, "Beast");
@@ -467,8 +385,8 @@ namespace request
 
     nlohmann::json error_response = 
     {
-        {"status", "error"},
-        {"message", message}
+      {"status", "error"},
+      {"message", message}
     };
 
     res.body() = error_response.dump();
@@ -484,8 +402,9 @@ namespace request
    * @return Response with the given message.
    */
   http::response<http::string_body> make_bad_request_response(
-    const std::string& message,  const http::request<http::string_body>& req)
-    {
+    const std::string& message,  const http::request<http::string_body>& req
+  )
+  {
     
     http::response<http::string_body> res{http::status::bad_request, req.version()};
     res.set(http::field::server, "Beast");
@@ -493,8 +412,8 @@ namespace request
     
     nlohmann::json error_response =
     {
-        {"status", "error"},
-        {"message", message}
+      {"status", "error"},
+      {"message", message}
     };
     
     res.body() = error_response.dump();
@@ -510,8 +429,9 @@ namespace request
    * @return Response with the given message.
    */
   http::response<http::string_body> make_too_many_requests_response(
-    const std::string& message, const http::request<http::string_body>& req)
-    {
+    const std::string& message, const http::request<http::string_body>& req
+  )
+  {
     
     http::response<http::string_body> res{http::status::too_many_requests, req.version()};
     res.set(http::field::server, "Beast");
@@ -519,8 +439,8 @@ namespace request
 
     nlohmann::json error_response =
     {
-        {"status", "error"},
-        {"message", message}
+      {"status", "error"},
+      {"message", message}
     };
 
     res.body() = error_response.dump();
@@ -536,7 +456,8 @@ namespace request
    * @return Response with the given message.
    */
   http::response<http::string_body> make_ok_request_response(
-    const std::string& message, const http::request<http::string_body>& req)
+    const std::string& message, const http::request<http::string_body>& req
+  )
   {
     
     http::response<http::string_body> res{http::status::ok, req.version()};
@@ -545,8 +466,8 @@ namespace request
 
     nlohmann::json ok_response =
     {
-        {"status", "ok"},
-        {"message", message}
+      {"status", "ok"},
+      {"message", message}
     };
 
     res.body() = ok_response.dump();

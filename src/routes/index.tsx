@@ -1,4 +1,5 @@
 import { Title } from '@solidjs/meta';
+import { useNavigate } from '@solidjs/router';
 import { createEffect, createMemo, createSignal, onCleanup, onMount, type Component } from 'solid-js';
 import { TextTitle, Text, Annotation, AnnotationData, SelectedData } from '~/utils/types';
 import { handle_annotation_click } from '~/utils/render/renderutils';
@@ -24,7 +25,7 @@ interface AnnotationCallbacks {
   set_annotation_data: (data: AnnotationData[]) => void;
 }
 
-const Index: Component = () => {
+const ReaderWithAnnotations: Component = () => {
   // ... state for annotation callbacks ...
   const [reader_callbacks, set_reader_callbacks] = createSignal<AnnotationCallbacks>({
     current_annotation_id: () => -1,
@@ -35,6 +36,7 @@ const Index: Component = () => {
 
   const callbacks = createMemo(() => reader_callbacks());
 
+  // ... state for annotation data and selected data ...
   const [current_annotation_data, set_current_annotation_data] = createSignal<AnnotationData | null>(null);
   const [update_response, set_update_response] = createSignal("");
   const [selected_data, set_selected_data] = createSignal<SelectedData | null>(null);
@@ -60,6 +62,7 @@ const Index: Component = () => {
     document.addEventListener("select-text", handle_select_text as EventListener);
 
     onCleanup(() => {
+      // ... cleanup event listeners ...
       document.removeEventListener("edit-annotation", handle_edit_annotation as EventListener);
       document.removeEventListener("update-annotation", handle_update_annotation as EventListener);
       document.removeEventListener("delete-annotation", handle_update_annotation as EventListener);
@@ -69,7 +72,6 @@ const Index: Component = () => {
 
   return (
     <>
-      <Title>Guided Reader</Title>
       <Reader set_callbacks={set_reader_callbacks} />
       {(callbacks().current_annotation_id() >= 0) &&
         (current_annotation_data() != null ?
@@ -103,6 +105,27 @@ const Index: Component = () => {
           </button>
         ) : null;
       })()}
+    </>
+  );
+}
+
+const Index: Component = () => {
+  const navigate = useNavigate();
+
+  onMount(() => {
+    const query_string = window.location.search;
+    const url_params = new URLSearchParams(query_string);
+    const logged_in = url_params.get('logged_in');
+
+    if (logged_in === 'true') {
+      window.location.href = '/';
+    }
+  });
+
+  return (
+    <>
+      <Title>Guided Reader</Title>
+      <ReaderWithAnnotations />
     </>
   );
 };

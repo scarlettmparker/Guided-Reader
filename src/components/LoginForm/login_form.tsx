@@ -1,5 +1,6 @@
 import { Component, createSignal, onMount } from "solid-js";
 import { login } from "~/utils/userutils";
+import { ENV } from "~/utils/const";
 import ButtonWithAlt from "~/components/ButtonWithAlt";
 import styles from "./login_form.module.css";
 
@@ -15,6 +16,7 @@ const LoginForm: Component = () => {
   const EYE_SOURCE = () => show_password() ? `${icon_path}/eye.png` : `${icon_path}/eye_closed.png`;
   const ALT_TEXT = () => show_password() ? 'Show password' : 'Hide password';
   const ALT_ONCLICK = () => set_show_password(!show_password());
+  const DISCORD_REDIRECT = ENV.VITE_DISCORD_REDIRECT_URI;
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -53,8 +55,10 @@ const LoginForm: Component = () => {
           </span>
         </div>
         <button class={`${styles.form_button} ${styles.button_text}`} onclick={() => login(username(), password(), set_error)}>Login</button>
-        <span class={`${styles.body_text} ${styles.no_account_text}`}>
-          Don't have an account? <a class={styles.highlight_text}>Register</a>
+        <span class={`${styles.body_text} ${styles.discord_account_text}`}>
+          <img src={`${icon_path}/discord.png`} class={styles.discord_icon}
+            width={EYE_SIZE} height={EYE_SIZE} draggable={false} />
+          <a class={styles.highlight_text} href={DISCORD_REDIRECT}>Authenticate with Discord</a>
         </span>
       </div>
     </>

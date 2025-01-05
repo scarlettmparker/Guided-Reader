@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import { useUser } from "~/usercontext";
 import { UserData, CACHE_DURATION, CACHE_KEY } from "~/utils/const";
 import { get_user_data_from_session } from "~/utils/userutils";
@@ -10,8 +10,9 @@ import styles from './navbar.module.css';
  * If the user is not logged in, the user's username and user_id are set to
  * empty string and -1 respectively.
  */
-async function set_user_status() {
+export async function set_user_status() {
   const { set_username, set_user_id, set_discord_id, set_avatar, set_logged_in } = useUser();
+
   if (localStorage.getItem('logged_in') === null || localStorage.getItem('logged_in') === 'false') {
     set_logged_in(false);
     return;
@@ -23,6 +24,7 @@ async function set_user_status() {
     localStorage.setItem('logged_in', 'false');
     set_logged_in(false);
   } else {
+    // ... update the user context ...
     set_username(user_data.username);
     set_user_id(user_data.id);
     set_discord_id(user_data.discord_id);
@@ -49,15 +51,23 @@ const Navbar: Component = () => {
 
   let MAX_USERNAME_LENGTH = 18;
 
-  onMount(async () => {
-    await set_user_status();
+  const set_user_details = () => {
     if (avatar() !== "-1" && discord_id() !== "-1") {
       set_avatar_url(build_avatar_string(discord_id(), avatar()));
     }
+
     if (username().length > MAX_USERNAME_LENGTH) {
       set_username(username().substring(0, MAX_USERNAME_LENGTH) + "...");
     }
+  }
+
+  onMount(async () => {
+    await set_user_status();
   });
+
+  createEffect(() => {
+    set_user_details();
+  })
 
   return (
     <Show when={username() !== ""} fallback={<LoginNavbar />} >

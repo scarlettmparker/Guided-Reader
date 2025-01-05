@@ -28,7 +28,6 @@ namespace server
       "TLS_CHACHA20_POLY1305_SHA256:"
       "TLS_AES_128_GCM_SHA256");
 
-
     ctx.set_options(
       ssl::context::default_workarounds |
       ssl::context::no_sslv2 |

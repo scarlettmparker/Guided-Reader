@@ -8,19 +8,21 @@ import Navbar from "./components/Navbar";
 import Index from "./routes";
 import Login from "./routes/login";
 import Logout from "./routes/logout";
+import AuthDiscord from "./routes/auth_discord";
 
 render(
   () => (
-    <MetaProvider>
-      <UserProvider>
+    <UserProvider>
+      <MetaProvider>
         <Navbar />
         <Router>
           <Route path="/" component={Index} />
           <Route path="/login" component={Login} />
           <Route path="/logout" component={Logout} />
+          <Route path='/auth_discord' component={AuthDiscord} />
         </Router>
-      </UserProvider>
-    </MetaProvider>
+      </MetaProvider>
+    </UserProvider>
   ),
   document.getElementById("root")!
 );

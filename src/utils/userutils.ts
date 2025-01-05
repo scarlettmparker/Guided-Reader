@@ -96,6 +96,37 @@ export async function get_user_data_from_session(CACHE_DURATION: number, CACHE_K
   return { id: -1, username: "", avatar: "", discord_id: "", nickname: "" };
 }
 
+/**
+ * Logs in the user with the given Discord code from the OAuth2 flow.
+ * 
+ * @param code Discord code from the OAuth2 flow.
+ * @returns True if the login is successful, false otherwise.
+ */
+export async function discord_login(code: string): Promise<boolean> {
+  const fetch_options: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      code: code,
+    }),
+  };
+
+  const response = await fetch(`/api/discord`, {
+    ...fetch_options,
+  });
+
+  const data = await response.json();
+  if (data.status === 'ok') {
+    localStorage.setItem('logged_in', 'true');
+    return true;
+  }
+
+  return false;
+}
 
 /**
  * Logs in the user with the given username and password.

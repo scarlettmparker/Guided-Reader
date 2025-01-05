@@ -1,12 +1,15 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#pragma once
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/beast/ssl.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl/stream.hpp>
+#include <boost/asio/connect.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/config.hpp>
-#include <boost/beast/ssl.hpp>
 #include <boost/asio/ssl.hpp>
 
 #include <filesystem>

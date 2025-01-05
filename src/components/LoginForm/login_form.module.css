@@ -12,7 +12,7 @@
   z-index: 1;
   width: 640px;
   height: 420px;
-  padding: 70px 90px 70px 80px;
+  padding: 60px 90px 60px 80px;
 
   border-radius: 20px;
   background-color: #fbfbfb;
@@ -100,6 +100,13 @@
   color: rgb(235, 235, 235);
 }
 
+.discord_account_text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+}
+
 .login_form {
   margin-top: 2.25em;
 }
@@ -156,7 +163,12 @@
   color: #252525;
 }
 
-.no_account_text {
+.no_account_text,
+.discord_account_text {
   position: relative;
   align-self: center;
+}
+
+.discord_account_text {
+  margin-bottom: 0.75em;
 }
