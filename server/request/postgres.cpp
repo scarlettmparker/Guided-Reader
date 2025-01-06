@@ -147,8 +147,6 @@ namespace postgres
       "           'text_id', a.text_id"
       "         ) as annotation,"
       "         a.description::text,"
-      "         COALESCE(SUM(CASE WHEN uai.type = 'LIKE' THEN 1 ELSE 0 END), 0) AS likes,"
-      "         COALESCE(SUM(CASE WHEN uai.type = 'DISLIKE' THEN 1 ELSE 0 END), 0) AS dislikes,"
       "         a.created_at::integer,"
       "         json_build_object("
       "           'id', u.id,"
@@ -158,7 +156,6 @@ namespace postgres
       "         ) as author "
       "  FROM public.\"Annotation\" a"
       "  LEFT JOIN public.\"User\" u ON a.user_id = u.id"
-      "  LEFT JOIN public.\"UserAnnotationInteraction\" uai ON a.id = uai.annotation_id"
       "  WHERE a.text_id = $1 "
       "  AND a.start >= $2 "
       "  AND a.\"end\" <= $3"
@@ -192,6 +189,36 @@ namespace postgres
     txn.conn().prepare("delete_annotation",
       "DELETE FROM public.\"Annotation\" "
       "WHERE id = $1");
+
+    // ... user annotation interaction queries ...
+    txn.conn().prepare("select_interaction_data",
+      "SELECT array_to_json(array_agg(row_to_json(t))) "
+      "FROM ("
+      "  SELECT json_build_object("
+      "           'user_id', uai.user_id,"
+      "           'type', uai.type"
+      "         ) as interaction "
+      "  FROM public.\"UserAnnotationInteraction\" uai"
+      "  WHERE uai.annotation_id = $1"
+      ") t");
+
+    txn.conn().prepare("select_annotation_interaction_type",
+      "SELECT type "
+      "FROM public.\"UserAnnotationInteraction\" "
+      "WHERE annotation_id = $1 "
+      "AND user_id = $2");
+
+    txn.conn().prepare("insert_interaction",
+      "INSERT INTO public.\"UserAnnotationInteraction\" ("
+      "annotation_id, user_id, type"
+      ") VALUES ("
+      "$1, $2, $3"
+      ")");
+
+    txn.conn().prepare("delete_interaction",
+      "DELETE FROM public.\"UserAnnotationInteraction\" "
+      "WHERE annotation_id = $1 "
+      "AND user_id = $2");
 
     txn.commit();
     return c;

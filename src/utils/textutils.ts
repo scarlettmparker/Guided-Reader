@@ -14,21 +14,37 @@ import { delay } from "./userutils";
 export async function get_titles(
   PAGE: number, PAGE_SIZE: number, SORT: number, set_reached_end: (reached_end: boolean) => void
 ): Promise<TextTitle[]> {
-  try {
-  const response = await fetch(
-    `/api/titles?sort=${SORT}&page=${PAGE}&page_size=${PAGE_SIZE}`,
-  );
+  const REQUEST_TIMEOUT = 5000;
 
-  const data = await response.json();
-  if (data.status == 'ok') {
-    return data.message;
-  } else {
-    if (data.message == 'No titles found') {
-      set_reached_end(true);
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+      const response = await fetch(
+        `/api/titles?sort=${SORT}&page=${PAGE}&page_size=${PAGE_SIZE}`,
+        {
+          signal: controller.signal,
+        }
+      );
+
+      const data = await response.json();
+      if (data.status == 'ok') {
+        return data.message;
+      } else {
+        if (data.message == 'No titles found') {
+          set_reached_end(true);
+        }
+      }
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error);
+      if (attempt < MAX_RETRIES) {
+        const backoff_delay = BASE_DELAY * Math.pow(2, attempt);
+        await delay(backoff_delay);
+      }
+    } finally {
+      clearTimeout(timeout_id);
     }
-  }
-  } catch (error) {
-    console.error('Error fetching titles:', error);
   }
   return [];
 }
@@ -43,35 +59,44 @@ export async function get_titles(
  * @returns Text object.
  */
 export async function get_text_data(id: number, language: string, data_type: string): Promise<Text | Annotation[]> {
-  const controller = new AbortController();
-  const timeout_id = setTimeout(() => controller.abort(), 5000);
+  const REQUEST_TIMEOUT = 5000;
 
-  try {
-    const response = await fetch(
-      `/api/text?text_object_id=${id}&language=${language}&type=${data_type}`,
-      {
-        signal: controller.signal,
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+      const response = await fetch(
+        `/api/text?text_object_id=${id}&language=${language}&type=${data_type}`,
+        {
+          signal: controller.signal,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+
+      if (data_type == "annotations") {
+        return data.message;
+      } else if (data.status === 'ok' && data.message?.[0]) {
+        return data.message[0];
+      }
+
+      throw new Error('Invalid response format');
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error);
+      if (attempt < MAX_RETRIES) {
+        const backoff_delay = BASE_DELAY * Math.pow(2, attempt);
+        await delay(backoff_delay);
+      }
+    } finally {
+      clearTimeout(timeout_id);
     }
-
-    const data = await response.json();
-
-    if (data_type == "annotations") {
-      return data.message;
-    } else if (data.status === 'ok' && data.message?.[0]) {
-      return data.message[0];
-    }
-
-    throw new Error('Invalid response format');
-  } catch (error) {
-    return { annotations: [], id: -1, text: '', language: '', text_object_id: -1 };
-  } finally {
-    clearTimeout(timeout_id);
   }
+  return { annotations: [], id: -1, text: '', language: '', text_object_id: -1 };
 }
 
 /**
@@ -85,32 +110,41 @@ export async function get_text_data(id: number, language: string, data_type: str
  * @returns List of annotation data.
  */
 export async function get_annotation_data(id: number, start: number, end: number): Promise<AnnotationData[]> {
-  const controller = new AbortController();
-  const timeout_id = setTimeout(() => controller.abort(), 5000);
+  const REQUEST_TIMEOUT = 5000;
 
-  try {
-    const response = await fetch(
-      `/api/annotation?text_id=${id}&start=${start}&end=${end}`,
-      {
-        signal: controller.signal,
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+      const response = await fetch(
+        `/api/annotation?text_id=${id}&start=${start}&end=${end}`,
+        {
+          signal: controller.signal,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      if (data.status === 'ok') {
+        return data.message;
+      }
+
+      throw new Error('Invalid response format');
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error);
+      if (attempt < MAX_RETRIES) {
+        const backoff_delay = BASE_DELAY * Math.pow(2, attempt);
+        await delay(backoff_delay);
+      }
+    } finally {
+      clearTimeout(timeout_id);
     }
-
-    const data = await response.json();
-    if (data.status === 'ok') {
-      return data.message;
-    }
-
-    throw new Error('Invalid response format');
-  } catch (error) {
-    return [];
-  } finally {
-    clearTimeout(timeout_id);
   }
+  return [];
 }
 
 

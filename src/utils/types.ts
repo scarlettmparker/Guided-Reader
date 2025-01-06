@@ -28,22 +28,27 @@ export type NewAnnotation = {
   description: string;
 }
 
+// ... displaying annotations ...
 export type AnnotationData = {
   annotation: Annotation;
   description: string;
-  dislikes: number;
-  likes: number;
   created_at: number;
   author: Author;
 }
 
 export type Author = {
-  user_id: number;
+  id: number;
   username: string;
   discord_id: string;
   avatar: string;
 }
 
+export type Interaction = {
+  user_id: number;
+  type: string;
+}
+
+// ... creating new annotations ...
 export type SelectedText = {
   text_id: number;
   text?: string;

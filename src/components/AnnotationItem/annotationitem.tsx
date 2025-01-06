@@ -1,10 +1,12 @@
-import { Component, createSignal, onMount } from "solid-js";
+import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { marked } from 'marked';
 import { build_avatar_string } from "../Navbar/navbar";
-import { AnnotationData } from "~/utils/types";
+import { AnnotationData, Interaction } from "~/utils/types";
 import { delete_annotation } from "~/utils/textutils";
 import AnnotationItemProps from "./annotationitemprops";
 import styles from "./annotationitem.module.css";
+import { get_interactions, post_interaction } from "~/utils/interactionutils";
+import { useUser } from "~/usercontext";
 
 /**
  * Calculate the time ago from a given timestamp.
@@ -42,6 +44,7 @@ function calculate_time_ago(timestamp: number): string {
  * @returns JSX Element for the annotation item.
  */
 const AnnotationItem: Component<AnnotationItemProps> = ({ annotation, editing }) => {
+  const { user_id } = useUser();
   const [html_content, set_html_content] = createSignal("");
 
   onMount(async () => {
@@ -72,7 +75,9 @@ const AnnotationItem: Component<AnnotationItemProps> = ({ annotation, editing })
       </div>
       <div class={styles.annotation_item_description} innerHTML={html_content()}>
       </div>
-      <AnnotationFooter annotation={annotation} editing={editing} />
+      {!editing &&
+        <AnnotationFooter annotation={annotation} editing={editing} is_author={annotation.author.id == user_id()} />
+      }
     </div>
   )
 }
@@ -98,11 +103,32 @@ const AnnotationProfile: Component<AnnotationProfileProps> = (props) => {
 interface AnnotationFooterProps {
   annotation: AnnotationData;
   editing: boolean;
+  is_author: boolean;
 }
 
+/**
+ * Component for displaying the footer of an annotation item.
+ * This includes the like and dislike buttons, as well as the edit and delete buttons for the author.
+ * 
+ * @param annotation Annotation data to display.
+ * @param editing Boolean indicating if the annotation is being edited.
+ * @param is_author Boolean indicating if the current user is the author of the annotation.
+ * @returns JSX Element for the annotation footer.
+ */
 const AnnotationFooter: Component<AnnotationFooterProps> = (props) => {
+  const { user_id } = useUser();
+
   const [response, set_response] = createSignal("");
+  const [interaction_data, set_interaction_data] = createSignal<Interaction[] | null>(null);
+  const [user_interaction, set_user_interaction] = createSignal<string>("");
+
+  const [likes, set_likes] = createSignal(0);
+  const [dislikes, set_dislikes] = createSignal(0);
+
   const icon_path = "./assets/annotation/icons";
+
+  const like_path = () => user_interaction() == "LIKE" ? `${icon_path}/voted.png` : `${icon_path}/unvoted.png`;
+  const dislike_path = () => user_interaction() == "DISLIKE" ? `${icon_path}/voted.png` : `${icon_path}/unvoted.png`;
 
   // ... open the editing annotation modal ...
   const set_editing_annotation = () => {
@@ -125,13 +151,37 @@ const AnnotationFooter: Component<AnnotationFooterProps> = (props) => {
     document.dispatchEvent(event);
   }
 
+  const update_interaction = async (type: "LIKE" | "DISLIKE", value: number) => {
+    if ((await post_interaction(user_id(), props.annotation.annotation.id, value)).success) {
+      const current_interaction = user_interaction();
+
+      // ... update the interaction data and user interaction state ...
+      set_user_interaction(current_interaction === type ? "" : type);
+      set_likes(likes() + (current_interaction === "LIKE" ? -1 : type === "LIKE" ? 1 : 0));
+      set_dislikes(dislikes() + (current_interaction === "DISLIKE" ? -1 : type === "DISLIKE" ? 1 : 0));
+    } else {
+      console.log(`Failed to ${type.toLowerCase()} annotation.`);
+    }
+  };
+
+  const like_annotation = () => update_interaction("LIKE", 1);
+  const dislike_annotation = () => update_interaction("DISLIKE", -1);
+
+  // ... get and set interaction data for the annotation ...
+  onMount(async () => {
+    set_interaction_data(await get_interactions(props.annotation.annotation.id));
+    set_user_interaction(interaction_data()?.find(interaction => interaction.user_id === user_id())?.type || "");
+    set_likes(interaction_data()?.filter(interaction => interaction.type === "LIKE").length || 0);
+    set_dislikes(interaction_data()?.filter(interaction => interaction.type === "DISLIKE").length || 0);
+  });
+
   return (
     <div class={styles.annotation_footer}>
-      <img src={`${icon_path}/unvoted.png`} alt="Like" class={styles.annotation_footer_icon} />
-      <span class={styles.annotation_footer_votes}>{props.annotation.likes - props.annotation.dislikes}</span>
-      <img src={`${icon_path}/unvoted.png`} alt="Dislike"
+      <img src={like_path()} alt="Like" onclick={like_annotation} class={styles.annotation_footer_icon} />
+      <span class={styles.annotation_footer_votes}>{likes() - dislikes()}</span>
+      <img src={dislike_path()} alt="Dislike" onclick={dislike_annotation}
         class={`${styles.annotation_footer_icon_dislike} ${styles.annotation_footer_icon}`} />
-      {!props.editing &&
+      {props.is_author &&
         <>
           <span class={styles.annotation_footer_edit}>
             <a onclick={set_editing_annotation}>Edit</a>

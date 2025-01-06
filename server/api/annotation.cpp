@@ -308,28 +308,34 @@ class AnnotationHandler : public RequestHandler
   http::response<http::string_body> validate_annotation_author(const http::request<http::string_body>& req, int annotation_id, int author_id) {
     // ... validate annotation author ...
     int real_author_id = select_author_id_by_annotation(annotation_id, false);
-    if (real_author_id == -1) {
+    if (real_author_id == -1)
+    {
       return request::make_bad_request_response("Annotation not found", req);
     }
-    if (real_author_id != author_id) {
+    if (real_author_id != author_id)
+    {
       return request::make_bad_request_response("Author ID mismatch. This incident has been reported", req);
     }
 
     // ... validate session and user
     std::string_view session_id = request::get_session_id_from_cookie(req);
     
-    if (session_id.empty()) {
+    if (session_id.empty())
+    {
       return request::make_unauthorized_response("Session ID not found", req);
     }
-    if (!request::validate_session(std::string(session_id), false)) {
+    if (!request::validate_session(std::string(session_id), false))
+    {
       return request::make_unauthorized_response("Invalid session ID", req);
     }
 
     int user_id = request::get_user_id_from_session(std::string(session_id), false);
-    if (user_id == -1) {
+    if (user_id == -1)
+    {
       return request::make_bad_request_response("User not found", req);
     }
-    if (user_id != real_author_id) {
+    if (user_id != real_author_id)
+    {
       return request::make_bad_request_response("Author ID mismatch. This incident has been reported", req);
     }
 
@@ -351,12 +357,6 @@ class AnnotationHandler : public RequestHandler
       /**
        * GET annotation details.
        */
-
-      if (!request::verify_client_certificate(READER_EXPECTED_DOMAIN))
-      {
-        return request::make_unauthorized_response("Invalid client certificate", req);
-      }
-
       std::optional<std::string> text_id_param = request::parse_from_request(req, "text_id");
       std::optional<std::string> annotation_start_param = request::parse_from_request(req, "start");
       std::optional<std::string> annotation_end_param = request::parse_from_request(req, "end");
@@ -452,18 +452,17 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Failed to update annotation", req);
       }
 
-      return request::make_json_request_response("Annotation updated", req);
+      return request::make_ok_request_response("Annotation updated", req);
     }
     else if (req.method() == http::verb::put)
     {
       /**
        * PUT a new annotation.
        */
-      if (middleware::rate_limited(ip_address, "/annotation_put", 1))
+      if (middleware::rate_limited(ip_address, "/annotation_put", 30000))
       {
         return request::make_too_many_requests_response("You may only submit an annotation once every 30 seconds", req);
       }
-
       if (!request::verify_client_certificate(READER_EXPECTED_DOMAIN))
       {
         return request::make_unauthorized_response("Invalid client certificate", req);
@@ -529,10 +528,12 @@ class AnnotationHandler : public RequestHandler
       }
 
       std::string_view session_id = request::get_session_id_from_cookie(req);
-      if (session_id.empty()) {
+      if (session_id.empty())
+      {
         return request::make_unauthorized_response("Session ID not found", req);
       }
-      if (!request::validate_session(std::string(session_id), false)) {
+      if (!request::validate_session(std::string(session_id), false))
+      {
         return request::make_unauthorized_response("Invalid session ID", req);
       }
 
@@ -541,7 +542,7 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Failed to insert annotation", req);
       }
 
-      return request::make_json_request_response("Annotation created", req);
+      return request::make_ok_request_response("Annotation created", req);
     }
     else if (req.method() == http::verb::delete_)
     {
@@ -590,7 +591,7 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Failed to delete annotation", req);
       }
 
-      return request::make_json_request_response("Annotation deleted", req);
+      return request::make_ok_request_response("Annotation deleted", req);
     }
     else
     {

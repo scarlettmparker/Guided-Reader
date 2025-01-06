@@ -505,6 +505,10 @@ class DiscordHandler : public RequestHandler
        * Unlink account from Discord.
        */
     }
+    else
+    {
+      return request::make_bad_request_response("Invalid method", req);
+    }
   }
 };
 

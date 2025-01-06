@@ -91,7 +91,7 @@ const ReaderWithAnnotations: Component = () => {
       {(() => {
         const data = selected_data();
         return data && data.position ? (
-          <button class={styles.annotate_button}
+          <button id="annotate_button" class={styles.annotate_button}
             style={{
               left: `${data.position.x}px`,
               top: `${data.position.y}px`
@@ -110,9 +110,8 @@ const ReaderWithAnnotations: Component = () => {
 }
 
 const Index: Component = () => {
-  const navigate = useNavigate();
-
   onMount(() => {
+    // ... redirect to home page if just logged in (with oauth) ...
     const query_string = window.location.search;
     const url_params = new URLSearchParams(query_string);
     const logged_in = url_params.get('logged_in');

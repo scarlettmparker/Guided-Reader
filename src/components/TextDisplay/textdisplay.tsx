@@ -236,7 +236,13 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
     set_button_position(null);
   }
 
-  const handle_mouse_up = () => {
+  const handle_mouse_up = (event: MouseEvent) => {
+    // ... ensure the annotate button can still be clicked ...
+    if ((event.target as HTMLElement).id === "annotate_button") {
+      return;
+    }
+
+    // ... clear the selection if it is not within the text content ...
     const selection = window.getSelection();
     if (!selection_in_text_content(selection!)) {
       set_selected_text(null);
@@ -256,6 +262,7 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
           && current.start === last.start
           && current.end == last.end;
 
+        // ... if the selection is the same as the last selection, clear the selection ...
         if (!same_selection) {
           set_button_position(new_position);
           set_last_selected_text(selected_text());
