@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal } from "solid-js";
+import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { get_annotation_data } from "~/utils/textutils";
 import { Annotation, AnnotationData } from "~/utils/types";
 
@@ -20,6 +20,11 @@ import styles from "./annotationmodal.module.css";
  * @returns JSX Element for the annotation modal.
  */
 const AnnotationModal: Component<AnnotationModalProps> = (props) => {
+  // ... filtered by discord verified accounts ...
+  const [verified_annotations, set_verified_annotations] = createSignal<AnnotationData[]>([]);
+  const [unverified_annotations, set_unverified_annotations] = createSignal<AnnotationData[]>([]);
+  const [show_verified_annotations, set_show_verified_annotations] = createSignal(true);
+
   const [first_non_null_annotation, set_first_non_null_annotation] = createSignal<Annotation | null>(null);
   const [new_selected_data, set_new_selected_data] = createSignal({ text: { text_id: -1, start: -1, end: -1 } });
   const [updating, set_updating] = createSignal(false);
@@ -40,6 +45,29 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
 
     /* TODO: Cache the annotation data to prevent an extra API call when returning to annotation modal */
   }
+
+  const delete_annotated_data = (updated_data: AnnotationData[], message: string) => {
+    if (message == "Annotation deleted") {
+      props.set_annotation_data(updated_data);
+    }
+  }
+
+  // ... filter the annotations by verified and unverified ...
+  createEffect(() => {
+    if (props.annotation_data().length == 0) return;
+    const verified = props.annotation_data().filter(annotation => annotation.author.discord_id !== "-1");
+    const unverified = props.annotation_data().filter(annotation => annotation.author.discord_id === "-1");
+
+    // ... set the verified and unverified annotations ...
+    set_verified_annotations(verified);
+    set_unverified_annotations(unverified);
+
+    if (verified.length == 0) {
+      set_show_verified_annotations(false);
+    } else if (unverified.length == 0) {
+      set_show_verified_annotations(true);
+    }
+  })
 
   createEffect(async () => {
     const annotation = first_non_null_annotation();
@@ -64,17 +92,11 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
     }
   });
 
-  const delete_annotated_data = (updated_data: AnnotationData[], message: string) => {
-    if (message == "Annotation deleted") {
-      props.set_annotation_data(updated_data);
-    }
-  }
-
   createEffect(async () => {
     if (props.update_response().length > 0) {
       set_updating(true);
       clearTimeout(window.update_response_timeout);
-      
+
       // ... extract id from response message ...
       const id_match = props.update_response().match(/\[ID:\s+(\d+)\]/);
       const deleted_id = id_match ? parseInt(id_match[1]) : null;
@@ -104,13 +126,24 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
 
   return (
     <div class={styles.annotation_modal}>
-      <AnnotationModalHeader title="Annotations" set_current_annotation_id={props.set_current_annotation} />
+      <div class={styles.annotation_header}>
+        <AnnotationModalHeader style={styles.annotation_modal_header} title="Annotations" set_current_annotation_id={props.set_current_annotation} />
+        {verified_annotations().length > 0 && unverified_annotations().length > 0 &&
+          <div class={styles.verified_header}>
+            <button class={styles.verified_button} onclick={() => set_show_verified_annotations(!show_verified_annotations())}>
+              {show_verified_annotations() ? "Verified" : "Unverified"}
+            </button>
+            <button class={styles.info_button}>?</button>
+          </div>
+        }
+      </div>
       <div class={styles.annotation_modal_content}>
-        {props.annotation_data()
+        {(show_verified_annotations() ? verified_annotations() : unverified_annotations())
           .sort((a, b) => (b.likes - b.dislikes) - (a.likes - a.dislikes))
           .map(annotation => (
             <AnnotationItem annotation={annotation} editing={false} />
-          ))}
+          ))
+        }
       </div>
       <div class={styles.new_annotation}>
         <span class={styles.new_annotation_button} onclick={set_new_annotation}>

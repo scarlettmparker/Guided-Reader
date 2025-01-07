@@ -33,6 +33,8 @@ export type AnnotationData = {
   annotation: Annotation;
   description: string;
   created_at: number;
+  likes: number;
+  dislikes: number;
   author: Author;
 }
 

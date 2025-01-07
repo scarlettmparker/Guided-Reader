@@ -1,5 +1,4 @@
 import { Title } from '@solidjs/meta';
-import { useNavigate } from '@solidjs/router';
 import { createEffect, createMemo, createSignal, onCleanup, onMount, type Component } from 'solid-js';
 import { TextTitle, Text, Annotation, AnnotationData, SelectedData } from '~/utils/types';
 import { handle_annotation_click } from '~/utils/render/renderutils';
@@ -11,8 +10,8 @@ import TextListItem from '~/components/TextListItem';
 import TextDisplay from '~/components/TextDisplay';
 import AnnotationModal from '~/components/AnnotationModal';
 import EditingAnnotationModal from '~/components/EditingAnnotationModal';
-import styles from './index.module.css';
 import CreatingAnnotationModal from '~/components/CreatingAnnotationModal';
+import styles from './index.module.css';
 
 const DEFAULT_LANGUAGE = "GR";
 const PAGE_SIZE = 335;
@@ -192,14 +191,17 @@ const Reader: Component<ReaderProps> = (props) => {
     }
   })
 
+  // ... checks if a text is already loaded ...
   const existing_text = (id: number, language: string) => {
     return texts().find(text => text.text_object_id === id && text.language === language);
   };
 
+  // ... gets the current text to display ...
   const get_current_text = createMemo(() => {
     return texts().find(text => text.text_object_id === current_text());
   });
 
+  // ... loads a text and its annotations ...
   const load_text_with_annotations = async (id: number, language: string) => {
     await load_text(id, language);
     if (!annotations_map().has(id)) {

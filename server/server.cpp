@@ -16,12 +16,13 @@ namespace server
     // ... enable session caching ...
     SSL_CTX_set_session_cache_mode(ctx.native_handle(), 
       SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR);
-
     SSL_CTX_set_session_id_context(ctx.native_handle(), 
       (const unsigned char*)"guided_reader", strlen("guided_reader"));
-    SSL_CTX_sess_set_cache_size(ctx.native_handle(), 10000);
-
-    SSL_CTX_set_timeout(ctx.native_handle(), 3600); // 1 hour
+    SSL_CTX_sess_set_cache_size(ctx.native_handle(), 50000);
+    SSL_CTX_set_timeout(ctx.native_handle(), 7200); // 2 hours
+    SSL_CTX_set_options(ctx.native_handle(), SSL_OP_NO_TICKET);
+    SSL_CTX_set_options(ctx.native_handle(), SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
+    SSL_CTX_set_default_read_buffer_len(ctx.native_handle(), 16384);
 
     SSL_CTX_set_ciphersuites(ctx.native_handle(),
       "TLS_AES_256_GCM_SHA384:"
@@ -87,6 +88,14 @@ namespace server
   SSLSession::SSLSession(tcp::socket socket, ssl::context & ctx)
     : stream_(std::move(socket), ctx) { }
 
+  SSLSession::~SSLSession()
+  {
+    if (cached_session_)
+    {
+      SSL_SESSION_free(cached_session_);
+    }
+  }
+
   void SSLSession::run()
   {
     do_handshake();
@@ -98,11 +107,21 @@ namespace server
   void SSLSession::do_handshake()
   {
     auto self = shared_from_this();
+
+    if (cached_session_)
+    {
+      SSL_set_session(stream_.native_handle(), cached_session_);
+    }
+
     stream_.async_handshake(ssl::stream_base::server,
       [this, self](beast::error_code ec)
       {
         if (!ec)
         {
+          if (!cached_session_)
+          {
+            cached_session_ = SSL_get1_session(stream_.native_handle());
+          }
           do_read();
         }
       });

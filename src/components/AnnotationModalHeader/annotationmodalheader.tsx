@@ -27,7 +27,7 @@ const AnnotationModalHeader: Component<AnnotationModalHeaderProps> = (props) => 
   }
 
   return (
-    <div class={styles.annotation_modal_header}>
+    <div class={`${styles.annotation_modal_header} ${props.style!}`}>
       <span class={styles.close} onclick={back}>{
         props.current_annotation_id! && props.current_annotation_id!().toString().startsWith("-10") ? "<" : "X"
       }</span>

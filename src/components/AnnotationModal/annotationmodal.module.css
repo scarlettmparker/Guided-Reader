@@ -25,10 +25,14 @@
 }
 
 .annotation_modal_header {
+  position: absolute;
+  left: 0;
+}
+
+.annotation_header {
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: center;
 }
 
@@ -36,6 +40,48 @@
   margin-right: auto;
   font-weight: 700;
   font-size: 1.2rem;
+}
+
+.verified_header {
+  display: flex;
+  flex-direction: row;
+  margin-left: auto;
+  gap: 0.25rem;
+}
+
+
+.verified_header button {
+  z-index: 1;
+  font-family: 'Open Sans', sans-serif;
+
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  border-radius: 15px;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.verified_button {
+  cursor: pointer;
+  background-color: #252525;
+  border: 1px solid #272121;
+  color: white;
+}
+
+.verified_button:hover {
+  border: 1px solid #CF3A5F;
+  background-color: #ECECEC;
+  color: #CF3A5F;
+}
+
+.info_button {
+  border: 1px solid #C0C0C0;
+  color: #272121;
+}
+
+.info_button:hover {
+  border: 1px solid #CF3A5F;
+  background-color: #ECECEC;
+  color: #CF3A5F;
 }
 
 .annotation_modal_content {

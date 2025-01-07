@@ -22,9 +22,11 @@ export async function get_interactions(annotation_id: number): Promise<Interacti
       }
 
       const data = await response.json();
-      if (data.status === 'ok') {
+      if (data.status === 'ok' && Array.isArray(data.message)) {
         const interactions = data.message.map((item: { interaction: Interaction }) => item.interaction);
         return interactions;
+      } else if (data.message = 'No interactions found') {
+        return [];
       }
 
       throw new Error('Invalid response format');
