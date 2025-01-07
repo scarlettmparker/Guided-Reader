@@ -1,9 +1,11 @@
 import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import { render_annotated_text } from "~/utils/render/renderutils";
 import { SelectedText, Position, Annotation } from "~/utils/types";
+import { get_text_data } from "~/utils/textutils";
+
+import Toolbar from "../Toolbar";
 import TextDisplayProps from "./textdisplayprops";
 import styles from "./textdisplay.module.css";
-import { get_text_data } from "~/utils/textutils";
 
 const SELECTION_LIMIT = 90;
 
@@ -56,8 +58,9 @@ function is_intersecting_annotation(range: Range): boolean {
  */
 function calculate_position(range: Range): Position {
   const { left, top, width } = range.getBoundingClientRect();
+
   return {
-    x: left + (width / 2) + window.scrollX - 46,
+    x: left + (width / 2) + window.scrollX,
     y: top + window.scrollY - 30
   };
 }
@@ -225,6 +228,7 @@ function selection_in_text_content(selection: Selection): boolean {
  */
 const TextDisplay: Component<TextDisplayProps> = (props) => {
   const empty_text_data = { text_id: -1, text: "", start: -1, end: -1 };
+  let ref!: HTMLDivElement;
 
   const [selected_text, set_selected_text] = createSignal<SelectedText | null>(null);
   const [last_selected_text, set_last_selected_text] = createSignal<SelectedText | null>(empty_text_data);
@@ -303,7 +307,8 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
   })
 
   return (
-    <div class={styles.text_display}>
+    <div ref={ref} class={styles.text_display}>
+      <Toolbar text_ref={ref} />
       <Show when={props.error()}>
         <div class={styles.error}>{props.error()}</div>
       </Show>

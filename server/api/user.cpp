@@ -294,7 +294,7 @@ class UserHandler : public RequestHandler
       std::string username = json_request["username"].get<std::string>();
       std::string password = json_request["password"].get<std::string>();
 
-      if (!login(username, password))
+      if (!login(username, password) || password.empty())
       {
         return request::make_unauthorized_response("Invalid username or password", req);
       }

@@ -147,6 +147,56 @@ class DiscordHandler : public RequestHandler
 
     return request::make_bad_request_response("User not in Greek Learning guild", req);
   }
+  
+  /**
+   * Helper function to extract the avatar ID from the user's roles JSON.
+   * This gets the user's avatar from the Greek Learning guild if it is available.
+   * If the user has no avatar on either Discord or the Guild, it returns -1.
+   *
+   * @param roles_json JSON response from Discord with the user's roles.
+   * @return Avatar ID of the user.
+   */
+  std::string get_avatar(const nlohmann::json & roles_json)
+  {
+    std::string avatar;
+    try
+    {
+      avatar = roles_json["avatar"].get<std::string>();
+    }
+    catch (const nlohmann::json::type_error & e)
+    {
+      try
+      {
+        avatar = roles_json["user"]["avatar"].get<std::string>();
+      }
+      catch (const nlohmann::json::type_error & e)
+      {
+        avatar = "-1";
+      }
+    }
+    return avatar;
+  }
+
+  /**
+   * Helper function to extract the nickname from the user's roles JSON.
+   * Functionally the same as the get_avatar function, but for the user's nickname.
+   *
+   * @param roles_json JSON response from Discord with the user's roles.
+   * @return Nickname of the user.
+   */
+  std::string get_nickname(const nlohmann::json & roles_json)
+  {
+    std::string nickname;
+    try
+    {
+      nickname = roles_json["nick"].get<std::string>();
+    }
+    catch (const nlohmann::json::type_error & e)
+    {
+      nickname = roles_json["user"]["global_name"].get<std::string>();
+    }
+    return nickname;
+  }
 
   /**
    * Verify the user's roles in the Greek Learning guild. This is used to check
@@ -189,33 +239,8 @@ class DiscordHandler : public RequestHandler
       return request::make_bad_request_response("Failed to update user roles", req);
     }
 
-    // ... update the user's data with the avatar and nickname ...
-    std::string avatar;
-    try
-    {
-      avatar = roles_json["avatar"].get<std::string>();
-    }
-    catch (const nlohmann::json::type_error & e)
-    {
-      try
-      {
-        avatar = roles_json["user"]["avatar"].get<std::string>();
-      }
-      catch (const nlohmann::json::type_error & e)
-      {
-        avatar = "-1";
-      }
-    }
-
-    std::string nickname;
-    try
-    {
-      nickname = roles_json["nick"].get<std::string>();
-    }
-    catch (const nlohmann::json::type_error & e)
-    {
-      nickname = roles_json["user"]["global_name"].get<std::string>();
-    }
+    std::string avatar = get_avatar(roles_json);
+    std::string nickname = get_nickname(roles_json);
 
     if (!update_user_data(user_id, avatar, nickname, false))
     {
@@ -338,6 +363,40 @@ class DiscordHandler : public RequestHandler
   }
 
   /**
+   * Register a user with Discord. This is used to create a new user in the database
+   * if they are not already registered (attempt to login with Discord but no account matches).
+   *
+   * @param discord_id Discord ID to register.
+   * @param username Username to register.
+   * @param avatar Avatar URL to register.
+   * @param verbose Whether to print messages to stdout.
+   * @return true if the user was registered, false otherwise.
+   */
+  bool register_with_discord(const std::string & discord_id, const std::string & username, const std::string & avatar, bool verbose)
+  {
+    try
+    {
+      int current_time = static_cast<int>(std::time(0));
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "register_with_discord",
+        discord_id, username, avatar, current_time
+      );
+      txn.commit();
+
+      return true;
+    }
+    catch (const std::exception & e)
+    {
+      verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
+    } catch (...)
+    {
+      verbose && std::cerr << "Unknown error while executing query" << std::endl;
+    }
+    return false;
+  }
+
+  /**
    * Validate or invalidate a user's Discord status. This is used to remove the
    * user's connection to Discord if they are not in the Greek Learning guild.
    * 
@@ -453,34 +512,52 @@ class DiscordHandler : public RequestHandler
       }
 
       std::string discord_id = user_data_json["id"].get<std::string>();
+      std::string username = user_data_json["username"].get<std::string>();
+      std::string avatar;
+
+      try
+      {
+        avatar = user_data_json["avatar"].get<std::string>();
+      } catch (const nlohmann::json::type_error & e)
+      {
+        avatar = "-1";
+      }
 
       // ... check if Discord id is already linked to an account ...
       int user_id = select_user_id_by_discord_id(discord_id, false);
       if (user_id == -1)
       {
+        if (!register_with_discord(discord_id, username, avatar, true))
+        {
+          return request::make_bad_request_response("Failed to register user with Discord", req);
+        }
         // ... register user ... (make endpoint later for this)
-        // ... make sure to check that the user is in greek learning guild ...
-        return request::make_bad_request_response("User not found", req);
       }
 
       // ... otherwise, login user ...
       // ... make sure to check that the user is in greek learning guild ...
+      validate_discord_status(user_id, true, false);
+      
       http::response<http::string_body> guild_response = verify_guild_membership(req, access_token);
       if (guild_response.result() != http::status::ok)
       {
+        if (guild_response.body().find("User not in Greek Learning guild") == std::string::npos)
+        {
+          return guild_response;
+        }
         validate_discord_status(user_id, false, false);
-        return guild_response;
       }
 
       // ... check the user's roles in the guild ...
       http::response<http::string_body> role_response = verify_user_guild_roles(req, user_id, access_token);
       if (role_response.result() != http::status::ok)
       {
+        if (role_response.body().find("User has no roles") == std::string::npos)
+        {
+          return role_response;
+        }
         validate_discord_status(user_id, false, false);
-        return role_response;
       }
-
-      validate_discord_status(user_id, true, false);
 
       // ... generate the session to log in the user ...
       std::string session_id = session::generate_session_id(false);

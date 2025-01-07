@@ -152,6 +152,10 @@ const AnnotationFooter: Component<AnnotationFooterProps> = (props) => {
   }
 
   const update_interaction = async (type: "LIKE" | "DISLIKE", value: number) => {
+    if (user_id() == -1) {
+      window.location.href = "/login";
+    } 
+
     if ((await post_interaction(user_id(), props.annotation.annotation.id, value)).success) {
       const current_interaction = user_interaction();
 
@@ -159,8 +163,6 @@ const AnnotationFooter: Component<AnnotationFooterProps> = (props) => {
       set_user_interaction(current_interaction === type ? "" : type);
       set_likes(likes() + (current_interaction === "LIKE" ? -1 : type === "LIKE" ? 1 : 0));
       set_dislikes(dislikes() + (current_interaction === "DISLIKE" ? -1 : type === "DISLIKE" ? 1 : 0));
-    } else {
-      console.log(`Failed to ${type.toLowerCase()} annotation.`);
     }
   };
 

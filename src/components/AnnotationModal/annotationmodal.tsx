@@ -55,8 +55,9 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
   // ... filter the annotations by verified and unverified ...
   createEffect(() => {
     if (props.annotation_data().length == 0) return;
-    const verified = props.annotation_data().filter(annotation => annotation.author.discord_id !== "-1");
-    const unverified = props.annotation_data().filter(annotation => annotation.author.discord_id === "-1");
+    console.log(props.annotation_data())
+    const verified = props.annotation_data().filter(annotation => annotation.author.discord_status === true);
+    const unverified = props.annotation_data().filter(annotation => annotation.author.discord_status === false);
 
     // ... set the verified and unverified annotations ...
     set_verified_annotations(verified);

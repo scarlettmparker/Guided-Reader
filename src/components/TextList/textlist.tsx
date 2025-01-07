@@ -1,5 +1,5 @@
 import { Component, For, onCleanup, onMount } from "solid-js";
-import { TextTitle } from "~/types";
+import { TextTitle } from "~/utils/types";
 import TextListProps from "./textlistprops";
 import styles from "./textlist.module.css";
 

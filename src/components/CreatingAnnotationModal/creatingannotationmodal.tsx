@@ -26,7 +26,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
 
   // ... mock author object ...
   const author: Author = {
-    user_id: user_id(),
+    id: user_id(),
     username: username(),
     discord_id: discord_id(),
     avatar: avatar()

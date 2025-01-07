@@ -1,5 +1,5 @@
-import { BASE_DELAY, ENV, MAX_RETRIES } from "./const";
-import { TextTitle, Text, Annotation, AnnotationData, NewAnnotation } from "./types";
+import { BASE_DELAY, MAX_RETRIES } from "./const";
+import { TextTitle, Text, Annotation, AnnotationData, NewAnnotation, TextBrief } from "./types";
 import { delay } from "./userutils";
 
 /**
@@ -47,6 +47,45 @@ export async function get_titles(
     }
   }
   return [];
+}
+
+/**
+ * Fetches a brief of the text to display next to the text itself.
+ * This includes the title, level, audio ID, group, and author.
+ * 
+ * @param id Text ID to fetch the brief for.
+ * @returns Text brief object.
+ */
+export async function get_text_brief(id: number, language: string): Promise<TextBrief> {
+  const REQUEST_TIMEOUT = 5000;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout_id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+      const response = await fetch(
+        `/api/text?text_object_id=${id}&type=brief&language=${language}`,
+        {
+          signal: controller.signal,
+        }
+      );
+
+      const data = await response.json();
+      if (data.status == 'ok') {
+        return data.message[0];
+      }
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error);
+      if (attempt < MAX_RETRIES) {
+        const backoff_delay = BASE_DELAY * Math.pow(2, attempt);
+        await delay(backoff_delay);
+      }
+    } finally {
+      clearTimeout(timeout_id);
+    }
+  }
+  return { id: -1, title: '', brief: '', level: '', languages: [], audio_id: -1, group: null, author: null };
 }
 
 /**

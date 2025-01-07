@@ -19,6 +19,7 @@ namespace server
     SSL_CTX_set_session_id_context(ctx.native_handle(), 
       (const unsigned char*)"guided_reader", strlen("guided_reader"));
     SSL_CTX_sess_set_cache_size(ctx.native_handle(), 50000);
+    
     SSL_CTX_set_timeout(ctx.native_handle(), 7200); // 2 hours
     SSL_CTX_set_options(ctx.native_handle(), SSL_OP_NO_TICKET);
     SSL_CTX_set_options(ctx.native_handle(), SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);

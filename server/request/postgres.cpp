@@ -60,6 +60,36 @@ namespace postgres
       "  AND language = $2"
       ") t");
 
+    txn.conn().prepare("select_text_brief",
+      "SELECT array_to_json(array_agg(row_to_json(t))) "
+      "FROM ("
+      "  SELECT t.id::integer,"
+      "         tobj.title::text,"
+      "         tobj.brief::text,"
+      "         tobj.level::text,"
+      "         t.audio_id::integer,"
+      "         json_build_object("
+      "           'id', tg.id,"
+      "           'group_name', tg.group_name,"
+      "           'group_url', tg.group_url"
+      "         ) as \"group\","
+      "         CASE WHEN t.author_id IS NOT NULL THEN json_build_object("
+      "           'id', u.id,"
+      "           'username', u.username,"
+      "           'discord_id', u.discord_id,"
+      "           'avatar', u.avatar,"
+      "           'nickname', u.nickname,"
+      "           'discord_status', u.discord_status"
+      "         ) END as author,"
+      "         (SELECT array_agg(language) FROM public.\"Text\" WHERE text_object_id = t.text_object_id) as languages"
+      "  FROM public.\"Text\" t"
+      "  LEFT JOIN public.\"TextObject\" tobj ON t.text_object_id = tobj.id"
+      "  LEFT JOIN public.\"TextGroup\" tg ON tobj.group_id = tg.id"
+      "  LEFT JOIN public.\"User\" u ON t.author_id = u.id"
+      "  WHERE t.text_object_id = $1"
+      "  AND t.language = $2"
+      ") t");
+
     // ... title queries ...
     txn.conn().prepare("select_titles",
       "SELECT array_to_json(array_agg(row_to_json(t))) "
@@ -114,6 +144,13 @@ namespace postgres
       "WHERE discord_id = $1 "
       "LIMIT 1");
 
+    txn.conn().prepare("register_with_discord",
+      "INSERT INTO public.\"User\" ("
+      "discord_id, username, avatar, account_creation_date"
+      ") VALUES ("
+      "$1, $2, $3, $4"
+      ")");
+    
     txn.conn().prepare("validate_discord_status",
       "UPDATE public.\"User\" "
       "SET discord_status = true "
@@ -154,7 +191,8 @@ namespace postgres
       "           'id', u.id,"
       "           'username', u.username,"
       "           'discord_id', u.discord_id,"
-      "           'avatar', u.avatar"
+      "           'avatar', u.avatar,"
+      "           'discord_status', u.discord_status"
       "         ) as author "
       "  FROM public.\"Annotation\" a"
       "  LEFT JOIN public.\"User\" u ON a.user_id = u.id"
@@ -163,7 +201,7 @@ namespace postgres
       "  AND a.start >= $2 "
       "  AND a.\"end\" <= $3"
       "  GROUP BY a.id, a.start, a.\"end\", a.text_id, a.description,"
-      "  a.created_at, u.id, u.username, u.discord_id, u.avatar"
+      "  a.created_at, u.id, u.username, u.discord_id, u.discord_status, u.avatar"
       ") t");
 
     txn.conn().prepare("select_annotation_ranges",

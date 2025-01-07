@@ -36,7 +36,7 @@ using tcp = net::ip::tcp;
 namespace server {
   std::vector<std::unique_ptr<RequestHandler>> load_handlers(const std::string& directory);
   http::response<http::string_body> handle_request(http::request<http::string_body> const& req, const std::string& ip_address);
-
+  
   class SSLSession : public std::enable_shared_from_this<SSLSession>
   {
     ssl::stream<tcp::socket> stream_;

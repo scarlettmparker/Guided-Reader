@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+.text_info {
+  font-family: 'Open Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+
+  padding: 25px;
+  z-index: 1;
+  color: #272121;
+  background-color: #FBFBFB;
+
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.text_info_absolute {
+  display: flex;
+  position: absolute;
+  top: 45%;
+
+  width: 20vw;
+  max-width: 500px;
+  transform: translate(-50%, -50%);
+}
+
+.text_info_relative {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.header {
+  height: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.mini_user_profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+
+  font-weight: 500;
+  gap: 2px;
+}
+
+.mini_user_profile img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  user-select: none;
+}
+
+.user_profile_text {
+  padding: 4px 8px;
+  border-radius: 10px;
+  transition: background-color 0.15s ease-in-out,
+  color 0.15s ease-in-out;
+}
+
+.header_text {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brief_text {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.5;
+  hyphens: auto;
+}
+
+.footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.footer > * {
+  flex: 1;
+}
+
+.footer > *:first-child {
+  margin-right: auto;
+}
+
+.footer > *:last-child {
+  text-align: right;
+}
+
+.heavy_text {
+  font-weight: 500;
+}
+
+.body_text a {
+  color: rgb(207, 58, 95);
+  text-decoration: underline dotted rgba(37, 37, 37, 0.4);
+  text-underline-offset: 4px;
+}
+
+.body_text a,
+.mini_user_profile {
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+}
+
+.mini_user_profile a {
+  color: #272121;
+}
+
+.body_text a:hover {
+  color: rgb(124, 16, 49);
+  text-decoration: underline dotted rgba(80, 27, 40, 0.6);
+}
+
+.user_profile_text:hover {
+  color: rgb(207, 58, 95);
+  background-color: #ECECEC;
+}
+
+.author_text {
+  margin-top: auto;
+}

@@ -118,6 +118,58 @@ class TextHandler : public RequestHandler
     return text_data;
   }
 
+  /**
+   * Select brief text data from the database. This will return the text title
+   * and author of a text object, along with some other metadata.
+   *
+   * @param text_object_id ID of the text object to select.
+   * @param language Language of the text object to select.
+   * @param verbose Whether to print messages to stdout.
+   * @return JSON of brief text data.
+   */
+  nlohmann::json select_text_brief(int text_object_id, std::string language, bool verbose)
+  {
+    nlohmann::json text_data = nlohmann::json::array();
+    std::string cache_key = "text:" + std::to_string(text_object_id) + ":" + language + ":brief";
+    sw::redis::Redis& redis = Redis::get_instance();
+
+    try
+    {
+      std::optional<std::string> cache_result = redis.get(cache_key);
+
+      if (cache_result)
+      {
+        verbose && std::cout << "Cache hit for " << cache_key << std::endl;
+        return nlohmann::json::parse(*cache_result);
+      }
+
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_text_brief",
+        std::to_string(text_object_id), language
+      );
+      txn.commit();
+
+      if (r.empty())
+      {
+        verbose && std::cout << "Text with ID " << text_object_id << " not found" << std::endl;
+        return text_data;
+      }
+
+      text_data = nlohmann::json::parse(r[0][0].as<std::string>());
+      redis.set(cache_key, text_data.dump(), std::chrono::seconds(300)); // 5 minutes
+    }
+    catch (const std::exception &e)
+    {
+      verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+      verbose && std::cerr << "Unknown error while executing query" << std::endl;
+    }
+    return text_data;
+  }
+
   public:
   TextHandler(ConnectionPool & connection_pool) : pool(connection_pool) {}
 
@@ -156,29 +208,35 @@ class TextHandler : public RequestHandler
       }
 
       std::optional<std::string> language_param = request::parse_from_request(req, "language");
+      std::string language = * language_param;
+
       if (!language_param)
       {
         return request::make_bad_request_response("Missing language parameter", req);
       }
 
-      std::string language = *language_param;
       std::optional<std::string> type_param = request::parse_from_request(req, "type");
-
-      if (type_param && *type_param == "annotations")
+      if (type_param && * type_param == "brief")
       {
-        nlohmann::json annotation_data = select_annotations(text_object_id, language, false);
+        nlohmann::json brief_text_data = select_text_brief(text_object_id, language, true);
+        return request::make_json_request_response(brief_text_data, req);
+      }
+
+      if (type_param && * type_param == "annotations")
+      {
+        nlohmann::json annotation_data = select_annotations(text_object_id, language, true);
         return request::make_json_request_response(annotation_data, req); 
       }
       
-      nlohmann::json text_info = select_text_data(text_object_id, language, false);
+      nlohmann::json text_info = select_text_data(text_object_id, language, true);
       if (text_info.empty())
       {
         return request::make_bad_request_response("No text found", req);
       }
       
-      if (type_param && *type_param == "all")
+      if (type_param && * type_param == "all")
       {
-        nlohmann::json annotations = select_annotations(text_object_id, language, false);
+        nlohmann::json annotations = select_annotations(text_object_id, language, true);
         text_info[0]["annotations"] = annotations;
       }
 

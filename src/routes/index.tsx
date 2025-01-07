@@ -11,13 +11,17 @@ import TextDisplay from '~/components/TextDisplay';
 import AnnotationModal from '~/components/AnnotationModal';
 import EditingAnnotationModal from '~/components/EditingAnnotationModal';
 import CreatingAnnotationModal from '~/components/CreatingAnnotationModal';
+import TextInfo from '~/components/TextInfo';
+
 import styles from './index.module.css';
+import { useUser } from '~/usercontext';
 
 const DEFAULT_LANGUAGE = "GR";
-const PAGE_SIZE = 335;
+const PAGE_SIZE = 336;
 const SORT = 0;
 
-interface AnnotationCallbacks {
+interface TextCallbacks {
+  current_text: () => number;
   current_annotation_id: () => number;
   set_current_annotation_id: (annotation: number) => void;
   annotation_data: () => AnnotationData[];
@@ -26,7 +30,8 @@ interface AnnotationCallbacks {
 
 const ReaderWithAnnotations: Component = () => {
   // ... state for annotation callbacks ...
-  const [reader_callbacks, set_reader_callbacks] = createSignal<AnnotationCallbacks>({
+  const [reader_callbacks, set_reader_callbacks] = createSignal<TextCallbacks>({
+    current_text: () => -1,
     current_annotation_id: () => -1,
     set_current_annotation_id: () => { },
     annotation_data: () => [],
@@ -72,6 +77,9 @@ const ReaderWithAnnotations: Component = () => {
   return (
     <>
       <Reader set_callbacks={set_reader_callbacks} />
+      {callbacks().current_text() != -1 &&
+        <TextInfo text_id={callbacks().current_text} />
+      }
       {(callbacks().current_annotation_id() >= 0) &&
         (current_annotation_data() != null ?
           <EditingAnnotationModal current_annotation_data={current_annotation_data}
@@ -88,19 +96,39 @@ const ReaderWithAnnotations: Component = () => {
           set_current_annotation_id={callbacks().set_current_annotation_id} new_selected_data={new_selected_data} />
       }
       {(() => {
+        // TODO: make this a separate component
         const data = selected_data();
+        let button_ref!: HTMLButtonElement;
+
+        const [width, set_width] = createSignal(0);
+        const { user_id } = useUser();
+
+        // ... annotate the text ...
+        const annotate = () => {
+          callbacks().set_current_annotation_id(-2);
+          set_selected_data(null);
+          set_new_selected_data(data);
+        }
+
+        onMount(() => {
+          if (button_ref) {
+            // ... get half of width for offsetting the button ...
+            const bounding_box = button_ref.getBoundingClientRect();
+            const width = bounding_box.width;
+            set_width(width / 2);
+          }
+        });
+
         return data && data.position ? (
-          <button id="annotate_button" class={styles.annotate_button}
+          <button ref={button_ref} id="annotate_button" class={styles.annotate_button}
             style={{
-              left: `${data.position.x}px`,
+              left: `${data.position.x - width()}px`,
               top: `${data.position.y}px`
             }}
             onclick={() => {
-              callbacks().set_current_annotation_id(-2);
-              set_selected_data(null);
-              set_new_selected_data(data);
+              user_id() === -1 ? window.location.href = "/login" : annotate();
             }}>
-            Annotate
+            {user_id() === -1 ? "Login to annotate" : "Annotate"}
           </button>
         ) : null;
       })()}
@@ -129,7 +157,7 @@ const Index: Component = () => {
 };
 
 interface ReaderProps {
-  set_callbacks: (callbacks: AnnotationCallbacks) => void;
+  set_callbacks: (callbacks: TextCallbacks) => void;
 }
 
 /**
@@ -159,7 +187,8 @@ const Reader: Component<ReaderProps> = (props) => {
   const [reached_end, set_reached_end] = createSignal(false);
 
   // ... create callbacks for use of state in other components ...
-  const callbacks = createMemo<AnnotationCallbacks>(() => ({
+  const callbacks = createMemo<TextCallbacks>(() => ({
+    current_text: () => current_text(),
     current_annotation_id: () => current_annotation_id(),
     set_current_annotation_id: (annotation: number) => set_current_annotation_id(annotation),
     annotation_data: () => annotation_data(),
@@ -277,7 +306,7 @@ const Reader: Component<ReaderProps> = (props) => {
 
   return (
     <div class={styles.reader}>
-      <div class={styles.text_list_wrapper}>
+      <div class={styles.text_list_wrapper} id="text_list_wrapper">
         <Header left={true}>
           <span class={styles.text_list_hide}>{">"}</span>
           <span class={styles.header_text}>Texts (κείμενα)</span>
@@ -290,7 +319,7 @@ const Reader: Component<ReaderProps> = (props) => {
           }
         </TextList>
       </div>
-      <div class={styles.text_display_wrapper}>
+      <div class={styles.text_display_wrapper} id="text_display_wrapper">
         <Header>
         </Header>
         <TextDisplay current_text={current_text} loading_texts={loading_texts} error={error}

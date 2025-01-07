@@ -13,6 +13,23 @@ export type Text = {
   text_object_id: number;
 }
 
+export type TextBrief = {
+  id: number;
+  title: string;
+  brief: string;
+  level: string;
+  languages: string[];
+  audio_id: number;
+  group: Group | null;
+  author: Author | null;
+}
+
+type Group = {
+  id: number;
+  group_name: string;
+  group_url: string;
+}
+
 export type Annotation = {
   id: number;
   start: number;
@@ -42,6 +59,7 @@ export type Author = {
   id: number;
   username: string;
   discord_id: string;
+  discord_status?: boolean;
   avatar: string;
 }
 
