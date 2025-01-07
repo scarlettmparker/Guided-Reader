@@ -119,6 +119,9 @@ export async function get_text_data(id: number, language: string, data_type: str
       const data = await response.json();
 
       if (data_type == "annotations") {
+        if (data.message === "No annotations found") {
+          return [];
+        }
         return data.message;
       } else if (data.status === 'ok' && data.message?.[0]) {
         return data.message[0];

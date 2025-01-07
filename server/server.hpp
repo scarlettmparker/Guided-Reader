@@ -45,13 +45,9 @@ namespace server {
 
     public:
       explicit SSLSession(tcp::socket socket, ssl::context& ctx);
-      ~SSLSession();
       void run();
     
     private:
-      SSL_SESSION * cached_session_ = nullptr;
-      std::unordered_map<std::string, SSL_SESSION*> session_cache_;
-      std::mutex session_cache_mutex_;
       void do_handshake();
       void do_read();
       void do_write(http::response<http::string_body> res);

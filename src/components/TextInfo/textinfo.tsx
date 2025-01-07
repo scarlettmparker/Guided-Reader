@@ -15,6 +15,15 @@ const level_map = new Map([
   ["Γ2", "#1b5eb3"],
 ]);
 
+/**
+ * The TextInfo component displays a brief about a text. This will include the title,
+ * level, group, author, brief, languages, and audio availability of the text.
+ * Positioning is based on the current position of the text display wrapper, which
+ * I know is a little but jank but it's literally CSS so who cares.
+ * 
+ * @param text_id The ID of the text to fetch/display information for.
+ * @returns JSX Element for the text info.
+ */
 const TextInfo: Component<TextInfoProps> = (props) => {
   const [text_brief, set_text_brief] = createSignal<TextBrief | null>(null);
   const [display_spacing, set_display_spacing] = createSignal(0);

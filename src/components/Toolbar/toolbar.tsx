@@ -4,7 +4,9 @@ import styles from './toolbar.module.css';
 const Toolbar: Component<ToolbarProps> = (props) => {
   return (
     <div class={styles.toolbar}>
-      hey
+      <button class={styles.toolbar_button}>
+        T
+      </button>
     </div>
   );
 }

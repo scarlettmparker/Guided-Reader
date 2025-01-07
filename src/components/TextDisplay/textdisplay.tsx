@@ -316,12 +316,12 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
         fallback={<div>Select a text to begin</div>}>
         <Show when={!props.loading_texts().has(props.current_text())}
           fallback={<div>Loading...</div>}>
-          <>
+          <div class={styles.text_content}>
             <div id="text_content" class={styles.text_content} innerHTML={
               render_annotated_text(props.get_current_text()?.text!,
                 props.annotations_map().get(props.current_text()) || [])
             } />
-          </>
+          </div>
         </Show>
       </Show>
     </div>

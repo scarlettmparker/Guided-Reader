@@ -186,13 +186,16 @@ class TextHandler : public RequestHandler
        * GET text details.
        */
       std::optional<std::string> text_object_id_param = request::parse_from_request(req, "text_object_id");
+      std::optional<std::string> language_param = request::parse_from_request(req, "language");
+      std::optional<std::string> type_param = request::parse_from_request(req, "type");
 
-      if (!text_object_id_param)
+      if (!text_object_id_param.has_value() || !language_param.has_value())
       {
-        return request::make_bad_request_response("Missing text_object_id parameter", req);
+        return request::make_bad_request_response("Missing parameters text_object_id | language", req);
       }
 
       int text_object_id;
+      std::string language = language_param.value();
       
       try
       {
@@ -207,36 +210,32 @@ class TextHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for text_object_id", req);
       }
 
-      std::optional<std::string> language_param = request::parse_from_request(req, "language");
-      std::string language = * language_param;
-
       if (!language_param)
       {
         return request::make_bad_request_response("Missing language parameter", req);
       }
 
-      std::optional<std::string> type_param = request::parse_from_request(req, "type");
-      if (type_param && * type_param == "brief")
+      if (type_param.has_value() && type_param.value() == "brief")
       {
-        nlohmann::json brief_text_data = select_text_brief(text_object_id, language, true);
+        nlohmann::json brief_text_data = select_text_brief(text_object_id, language, false);
         return request::make_json_request_response(brief_text_data, req);
       }
 
-      if (type_param && * type_param == "annotations")
+      if (type_param.has_value() && type_param.value() == "annotations")
       {
-        nlohmann::json annotation_data = select_annotations(text_object_id, language, true);
+        nlohmann::json annotation_data = select_annotations(text_object_id, language, false);
         return request::make_json_request_response(annotation_data, req); 
       }
-      
-      nlohmann::json text_info = select_text_data(text_object_id, language, true);
+
+      nlohmann::json text_info = select_text_data(text_object_id, language, false);
       if (text_info.empty())
       {
         return request::make_bad_request_response("No text found", req);
       }
       
-      if (type_param && * type_param == "all")
+      if (type_param.has_value() && type_param.value() == "all")
       {
-        nlohmann::json annotations = select_annotations(text_object_id, language, true);
+        nlohmann::json annotations = select_annotations(text_object_id, language, false);
         text_info[0]["annotations"] = annotations;
       }
 

@@ -167,6 +167,7 @@ interface ReaderProps {
  * @returns JSX Element for the Guided Reader.
  */
 const Reader: Component<ReaderProps> = (props) => {
+  const [list_displayed, set_list_displayed] = createSignal(true);
   const [current_text, set_current_text] = createSignal(-1);
 
   // ... state for loading texts and annotations ...
@@ -305,20 +306,22 @@ const Reader: Component<ReaderProps> = (props) => {
   }
 
   return (
-    <div class={styles.reader}>
-      <div class={styles.text_list_wrapper} id="text_list_wrapper">
-        <Header left={true}>
-          <span class={styles.text_list_hide}>{">"}</span>
-          <span class={styles.header_text}>Texts (κείμενα)</span>
-        </Header>
-        <TextList items={titles} page={page} set_page={set_page}>
-          {
-            (text) => <TextListItem text={text} class={() => current_text() == text.id ? styles.text_list_item_selected
-              : styles.text_list_item} onclick={async () => await set_inner_text(text.id, DEFAULT_LANGUAGE)}
-              onmouseenter={async () => load_text_with_annotations(text.id, DEFAULT_LANGUAGE)} />
-          }
-        </TextList>
-      </div>
+    <div class={`${styles.reader} ${!list_displayed() && styles.reader_list_hidden}`}>
+      {list_displayed() &&
+        <div class={styles.text_list_wrapper} id="text_list_wrapper">
+          <Header left={true}>
+            <span class={styles.text_list_hide} onclick={() => set_list_displayed(false)}>{">"}</span>
+            <span class={styles.header_text}>Texts (κείμενα)</span>
+          </Header>
+          <TextList items={titles} page={page} set_page={set_page}>
+            {
+              (text) => <TextListItem text={text} class={() => current_text() == text.id ? styles.text_list_item_selected
+                : styles.text_list_item} onclick={async () => await set_inner_text(text.id, DEFAULT_LANGUAGE)}
+                onmouseenter={async () => load_text_with_annotations(text.id, DEFAULT_LANGUAGE)} />
+            }
+          </TextList>
+        </div>
+      }
       <div class={styles.text_display_wrapper} id="text_display_wrapper">
         <Header>
         </Header>

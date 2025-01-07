@@ -19,6 +19,10 @@
   }
 }
 
+.reader_list_hidden {
+  right: 0px;
+}
+
 .text_list_wrapper {
   position: relative;
   display: flex;
@@ -27,7 +31,7 @@
   align-items: flex-end;
 
   max-width: 400px;
-  width: 100%;
+  width: 100vw;
   z-index: 2;
 
   @media (max-width: 1550px) {
@@ -40,17 +44,31 @@
 .text_display_wrapper {
   max-width: 750px;
   width: 100%;
-  position: relative;
   z-index: 1;
+  position: relative;
 }
 
 .text_list_hide {
+  position: absolute;
   margin-right: auto;
   color: white;
+  user-select: none;
+  cursor: pointer;
+
+  left: 0px;
+  padding: 10px 20px;
+  transition: transform 1s;
+}
+
+.text_list_hide:hover {
+  animation: spin_reverse 0.6s;
+}
+
+.text_list_hide:not(:hover) {
+  animation: spin 0.6s;
 }
 
 .header_text {
-  margin-right: auto;
   font-size: 1.5rem;
   color: white;
 }
@@ -108,4 +126,25 @@
   border: 1px solid #CF3A5F;
   background-color: #ECECEC;
   color: #CF3A5F;
+}
+
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes spin_reverse {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }

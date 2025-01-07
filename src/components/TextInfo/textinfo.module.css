@@ -17,8 +17,8 @@
 .text_info_absolute {
   display: flex;
   position: absolute;
+  
   top: 45%;
-
   width: 20vw;
   max-width: 500px;
   transform: translate(-50%, -50%);

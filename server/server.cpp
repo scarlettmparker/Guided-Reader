@@ -89,14 +89,6 @@ namespace server
   SSLSession::SSLSession(tcp::socket socket, ssl::context & ctx)
     : stream_(std::move(socket), ctx) { }
 
-  SSLSession::~SSLSession()
-  {
-    if (cached_session_)
-    {
-      SSL_SESSION_free(cached_session_);
-    }
-  }
-
   void SSLSession::run()
   {
     do_handshake();
@@ -109,20 +101,11 @@ namespace server
   {
     auto self = shared_from_this();
 
-    if (cached_session_)
-    {
-      SSL_set_session(stream_.native_handle(), cached_session_);
-    }
-
     stream_.async_handshake(ssl::stream_base::server,
       [this, self](beast::error_code ec)
       {
         if (!ec)
         {
-          if (!cached_session_)
-          {
-            cached_session_ = SSL_get1_session(stream_.native_handle());
-          }
           do_read();
         }
       });
