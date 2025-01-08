@@ -46,7 +46,15 @@ class TitlesHandler : public RequestHandler
         "select_titles",
         std::to_string(page_size), std::to_string(page * page_size)
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty() || r[0][0].is_null())
       {

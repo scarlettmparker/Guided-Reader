@@ -282,7 +282,15 @@ class DiscordHandler : public RequestHandler
         user_id,
         oss.str()
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
       return true;
     }
     catch (const std::exception & e)
@@ -317,7 +325,15 @@ class DiscordHandler : public RequestHandler
           "update_user_data",
           user_id, avatar, nickname
         );
+        try
+      {
         txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
         return true;
       }
       catch (...)
@@ -351,7 +367,15 @@ class DiscordHandler : public RequestHandler
       pqxx::result r = txn.exec_prepared(
         "select_user_id_by_discord_id", discord_id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -390,7 +414,15 @@ class DiscordHandler : public RequestHandler
         "register_with_discord",
         discord_id, username, avatar, current_time
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       return true;
     }
@@ -432,7 +464,15 @@ class DiscordHandler : public RequestHandler
           user_id
         );
       }
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
       return true;
     }
     catch (const std::exception & e)
@@ -545,10 +585,7 @@ class DiscordHandler : public RequestHandler
       // ... otherwise, login user ...
       // ... make sure to check that the user is in greek learning guild ...
       validate_discord_status(user_id, true, false);
-      
-      // ... CODE BELOW CAUSES BACKEND TO CRASH DUNNO WHY I'LL FIX IT LATER ...
-      
-      /**
+
       try
       {
         http::response<http::string_body> guild_response = verify_guild_membership(req, access_token);
@@ -585,7 +622,6 @@ class DiscordHandler : public RequestHandler
         std::cerr << "Failed to verify user roles: " << e.what() << std::endl;
         return request::make_bad_request_response("Failed to verify user roles", req);
       }
-      */
 
       // ... generate the session to log in the user ...
       std::string session_id = session::generate_session_id(false);

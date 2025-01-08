@@ -38,7 +38,16 @@ class TextHandler : public RequestHandler
         "select_annotations",
         std::to_string(text_id)
       );
-      txn.commit();
+      
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -96,7 +105,15 @@ class TextHandler : public RequestHandler
         "select_text_details",
         std::to_string(text_object_id), language
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -148,7 +165,15 @@ class TextHandler : public RequestHandler
         "select_text_brief",
         std::to_string(text_object_id), language
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {

@@ -33,7 +33,15 @@ class UserHandler : public RequestHandler
       pqxx::result r = txn.exec_prepared(
         "select_user_id", username
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -66,7 +74,15 @@ class UserHandler : public RequestHandler
       pqxx::result r = txn.exec_prepared(
         "select_user_data_by_id", id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -106,7 +122,15 @@ class UserHandler : public RequestHandler
       pqxx::result r = txn.exec_prepared(
         "select_username_by_id", id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -141,7 +165,15 @@ class UserHandler : public RequestHandler
       pqxx::result r = txn.exec_prepared(
         "select_user_password", username
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -181,7 +213,15 @@ class UserHandler : public RequestHandler
         "insert_user",
         username, hashed_password, current_time
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
       
       return true;
     }

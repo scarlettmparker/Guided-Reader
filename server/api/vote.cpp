@@ -26,7 +26,15 @@ class VoteHandler : public RequestHandler
         "select_interaction_data",
         annotation_id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -65,7 +73,15 @@ class VoteHandler : public RequestHandler
         "select_annotation_interaction_type",
         annotation_id, user_id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -103,7 +119,15 @@ class VoteHandler : public RequestHandler
         "insert_interaction",
         annotation_id, user_id, interaction_type
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.affected_rows() == 0)
       {
@@ -140,7 +164,15 @@ class VoteHandler : public RequestHandler
         "delete_interaction",
         annotation_id, user_id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.affected_rows() == 0)
       {

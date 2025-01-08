@@ -56,7 +56,15 @@ class AnnotationHandler : public RequestHandler
         std::to_string(text_id), std::to_string(start), std::to_string(end)
       );
       
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -95,7 +103,15 @@ class AnnotationHandler : public RequestHandler
       pqxx::result r = txn.exec_prepared(
         "select_author_id_by_annotation", annotation_id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -132,7 +148,15 @@ class AnnotationHandler : public RequestHandler
         "update_annotation",
         description, annotation_id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.affected_rows() == 0)
       {
@@ -158,9 +182,10 @@ class AnnotationHandler : public RequestHandler
    * annotation that overlaps with an existing annotation, it will be rejected.
    *
    * @param text_id ID of the text to select annotation ranges from.
+   * @param verbose Whether to print messages to stdout.
    * @return Array of integers representing the start and end positions of annotations.
    */
-  RangeOccupancies select_annotation_ranges(int text_id)
+  RangeOccupancies select_annotation_ranges(int text_id, bool verbose)
   {
     try
     {
@@ -169,7 +194,15 @@ class AnnotationHandler : public RequestHandler
         "select_annotation_ranges",
         text_id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.empty())
       {
@@ -240,7 +273,15 @@ class AnnotationHandler : public RequestHandler
         "insert_annotation",
         text_id, user_id, start, end, description, created_at
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.affected_rows() == 0)
       {
@@ -276,7 +317,15 @@ class AnnotationHandler : public RequestHandler
         "delete_annotation",
         annotation_id
       );
-      txn.commit();
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
 
       if (r.affected_rows() == 0)
       {
@@ -504,7 +553,7 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for text_id | user_id | start | end", req);
       }
 
-      RangeOccupancies ranges = select_annotation_ranges(text_id);
+      RangeOccupancies ranges = select_annotation_ranges(text_id, false);
       if (!check_valid_ranges(ranges.ranges, ranges.size, start, end))
       {
         return request::make_bad_request_response("Annotation overlaps with existing annotation", req);
