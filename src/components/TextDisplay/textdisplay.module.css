@@ -21,9 +21,12 @@
 }
 
 .text_content {
+  position: relative;
   padding-right: 10px;
   height: 100%;
   width: 100%;
+  bottom: 0;
+  margin-top: auto;
   
   overflow-x: hidden;
   overflow-y: auto;

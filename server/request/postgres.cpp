@@ -391,7 +391,7 @@ namespace postgres
    * Get the global connection pool.
    * @return Global connection pool.
    */
-  ConnectionPool& get_connection_pool()
+  ConnectionPool & get_connection_pool()
   {
     if (!global_pool)
     {

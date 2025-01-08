@@ -1,7 +1,6 @@
 #include "api.hpp"
 #include "bcrypt/BCrypt.hpp"
 #include "../auth/session.hpp"
-#include "../request/redis.hpp"
 
 #include <openssl/rand.h>
 #include <ctime>

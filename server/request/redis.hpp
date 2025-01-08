@@ -11,8 +11,8 @@
 class Redis
 {
   private:
-  static std::unique_ptr<sw::redis::Redis> instance_;
-  Redis() = delete;
+    static std::unique_ptr<sw::redis::Redis> instance_;
+    Redis() = delete;
 
   public:
   static void init_connection();
