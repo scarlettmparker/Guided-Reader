@@ -13,28 +13,13 @@ namespace server
   {
     ssl::context ctx(ssl::context::tlsv13_server);
 
-    // ... enable session caching ...
-    SSL_CTX_set_session_cache_mode(ctx.native_handle(), 
-      SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR);
-    SSL_CTX_set_session_id_context(ctx.native_handle(), 
-      (const unsigned char*)"guided_reader", strlen("guided_reader"));
-    SSL_CTX_sess_set_cache_size(ctx.native_handle(), 50000);
-    
-    SSL_CTX_set_timeout(ctx.native_handle(), 7200); // 2 hours
-    SSL_CTX_set_options(ctx.native_handle(), SSL_OP_NO_TICKET);
-    SSL_CTX_set_options(ctx.native_handle(), SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
-    SSL_CTX_set_default_read_buffer_len(ctx.native_handle(), 16384);
-
     SSL_CTX_set_ciphersuites(ctx.native_handle(),
       "TLS_AES_256_GCM_SHA384:"
-      "TLS_CHACHA20_POLY1305_SHA256:"
-      "TLS_AES_128_GCM_SHA256");
+      "TLS_CHACHA20_POLY1305_SHA256:");
 
     ctx.set_options(
-      ssl::context::default_workarounds |
       ssl::context::no_sslv2 |
       ssl::context::no_sslv3 |
-      ssl::context::single_dh_use |
       ssl::context::no_compression
     );
 

@@ -219,7 +219,8 @@ class DiscordHandler : public RequestHandler
     try
     {
       roles_json = nlohmann::json::parse(user_roles);
-    } catch (const nlohmann::json::parse_error & e)
+    }
+    catch (const nlohmann::json::parse_error & e)
     {
       return request::make_bad_request_response("Invalid Discord user roles response", req);
     }
@@ -291,6 +292,7 @@ class DiscordHandler : public RequestHandler
     {
       verbose && std::cerr << "Unknown error while executing query" << std::endl;
     }
+    return false;
   }
 
   /**
@@ -309,14 +311,20 @@ class DiscordHandler : public RequestHandler
     try
     {
       pqxx::work & txn = request::begin_transaction(pool);
-      pqxx::result r = txn.exec_prepared(
-        "update_user_data",
-        user_id,
-        avatar,
-        nickname
-      );
-      txn.commit();
-      return true;
+      try
+      {
+        pqxx::result r = txn.exec_prepared(
+          "update_user_data",
+          user_id, avatar, nickname
+        );
+        txn.commit();
+        return true;
+      }
+      catch (...)
+      {
+        txn.abort();
+        throw;
+      }
     }
     catch (const std::exception & e)
     {
@@ -538,26 +546,46 @@ class DiscordHandler : public RequestHandler
       // ... make sure to check that the user is in greek learning guild ...
       validate_discord_status(user_id, true, false);
       
-      http::response<http::string_body> guild_response = verify_guild_membership(req, access_token);
-      if (guild_response.result() != http::status::ok)
+      // ... CODE BELOW CAUSES BACKEND TO CRASH DUNNO WHY I'LL FIX IT LATER ...
+      
+      /**
+      try
       {
-        if (guild_response.body().find("User not in Greek Learning guild") == std::string::npos)
+        http::response<http::string_body> guild_response = verify_guild_membership(req, access_token);
+        if (guild_response.result() != http::status::ok)
         {
-          return guild_response;
+          if (guild_response.body().find("User not in Greek Learning guild") == std::string::npos)
+          {
+            return guild_response;
+          }
+          validate_discord_status(user_id, false, false);
         }
-        validate_discord_status(user_id, false, false);
+      }
+      catch (const std::exception & e)
+      {
+        std::cerr << "Failed to verify guild membership: " << e.what() << std::endl;
+        return request::make_bad_request_response("Failed to verify guild membership", req);
       }
 
       // ... check the user's roles in the guild ...
-      http::response<http::string_body> role_response = verify_user_guild_roles(req, user_id, access_token);
-      if (role_response.result() != http::status::ok)
+      try
       {
-        if (role_response.body().find("User has no roles") == std::string::npos)
+        http::response<http::string_body> role_response = verify_user_guild_roles(req, user_id, access_token);
+        if (role_response.result() != http::status::ok)
         {
-          return role_response;
+          if (role_response.body().find("User has no roles") == std::string::npos)
+          {
+            return role_response;
+          }
+          validate_discord_status(user_id, false, false);
         }
-        validate_discord_status(user_id, false, false);
       }
+      catch (const std::exception & e)
+      {
+        std::cerr << "Failed to verify user roles: " << e.what() << std::endl;
+        return request::make_bad_request_response("Failed to verify user roles", req);
+      }
+      */
 
       // ... generate the session to log in the user ...
       std::string session_id = session::generate_session_id(false);

@@ -122,7 +122,7 @@ namespace httpclient
       // ... create the request ...
       http::request<http::string_body> req{method, target, 11};
       req.set(http::field::host, host_);
-      req.set(http::field::user_agent, "GuidedReader");
+      req.set(http::field::user_agent, "guided_reader");
 
       if (!auth_header_.empty())
       {

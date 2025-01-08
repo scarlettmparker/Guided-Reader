@@ -22,14 +22,28 @@ function validate_selection(selection: Selection | null): boolean {
 }
 
 /**
- * Save the selected text to local storage.
+ * Send a selected text event to the document. This is used for the WordReference
+ * menu to quickly look up words after selecting them. It has a debounce of 100ms.
  * 
- * @param selection Selection to save.
+ * @param selection Selection to send the event for.
  */
-function save_to_local_storage(selection: Selection): void {
-  if (selection.toString().length > 0) {
-    localStorage.setItem('last_selected_text', selection.toString().trim());
+function send_selected_text_event(selection: Selection): void {
+  let debounce_timer: NodeJS.Timeout | null = null;
+
+  if (debounce_timer) {
+    clearTimeout(debounce_timer);
   }
+
+  debounce_timer = setTimeout(() => {
+    if (selection.toString().length > 0) {
+      // ... send the selected text event to the document ...
+      const selected_text_event = new CustomEvent('selected-text', {
+        detail: selection.toString(),
+        bubbles: true
+      });
+      document.dispatchEvent(selected_text_event);
+    }
+  }, 100);
 }
 
 /**
@@ -131,7 +145,7 @@ function handle_text_selection(
   const original_range = selection!.getRangeAt(0);
   const original_selection = selection!.toString();
   adjust_selection_range(selection!, original_range, original_selection);
-  save_to_local_storage(selection!);
+  send_selected_text_event(selection!);
 
   if (selection!.toString() === text) {
     set_selected_text(null);
