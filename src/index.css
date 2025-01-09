@@ -13,3 +13,10 @@ a {
 p, h1, h2, h3, h4, h5, h6 {
   margin-top: 0;
 }
+
+hr {
+  width: 95%;
+  margin: 0.5rem auto;
+  border: none;
+  border-top: 1px solid #272121;
+}

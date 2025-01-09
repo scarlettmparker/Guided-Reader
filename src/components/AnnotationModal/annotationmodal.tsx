@@ -47,7 +47,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
   }
 
   const delete_annotated_data = (updated_data: AnnotationData[], message: string) => {
-    if (message == "Annotation deleted") {
+    if (message.toLowerCase().startsWith("annotation deleted")) {
       props.set_annotation_data(updated_data);
     }
   }

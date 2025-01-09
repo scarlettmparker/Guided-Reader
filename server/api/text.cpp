@@ -242,17 +242,17 @@ class TextHandler : public RequestHandler
 
       if (type_param.has_value() && type_param.value() == "brief")
       {
-        nlohmann::json brief_text_data = select_text_brief(text_object_id, language, true);
+        nlohmann::json brief_text_data = select_text_brief(text_object_id, language, false);
         return request::make_json_request_response(brief_text_data, req);
       }
 
       if (type_param.has_value() && type_param.value() == "annotations")
       {
-        nlohmann::json annotation_data = select_annotations(text_object_id, language, true);
+        nlohmann::json annotation_data = select_annotations(text_object_id, language, false);
         return request::make_json_request_response(annotation_data, req); 
       }
 
-      nlohmann::json text_info = select_text_data(text_object_id, language, true);
+      nlohmann::json text_info = select_text_data(text_object_id, language, false);
       if (text_info.empty())
       {
         return request::make_bad_request_response("No text found", req);
@@ -260,7 +260,7 @@ class TextHandler : public RequestHandler
       
       if (type_param.has_value() && type_param.value() == "all")
       {
-        nlohmann::json annotations = select_annotations(text_object_id, language, true);
+        nlohmann::json annotations = select_annotations(text_object_id, language, false);
         text_info[0]["annotations"] = annotations;
       }
 

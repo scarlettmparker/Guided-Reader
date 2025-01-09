@@ -66,7 +66,7 @@ class AnnotationHandler : public RequestHandler
         throw;
       }
 
-      if (r.empty())
+      if (r.empty() || r[0][0].is_null())
       {
         verbose && std::cout << "No annotations found" << std::endl;
         return annotation_info;
@@ -356,7 +356,7 @@ class AnnotationHandler : public RequestHandler
    */
   http::response<http::string_body> validate_annotation_author(const http::request<http::string_body>& req, int annotation_id, int author_id) {
     // ... validate annotation author ...
-    int real_author_id = select_author_id_by_annotation(annotation_id, true);
+    int real_author_id = select_author_id_by_annotation(annotation_id, false);
     if (real_author_id == -1)
     {
       return request::make_bad_request_response("Annotation not found", req);
@@ -373,12 +373,12 @@ class AnnotationHandler : public RequestHandler
     {
       return request::make_unauthorized_response("Session ID not found", req);
     }
-    if (!request::validate_session(std::string(session_id), true))
+    if (!request::validate_session(std::string(session_id), false))
     {
       return request::make_unauthorized_response("Invalid session ID", req);
     }
 
-    int user_id = request::get_user_id_from_session(std::string(session_id), true);
+    int user_id = request::get_user_id_from_session(std::string(session_id), false);
     if (user_id == -1)
     {
       return request::make_bad_request_response("User not found", req);
@@ -431,7 +431,7 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for text_id | start | end", req);
       }
 
-      nlohmann::json annotation_info = select_annotation_data(text_id, start, end, true);
+      nlohmann::json annotation_info = select_annotation_data(text_id, start, end, false);
       if (annotation_info.empty())
       {
         return request::make_bad_request_response("No annotations found", req);
@@ -496,7 +496,7 @@ class AnnotationHandler : public RequestHandler
         return validation_response;
       }
 
-      if (!update_annotation(annotation_id, description, true))
+      if (!update_annotation(annotation_id, description, false))
       {
         return request::make_bad_request_response("Failed to update annotation", req);
       }
@@ -553,7 +553,7 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for text_id | user_id | start | end", req);
       }
 
-      RangeOccupancies ranges = select_annotation_ranges(text_id, true);
+      RangeOccupancies ranges = select_annotation_ranges(text_id, false);
       if (!check_valid_ranges(ranges.ranges, ranges.size, start, end))
       {
         return request::make_bad_request_response("Annotation overlaps with existing annotation", req);
@@ -581,12 +581,12 @@ class AnnotationHandler : public RequestHandler
       {
         return request::make_unauthorized_response("Session ID not found", req);
       }
-      if (!request::validate_session(std::string(session_id), true))
+      if (!request::validate_session(std::string(session_id), false))
       {
         return request::make_unauthorized_response("Invalid session ID", req);
       }
 
-      if (!insert_annotation(text_id, user_id, start, end, description, true))
+      if (!insert_annotation(text_id, user_id, start, end, description, false))
       {
         return request::make_bad_request_response("Failed to insert annotation", req);
       }
@@ -635,7 +635,7 @@ class AnnotationHandler : public RequestHandler
         return validation_response;
       }
 
-      if (!delete_annotation(annotation_id, true))
+      if (!delete_annotation(annotation_id, false))
       {
         return request::make_bad_request_response("Failed to delete annotation", req);
       }

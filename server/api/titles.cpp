@@ -121,7 +121,7 @@ class TitlesHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for page | page_size | sort", req);
       }
 
-      nlohmann::json title_info = select_title_data(page, page_size, sort, true);
+      nlohmann::json title_info = select_title_data(page, page_size, sort, false);
       if (title_info.empty())
       {
         return request::make_bad_request_response("No titles found", req);

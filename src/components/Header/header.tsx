@@ -7,7 +7,7 @@ const Header: Component<HeaderProps> = (props) => {
   const [right_radius, set_right_radius] = createSignal(15);
 
   const RIGHT_COLLISION = 1550;
-  const LEFT_COLLISION = 770;
+  const LEFT_COLLISION = 780;
 
   const handle_resize = () => {
     const width = window.innerWidth;
@@ -26,9 +26,7 @@ const Header: Component<HeaderProps> = (props) => {
     });
   })
   return (
-    <div class={styles.header}
-      style={{ "border-radius": `${left_radius()}px ${right_radius()}px 0px 0px` }}
-    >
+    <div class={styles.header} style={{ "border-radius": `${left_radius()}px ${right_radius()}px 0px 0px` }}>
       {props.children}
     </div>
   )

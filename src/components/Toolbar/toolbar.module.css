@@ -46,6 +46,22 @@
   color: #CF3A5F;
 }
 
+.tooltip {
+  position: absolute;
+  width: fit-content;
+  white-space: nowrap;
+  color: white;
+  background-color: #272121;
+  border-radius: 10px;
+
+  padding: 0.3rem 0.5rem;
+  top: 2rem;
+  left: 50%;
+  font-size: 0.9rem;
+  user-select: none;
+  transform: translateX(-50%);
+}
+
 .text_size_menu,
 .wordreference_menu {
   position: relative;
@@ -55,13 +71,16 @@
   align-items: center;
 }
 
+.text_size_dropdown {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
 .text_size_dropdown,
 .wordreference_modal {
   position: absolute;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
 
   top: 2rem;
   padding: 0.4rem;
@@ -76,19 +95,28 @@
 }
 
 .wordreference_modal {
-  align-items: flex-start;
-  padding: 0.8rem 0.4rem;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.8rem 0.4rem 0.6rem 0.6rem;
   font-size: 0.9rem;
+
   width: 180px;
-  height: 220px;
+  max-height: 220px;
+  height: auto;
 }
 
 .wordreference_input {
+  font-family: 'Open Sans', sans-serif;
+  position: absolute;
+  left: 50%;
   width: 90%;
-  height: 1.5rem;
-  padding-left: 8px; /* 1/2rem */
-  color: #272121;
+  min-height: 1.5rem;
+  flex-shrink: 0;
+  transform: translateX(-50%);
 
+  padding-left: 8px; /* 1/2rem */
+  margin-bottom: 0.5rem;
+  color: #272121;
   border-radius: 10px;
   border: 1px solid #C0C0C0;
   outline: none;
@@ -96,6 +124,16 @@
 
 .wordreference_input:focus {
   border: 1px solid #CF3A5F;
+}
+
+.wordreference_answer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+
+  margin-top: 2.2rem;
+  width: 100%;
 }
 
 .text_size_dropdown {
@@ -106,4 +144,33 @@
 
 .text_size_dropdown .toolbar_button {
   border-radius: 10px;
+}
+
+.header_text {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.section_title {
+  font-weight: 500;
+}
+
+.header_divider {
+  margin-top: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.definition_text {
+  font-weight: 500;
+  color: #CF3A5F;
+}
+
+.meanings_text {
+  font-style: italic;
+  color: #696969; /* nice */
+  margin-top: 0.15rem;
+}
+
+.body_text {
+  hyphens: auto;
 }

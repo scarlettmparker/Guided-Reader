@@ -23,27 +23,26 @@ function validate_selection(selection: Selection | null): boolean {
 
 /**
  * Send a selected text event to the document. This is used for the WordReference
- * menu to quickly look up words after selecting them. It has a debounce of 100ms.
+ * menu to quickly look up words after selecting them.
  * 
  * @param selection Selection to send the event for.
  */
 function send_selected_text_event(selection: Selection): void {
-  let debounce_timer: NodeJS.Timeout | null = null;
+  const closest_div = selection.anchorNode?.parentElement?.closest('div');
+  const closest_div_id = closest_div ? closest_div.id : null;
 
-  if (debounce_timer) {
-    clearTimeout(debounce_timer);
+  if (closest_div_id !== "text_content") {
+    return;
   }
 
-  debounce_timer = setTimeout(() => {
-    if (selection.toString().length > 0) {
-      // ... send the selected text event to the document ...
-      const selected_text_event = new CustomEvent('selected-text', {
-        detail: selection.toString(),
-        bubbles: true
-      });
-      document.dispatchEvent(selected_text_event);
-    }
-  }, 100);
+  if (selection.toString().length > 0) {
+    // ... send the selected text event to the document ...
+    const selected_text_event = new CustomEvent('selected-text', {
+      detail: selection.toString(),
+      bubbles: true
+    });
+    document.dispatchEvent(selected_text_event);
+  }
 }
 
 /**
