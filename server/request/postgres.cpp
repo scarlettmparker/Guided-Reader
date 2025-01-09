@@ -282,11 +282,14 @@ namespace postgres
    */
   ConnectionPool::~ConnectionPool()
   {
+    std::lock_guard<std::mutex> lock(pool_mutex);
     while (!pool.empty())
     {
-      delete pool.front();
+      auto c = pool.front();
       pool.pop();
+      delete c;
     }
+    connection_metadata.clear();
   }
 
   /**
@@ -310,40 +313,73 @@ namespace postgres
    *
    * @return Connection from the pool.
    */
-  pqxx::connection* ConnectionPool::acquire()
+  pqxx::connection * ConnectionPool::acquire()
   {
-    pqxx::connection* c = nullptr;
+    pqxx::connection * c = nullptr;
     auto now = std::chrono::steady_clock::now();
 
     {
       std::unique_lock<std::mutex> lock(pool_mutex);
-      pool_cv.wait(lock, [this] { return !pool.empty(); });
+      bool got_connection = pool_cv.wait_for(
+        lock, std::chrono::milliseconds(ACQUIRE_TIMEOUT_MS), [this]
+        {
+          return !pool.empty();
+        }
+      );
+
+      if (!got_connection)
+      {
+        failed_acquires++;
+        throw std::runtime_error("Connection pool timeout");
+      }
+
       c = pool.front();
       pool.pop();
+      active_connections++;
     }
 
-    ConnectionMetadata & metadata = connection_metadata[c];
-    const auto connection_age = std::chrono::duration_cast<std::chrono::minutes>(
-      now - metadata.last_used).count();
-    const auto last_health_check = std::chrono::duration_cast<std::chrono::seconds>(
-      now - metadata.last_checked).count();
-
-    if (connection_age > 1 || last_health_check > 30)
+    for (int retry = 0; retry < MAX_RETRIES; retry++)
     {
-      metadata.is_healthy = validate_connection(c);
-      metadata.last_checked = now;
-      
-      if (!metadata.is_healthy)
+      // ... health check ...
+      ConnectionMetadata & metadata = connection_metadata[c];
+      const auto connection_age = std::chrono::duration_cast<std::chrono::minutes>(
+        now - metadata.last_used).count();
+      const auto last_health_check = std::chrono::duration_cast<std::chrono::seconds>(
+        now - metadata.last_checked).count();
+
+      if (connection_age > CONNECTION_LIFETIME_MIN || last_health_check > HEALTH_CHECK_INTERVAL_SEC)
       {
-        delete c;
-        c = create_new_connection();
-        connection_metadata[c] = {now, now, true};
-        return c;
+        metadata.is_healthy = validate_connection(c);
+        metadata.last_checked = now;
+        
+        if (!metadata.is_healthy)
+        {
+          delete c;
+          try
+          {
+            // ... attempt to create a new connection ...
+            c = create_new_connection();
+            connection_metadata[c] = {now, now, true};
+            return c;
+          }
+          catch (const std::exception & e)
+          {
+            if (retry == MAX_RETRIES - 1)
+            {
+              active_connections--;
+              throw;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100 * (retry + 1)));
+            continue;
+          }
+        }
       }
+      metadata.last_used = now;
+      return c;
     }
 
-    metadata.last_used = now;
-    return c;
+    active_connections--;
+    throw std::runtime_error("Failed to acquire connection");
   }
 
   /**
@@ -352,28 +388,13 @@ namespace postgres
    */
   void ConnectionPool::release(pqxx::connection* c)
   {
-    if (connection_metadata[c].is_healthy)
+    std::lock_guard<std::mutex> lock(pool_mutex);
+    if (active_connections > 0)
     {
-      std::lock_guard<std::mutex> lock(pool_mutex);
-      pool.push(c);
-      pool_cv.notify_one();
+      active_connections--;
     }
-    else
-    {
-      // ... replace unhealthy connection ...
-      delete c;
-
-      pqxx::connection* new_c = create_new_connection();
-      connection_metadata[new_c] = {
-        std::chrono::steady_clock::now(),
-        std::chrono::steady_clock::now(),
-        true
-      };
-
-      std::lock_guard<std::mutex> lock(pool_mutex);
-      pool.push(new_c);
-      pool_cv.notify_one();
-    }
+    pool.push(c);
+    pool_cv.notify_one();
   }
 
   /**
@@ -383,7 +404,7 @@ namespace postgres
   {
     if (!global_pool)
     {
-      global_pool = new ConnectionPool(5);
+      global_pool = new ConnectionPool(std::max(10u, 2 * std::thread::hardware_concurrency()));
     }
   }
 

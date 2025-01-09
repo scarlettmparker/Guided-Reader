@@ -121,7 +121,7 @@ class DiscordHandler : public RequestHandler
    */
   http::response<http::string_body> verify_guild_membership(const http::request<http::string_body> & req, const std::string & access_token)
   {
-    std::string guild_response = make_discord_guild_request(access_token, false);
+    std::string guild_response = make_discord_guild_request(access_token, true);
     if (guild_response.empty())
     {
       return request::make_bad_request_response("Failed to get Discord guild data", req);
@@ -209,7 +209,7 @@ class DiscordHandler : public RequestHandler
    */
   http::response<http::string_body> verify_user_guild_roles(const http::request<http::string_body> & req, int user_id, const std::string & access_token)
   {
-    std::string user_roles = get_user_roles(access_token, false);
+    std::string user_roles = get_user_roles(access_token, true);
     if (user_roles.empty())
     {
       return request::make_bad_request_response("Failed to get Discord user roles", req);
@@ -235,7 +235,7 @@ class DiscordHandler : public RequestHandler
     {
       return request::make_bad_request_response("User has no roles", req);
     }
-    if (!update_user_roles(user_id, roles, false))
+    if (!update_user_roles(user_id, roles, true))
     {
       return request::make_bad_request_response("Failed to update user roles", req);
     }
@@ -243,7 +243,7 @@ class DiscordHandler : public RequestHandler
     std::string avatar = get_avatar(roles_json);
     std::string nickname = get_nickname(roles_json);
 
-    if (!update_user_data(user_id, avatar, nickname, false))
+    if (!update_user_data(user_id, avatar, nickname, true))
     {
       return request::make_bad_request_response("Failed to update user data", req);
     }
@@ -515,7 +515,7 @@ class DiscordHandler : public RequestHandler
 
       // ... attempt to get token from Discord ...
       std::string code = json_request["code"].get<std::string>();
-      std::string token_response = make_discord_token_request(code, false);
+      std::string token_response = make_discord_token_request(code, true);
 
       if (token_response.empty())
       {
@@ -539,7 +539,7 @@ class DiscordHandler : public RequestHandler
       std::string token_type = token_json["token_type"].get<std::string>();
       
       // ... attempt to get user data from Discord ...
-      std::string user_data_response = get_discord_user_data(access_token, false);
+      std::string user_data_response = get_discord_user_data(access_token, true);
       if (user_data_response.empty())
       {
         return request::make_bad_request_response("Failed to get Discord user data", req);
@@ -572,7 +572,7 @@ class DiscordHandler : public RequestHandler
       }
 
       // ... check if Discord id is already linked to an account ...
-      int user_id = select_user_id_by_discord_id(discord_id, false);
+      int user_id = select_user_id_by_discord_id(discord_id, true);
       if (user_id == -1)
       {
         if (!register_with_discord(discord_id, username, avatar, true))
@@ -584,7 +584,7 @@ class DiscordHandler : public RequestHandler
 
       // ... otherwise, login user ...
       // ... make sure to check that the user is in greek learning guild ...
-      validate_discord_status(user_id, true, false);
+      validate_discord_status(user_id, true, true);
 
       try
       {
@@ -595,7 +595,7 @@ class DiscordHandler : public RequestHandler
           {
             return guild_response;
           }
-          validate_discord_status(user_id, false, false);
+          validate_discord_status(user_id, false, true);
         }
       }
       catch (const std::exception & e)
@@ -614,7 +614,7 @@ class DiscordHandler : public RequestHandler
           {
             return role_response;
           }
-          validate_discord_status(user_id, false, false);
+          validate_discord_status(user_id, false, true);
         }
       }
       catch (const std::exception & e)
@@ -628,7 +628,7 @@ class DiscordHandler : public RequestHandler
       std::string signed_session_id = session_id + "." + session::generate_hmac(session_id, READER_SECRET_KEY);
       int expires_in = std::stoi(READER_SESSION_EXPIRE_LENGTH);
       
-      if (!session::set_session_id(signed_session_id, user_id, expires_in, ip_address, false))
+      if (!session::set_session_id(signed_session_id, user_id, expires_in, ip_address, true))
       {
         return request::make_bad_request_response("Failed to set session ID", req);
       }

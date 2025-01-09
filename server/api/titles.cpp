@@ -63,7 +63,7 @@ class TitlesHandler : public RequestHandler
       }
 
       title_info = nlohmann::json::parse(r[0][0].as<std::string>());
-      redis.set(cache_key, title_info.dump(), std::chrono::seconds(3600)); // 1 hour
+      redis.set(cache_key, title_info.dump(), std::chrono::seconds(300)); // 5 minutes
     }
     catch (const std::exception &e)
     {
@@ -89,7 +89,7 @@ class TitlesHandler : public RequestHandler
     if (req.method() == http::verb::get)
     {
       /**
-       * GET text titles.
+       * GET text titles
        */
       std::optional<std::string> page_param = request::parse_from_request(req, "page");
       std::optional<std::string> page_size_param = request::parse_from_request(req, "page_size");
@@ -121,7 +121,7 @@ class TitlesHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for page | page_size | sort", req);
       }
 
-      nlohmann::json title_info = select_title_data(page, page_size, sort, false);
+      nlohmann::json title_info = select_title_data(page, page_size, sort, true);
       if (title_info.empty())
       {
         return request::make_bad_request_response("No titles found", req);

@@ -247,7 +247,7 @@ class UserHandler : public RequestHandler
    */
   bool login(std::string username, std::string password)
   {
-    std::string stored_password = select_password(username, false);
+    std::string stored_password = select_password(username, true);
     if (stored_password.empty())
     {
       return false;
@@ -277,18 +277,18 @@ class UserHandler : public RequestHandler
         return request::make_unauthorized_response("Session ID not found", req);
       }
  
-      if (!request::validate_session(std::string(session_id), false))
+      if (!request::validate_session(std::string(session_id), true))
       {
         return request::make_unauthorized_response("Invalid session ID", req);
       }
 
-      int user_id = request::get_user_id_from_session(std::string(session_id), false);
+      int user_id = request::get_user_id_from_session(std::string(session_id), true);
       if (user_id == -1)
       {
         return request::make_bad_request_response("User not found", req);
       }
 
-      UserData user_data = select_user_data_by_id(user_id, false);
+      UserData user_data = select_user_data_by_id(user_id, true);
       if (user_data.username.empty())
       {
         return request::make_bad_request_response("User not found", req);
@@ -340,7 +340,7 @@ class UserHandler : public RequestHandler
 
       std::string session_id = session::generate_session_id(false);
       std::string signed_session_id = session_id + "." + session::generate_hmac(session_id, READER_SECRET_KEY);
-      int user_id = select_user_id(username, false);
+      int user_id = select_user_id(username, true);
 
       if (user_id == -1)
       {
@@ -348,7 +348,7 @@ class UserHandler : public RequestHandler
       }
 
       int expires_in = std::stoi(READER_SESSION_EXPIRE_LENGTH);
-      if (!session::set_session_id(signed_session_id, user_id, expires_in, ip_address, false))
+      if (!session::set_session_id(signed_session_id, user_id, expires_in, ip_address, true))
       {
         return request::make_bad_request_response("Failed to set session ID", req);
       }
@@ -383,7 +383,7 @@ class UserHandler : public RequestHandler
       std::string username = json_request["username"].get<std::string>();
       std::string password = json_request["password"].get<std::string>();
 
-      if (select_user_id(username, false) != -1)
+      if (select_user_id(username, true) != -1)
       {
         return request::make_bad_request_response("Username taken", req);
       }
@@ -394,7 +394,7 @@ class UserHandler : public RequestHandler
         return request::make_bad_request_response("Failed to hash password", req);
       }
 
-      if (!register_user(username, hashed_password, false))
+      if (!register_user(username, hashed_password, true))
       {
         return request::make_bad_request_response("Failed to register user", req);
       }

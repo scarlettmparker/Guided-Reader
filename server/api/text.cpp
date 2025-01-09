@@ -88,7 +88,7 @@ class TextHandler : public RequestHandler
   {
     nlohmann::json text_data = nlohmann::json::array();
     std::string cache_key = "text:" + std::to_string(text_object_id) + ":" + language;
-    sw::redis::Redis& redis = Redis::get_instance();
+    sw::redis::Redis & redis = Redis::get_instance();
 
     try
     {
@@ -148,7 +148,7 @@ class TextHandler : public RequestHandler
   {
     nlohmann::json text_data = nlohmann::json::array();
     std::string cache_key = "text:" + std::to_string(text_object_id) + ":" + language + ":brief";
-    sw::redis::Redis& redis = Redis::get_instance();
+    sw::redis::Redis & redis = Redis::get_instance();
 
     try
     {
@@ -242,17 +242,17 @@ class TextHandler : public RequestHandler
 
       if (type_param.has_value() && type_param.value() == "brief")
       {
-        nlohmann::json brief_text_data = select_text_brief(text_object_id, language, false);
+        nlohmann::json brief_text_data = select_text_brief(text_object_id, language, true);
         return request::make_json_request_response(brief_text_data, req);
       }
 
       if (type_param.has_value() && type_param.value() == "annotations")
       {
-        nlohmann::json annotation_data = select_annotations(text_object_id, language, false);
+        nlohmann::json annotation_data = select_annotations(text_object_id, language, true);
         return request::make_json_request_response(annotation_data, req); 
       }
 
-      nlohmann::json text_info = select_text_data(text_object_id, language, false);
+      nlohmann::json text_info = select_text_data(text_object_id, language, true);
       if (text_info.empty())
       {
         return request::make_bad_request_response("No text found", req);
@@ -260,7 +260,7 @@ class TextHandler : public RequestHandler
       
       if (type_param.has_value() && type_param.value() == "all")
       {
-        nlohmann::json annotations = select_annotations(text_object_id, language, false);
+        nlohmann::json annotations = select_annotations(text_object_id, language, true);
         text_info[0]["annotations"] = annotations;
       }
 

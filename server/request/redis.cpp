@@ -13,6 +13,8 @@ void Redis::init_connection()
     sw::redis::ConnectionOptions connection_opts;
     connection_opts.host = READER_REDIS_HOST;
     connection_opts.port = std::stoi(READER_REDIS_PORT);
+    connection_opts.keep_alive = true;
+    connection_opts.connect_timeout = std::chrono::seconds(5);
 
     sw::redis::ConnectionPoolOptions pool_opts;
     pool_opts.size = 10;

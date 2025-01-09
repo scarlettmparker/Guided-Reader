@@ -72,11 +72,22 @@ namespace server
   }
 
   SSLSession::SSLSession(tcp::socket socket, ssl::context & ctx)
-    : stream_(std::move(socket), ctx) { }
+    : stream_(std::move(socket), ctx)
+    , timer_(stream_.get_executor()) { }
 
   void SSLSession::run()
   {
     do_handshake();
+  }
+  
+  void SSLSession::cancel_timer()
+  {
+    if (!timer_cancelled_)
+    {
+      beast::error_code ec;
+      timer_.cancel(ec);
+      timer_cancelled_ = true;
+    }
   }
 
   /**
@@ -85,13 +96,25 @@ namespace server
   void SSLSession::do_handshake()
   {
     auto self = shared_from_this();
-
+    
+    // ... handshake timeout ...
+    timer_.expires_after(std::chrono::seconds(HANDSHAKE_TIMEOUT_SECONDS));
+    timer_.async_wait([self](beast::error_code ec)
+    {
+      if (!ec) self->stream_.next_layer().close();
+    });
+    
     stream_.async_handshake(ssl::stream_base::server,
       [this, self](beast::error_code ec)
       {
         if (!ec)
         {
           do_read();
+        }
+        else 
+        {
+          std::cerr << "Handshake error: " << ec.message() << std::endl;
+          do_close();
         }
       });
   }
@@ -101,8 +124,26 @@ namespace server
    */
   void SSLSession::do_read()
   {
+    if (state_ == State::CLOSING || state_ == State::CLOSED)
+    {
+      return;
+    }
+
     auto self = shared_from_this();
-    
+    state_ = State::READING;
+    timer_cancelled_ = false;
+
+    // ... read timeout ...
+    timer_.expires_after(std::chrono::seconds(READ_TIMEOUT_SECONDS));
+    timer_.async_wait([self](beast::error_code ec)
+    {
+      if (!ec)
+      {
+        self->state_ = State::CLOSING;
+        self->stream_.next_layer().close();
+      }
+    });
+
     buffer_.consume(buffer_.size());
     req_ = {};
     
@@ -115,20 +156,37 @@ namespace server
     http::async_read(stream_, buffer_, req_,
       [this, self](beast::error_code ec, std::size_t bytes_transferred)
       {
-        if (ec == http::error::end_of_stream)
+        cancel_timer();
+
+        if (state_ == State::CLOSING)
         {
-          // ... connection closed correctly ...
+          return;
+        }
+
+        if (ec == http::error::end_of_stream || ec == net::error::operation_aborted)
+        {
+          // ... client closed connection ...
           return do_close();
         }
         
         if (ec)
         {
+          std::cerr << "Read error: " << ec.message() << std::endl;
           return do_close();
         }
 
-        auto ip_address = stream_.next_layer().remote_endpoint().address();
-        auto res = handle_request(req_, ip_address.to_string());
-        do_write(std::move(res));
+        try 
+        {
+          auto ip_address = stream_.next_layer().remote_endpoint().address();
+          auto res = handle_request(req_, ip_address.to_string());
+          state_ = State::WRITING;
+          do_write(std::move(res));
+        }
+        catch(const std::exception& e)
+        {
+          std::cerr << "Request handling error: " << e.what() << std::endl;
+          do_close();
+        }
       });
   }
 
@@ -138,23 +196,51 @@ namespace server
    */
   void SSLSession::do_write(http::response<http::string_body> res)
   {
+    if (state_ == State::CLOSING || state_ == State::CLOSED)
+    {
+      return;
+    }
+
     auto self = shared_from_this();
+    timer_cancelled_ = false;
 
-    
-    auto sp = std::make_shared<http::response<http::string_body>>(std::move(res));
-
-    http::async_write(stream_, *sp,
-    [this, self, sp](beast::error_code ec, std::size_t bytes_transferred)
+    // ... write timeout ...
+    timer_.expires_after(std::chrono::seconds(WRITE_TIMEOUT_SECONDS));
+    timer_.async_wait([self](beast::error_code ec)
     {
       if (!ec)
       {
-        do_read();
-      }
-      else
-      {
-        do_close();
+        self->state_ = State::CLOSING;
+        self->stream_.next_layer().close();
       }
     });
+
+    auto sp = std::make_shared<http::response<http::string_body>>(std::move(res));
+
+    http::async_write(stream_, *sp,
+      [this, self, sp](beast::error_code ec, std::size_t)
+      {
+        cancel_timer();
+
+        if (state_ == State::CLOSING)
+        {
+          return;
+        }
+
+        if (ec == net::error::operation_aborted)
+        {
+          return do_close();
+        }
+
+        if (ec)
+        {
+          std::cerr << "Write error: " << ec.message() << std::endl;
+          return do_close();
+        }
+
+        state_ = State::READING;
+        do_read();
+      });
   }
 
   /**
@@ -162,14 +248,28 @@ namespace server
    */
   void SSLSession::do_close()
   {
+    if (state_ == State::CLOSED)
+    {
+      return;
+    }
+
+    state_ = State::CLOSING;
+    cancel_timer();
+
     auto self = shared_from_this();
+
     stream_.async_shutdown(
     [this, self](beast::error_code ec)
     {
-      if (ec == net::error::eof)
+      if (ec && ec != net::error::eof && ec != net::error::operation_aborted && ec != beast::error::timeout)
       {
-        ec = {};
+        std::cerr << "Shutdown error: " << ec.message() << std::endl;
       }
+
+      beast::error_code err;
+      stream_.next_layer().shutdown(tcp::socket::shutdown_both, err);
+      stream_.next_layer().close(err);
+      state_ = State::CLOSED;
     });
   }
 

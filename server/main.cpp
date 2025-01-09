@@ -10,7 +10,9 @@ int main()
     auto const address = net::ip::make_address("0.0.0.0");
     unsigned short port = 443;
 
-    net::io_context ioc{1};
+    net::io_context ioc;
+    std::vector<std::thread> threads;
+
     auto listener = std::make_shared<server::Listener>(ioc, tcp::endpoint{address, port});
 
     /**
@@ -24,7 +26,16 @@ int main()
     Redis::init_connection();
     
     std::cout << "Server started on " << address << ":" << port << std::endl;
-    ioc.run();
+    
+    for (std::size_t i = 0; i < std::thread::hardware_concurrency(); ++i)
+    {
+      threads.emplace_back([&ioc] { ioc.run(); });
+    }
+
+    for (auto & t : threads)
+    {
+      t.join();
+    }
   }
   catch (const std::exception& e)
   {

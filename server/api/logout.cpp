@@ -21,7 +21,7 @@ class LogoutHandler : public RequestHandler
       {
         return request::make_unauthorized_response("Invalid or expired session", req);
       }
-      if (!request::invalidate_session(std::string(session_id), false))
+      if (!request::invalidate_session(std::string(session_id), true))
       {
         return request::make_bad_request_response("Failed to invalidate session", req);
       }

@@ -227,7 +227,7 @@ class VoteHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for annotation_id", req);
       }
 
-      nlohmann::json vote_info = select_interaction_data(annotation_id, false);
+      nlohmann::json vote_info = select_interaction_data(annotation_id, true);
       if (vote_info.empty())
       {
         return request::make_ok_request_response("No interactions found", req);
@@ -283,12 +283,12 @@ class VoteHandler : public RequestHandler
       {
         return request::make_unauthorized_response("Session ID not found", req);
       }
-      if (!request::validate_session(std::string(session_id), false))
+      if (!request::validate_session(std::string(session_id), true))
       {
         return request::make_unauthorized_response("Invalid session ID", req);
       }
 
-      int real_user_id = request::get_user_id_from_session(std::string(session_id), false);
+      int real_user_id = request::get_user_id_from_session(std::string(session_id), true);
       if (real_user_id == -1)
       {
         return request::make_bad_request_response("User not found", req);
@@ -298,20 +298,20 @@ class VoteHandler : public RequestHandler
         return request::make_bad_request_response("User ID mismatch. This incident has been reported", req);
       }
 
-      std::string interaction_type = select_annotation_interaction_type(annotation_id, user_id, false);
+      std::string interaction_type = select_annotation_interaction_type(annotation_id, user_id, true);
       std::string new_interaction_type = interaction == 1 ? "LIKE" : "DISLIKE";
 
       if (interaction_type.empty())
       {
         // ... insert the Interaction ...
-        if (!insert_interaction(annotation_id, user_id, new_interaction_type, false))
+        if (!insert_interaction(annotation_id, user_id, new_interaction_type, true))
         {
           return request::make_bad_request_response("Failed to insert interaction", req);
         }
         return request::make_ok_request_response("Interaction inserted", req);
       }
 
-      if (!delete_interaction(annotation_id, user_id, false))
+      if (!delete_interaction(annotation_id, user_id, true))
       {
         return request::make_bad_request_response("Failed to delete interaction", req);
       }
@@ -321,7 +321,7 @@ class VoteHandler : public RequestHandler
       }
       
       // ... insert the Interaction ...
-      if (!insert_interaction(annotation_id, user_id, new_interaction_type, false))
+      if (!insert_interaction(annotation_id, user_id, new_interaction_type, true))
       {
         return request::make_bad_request_response("Failed to insert interaction", req);
       }

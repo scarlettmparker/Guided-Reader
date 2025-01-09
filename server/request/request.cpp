@@ -13,24 +13,17 @@ namespace request
    * @param pool Connection pool to get a connection from.
    * @return Transaction object for the database.
    */
-  pqxx::work & begin_transaction(postgres::ConnectionPool & pool) {
-    auto start = std::chrono::steady_clock::now();
+  pqxx::work & begin_transaction(postgres::ConnectionPool & pool)
+  {
+    static thread_local std::unique_ptr<pqxx::work> current_txn;
     
-    if (cached_connection && !cached_connection->is_open()) {
-      cached_connection.reset();
-    }
-
-    if (!cached_connection || 
-      std::chrono::duration_cast<std::chrono::minutes>(start - last_used).count() > 1)
+    std::shared_ptr<pqxx::connection> conn(pool.acquire(), [&pool](pqxx::connection* c)
     {
-      cached_connection.reset(pool.acquire(), [&pool](pqxx::connection* c) {
-        pool.release(c);
-      });
-      last_used = start;  
-    }
+      pool.release(c);
+    });
 
-    current_txn = std::make_unique<pqxx::work>(*cached_connection);
-    return *current_txn;
+    current_txn = std::make_unique<pqxx::work>(*conn);
+    return * current_txn;
   }
 
   /**
