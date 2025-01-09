@@ -89,7 +89,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
 
   return (
     <div class={styles.annotation_modal}>
-      <AnnotationModalHeader title="Create Annotation" current_annotation_id={props.current_annotation_id}
+      <AnnotationModalHeader type={1} title="Create Annotation" current_annotation_id={props.current_annotation_id}
         set_current_annotation_id={props.set_current_annotation_id} />
       {!preview() && <span class={styles.selected_text}>{props.new_selected_data()!.text.text}</span>}
       <div class={styles.annotation_modal_content}>

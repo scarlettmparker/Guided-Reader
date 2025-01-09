@@ -71,7 +71,7 @@ const AnnotationItem: Component<AnnotationItemProps> = ({ annotation, editing })
       <div class={styles.annotation_item_header}>
         <AnnotationProfile username={annotation.author.username} discord_id={annotation.author.discord_id}
           avatar={annotation.author.avatar} editing={editing} />
-        <span>{calculate_time_ago(annotation.created_at)}</span>
+        <span class={styles.annotation_item_time}>{calculate_time_ago(annotation.created_at)}</span>
       </div>
       <div class={styles.annotation_item_description} innerHTML={html_content()}>
       </div>

@@ -15,19 +15,35 @@
   transform: translateY(-50%);
 
   padding: 20px;
-  width: 480px;
+  width: calc(100% - 40px);
+  max-width: 480px;
   height: 600px;
 
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
   border-radius: 20px 0 0 20px;
   background-color: #f2f2f2;
   border: 1px solid #e0e0e0;
+
+  @media (max-height: 780px) {
+    top: 4.3rem;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 475px) {
+    width: calc(100% - 20px);
+    padding: 20px 10px;
+  }
 }
 
 .annotation_modal_header {
   left: 0;
-  top: 20px;
+  top: 22px;
   position: absolute;
+
+  @media (max-width: 475px) {
+    position: relative;
+    top: 0;
+  }
 }
 
 .annotation_header {
@@ -38,6 +54,10 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+
+  @media (max-width: 475px) {
+    width: calc(100% - 20px);
+  }
 }
 
 .header_text {
@@ -79,6 +99,10 @@
 .info_button {
   border: 1px solid #C0C0C0;
   color: #272121;
+
+  @media (max-width: 475px) {
+    display: none;
+  }
 }
 
 .info_button:hover {

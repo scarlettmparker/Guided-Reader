@@ -45,7 +45,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
 
   return (
     <div class={styles.annotation_modal}>
-      <AnnotationModalHeader title="Edit Annotation" set_current_annotation_data={props.set_current_annotation_data} />
+      <AnnotationModalHeader type={1} title="Edit Annotation" set_current_annotation_data={props.set_current_annotation_data} />
       <div class={styles.annotation_modal_content}>
         {!preview() ?
           <textarea rows={12} class={styles.annotation_textarea}

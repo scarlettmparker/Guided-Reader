@@ -127,7 +127,7 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
   return (
     <div class={styles.annotation_modal}>
       <div class={styles.annotation_header}>
-        <AnnotationModalHeader style={styles.annotation_modal_header} title="Annotations" set_current_annotation_id={props.set_current_annotation} />
+        <AnnotationModalHeader type={0} style={styles.annotation_modal_header} title="Annotations" set_current_annotation_id={props.set_current_annotation} />
         {verified_annotations().length > 0 && unverified_annotations().length > 0 &&
           <div class={styles.verified_header}>
             <button class={styles.verified_button} onclick={() => set_show_verified_annotations(!show_verified_annotations())}>

@@ -9,6 +9,16 @@
 .header_text {
   font-weight: 700;
   font-size: 1.2rem;
+
+  @media (max-width: 375px) {
+    font-size: 1rem;
+  }
+}
+
+.header_text_media {
+  @media (max-width: 475px) {
+    margin-right: auto;
+  }
 }
 
 .close {
@@ -20,6 +30,14 @@
   padding: 10px 20px;
   font-size: 0.9rem;
   transition: transform 1s;
+}
+
+.close_media {
+  @media (max-width: 475px) {
+    position: relative;
+    margin-right: auto;
+    left: -20px;
+  }
 }
 
 .close:hover {

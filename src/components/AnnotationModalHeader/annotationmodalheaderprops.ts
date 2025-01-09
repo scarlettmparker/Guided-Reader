@@ -3,6 +3,7 @@ import { AnnotationData } from "~/utils/types";
 
 interface AnnotationModalHeaderProps {
   style?: string,
+  type: number,
   title: string,
   current_annotation_id?: Accessor<number>,
   set_current_annotation_id?: (id: number) => void
