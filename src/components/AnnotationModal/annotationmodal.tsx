@@ -6,6 +6,7 @@ import AnnotationModalProps from "./annotationmodalprops";
 import AnnotationItem from "../AnnotationItem";
 import AnnotationModalHeader from "../AnnotationModalHeader";
 import styles from "./annotationmodal.module.css";
+import { useUser } from "~/usercontext";
 
 /**
  * Component for displaying an annotation modal. This modal will display the annotation data.
@@ -20,6 +21,8 @@ import styles from "./annotationmodal.module.css";
  * @returns JSX Element for the annotation modal.
  */
 const AnnotationModal: Component<AnnotationModalProps> = (props) => {
+  const {user_id} = useUser();
+
   // ... filtered by discord verified accounts ...
   const [verified_annotations, set_verified_annotations] = createSignal<AnnotationData[]>([]);
   const [unverified_annotations, set_unverified_annotations] = createSignal<AnnotationData[]>([]);
@@ -39,11 +42,15 @@ const AnnotationModal: Component<AnnotationModalProps> = (props) => {
 
   // ... set mock selected data for new annotations ...
   const set_new_annotation = () => {
-    props.set_new_selected_data(new_selected_data());
-    const annotation_id = first_non_null_annotation()?.id ?? 0;
-    props.set_current_annotation(parseInt(`-10${annotation_id}`)); // -10 is the edit key
+    if (user_id() == -1) {
+      window.location.href = "/login";
+    } else {
+      props.set_new_selected_data(new_selected_data());
+      const annotation_id = first_non_null_annotation()?.id ?? 0;
+      props.set_current_annotation(parseInt(`-10${annotation_id}`)); // -10 is the edit key
 
-    /* TODO: Cache the annotation data to prevent an extra API call when returning to annotation modal */
+      /* TODO: Cache the annotation data to prevent an extra API call when returning to annotation modal */
+    }
   }
 
   const delete_annotated_data = (updated_data: AnnotationData[], message: string) => {

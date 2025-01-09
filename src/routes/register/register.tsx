@@ -1,20 +1,20 @@
 import { Title } from "@solidjs/meta";
 import { Component, createEffect } from "solid-js";
-import LoginForm from "~/components/LoginForm";
+import RegisterForm from "~/components/RegisterForm";
 
-const Login: Component = () => {
+const Register: Component = () => {
   createEffect(() => {
     if (localStorage.getItem("logged_in") == "true") {
       window.location.href = "/";
     }
-  })
+  });
 
   return (
     <>
-      <Title>Reader | Login</Title>
-      <LoginForm />
+      <Title>Reader | Register</Title>
+      <RegisterForm />
     </>
-  );
+  )
 }
 
-export default Login;
+export default Register;

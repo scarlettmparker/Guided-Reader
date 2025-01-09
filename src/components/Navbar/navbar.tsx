@@ -39,12 +39,56 @@ export function build_avatar_string(discord_id: string, avatar: string): string 
 }
 
 /**
- * Navbar component that displays the login button and a hide button.
- * Displays on every page.
+ * Navbar wrapper component, this is what decides if the navbar should be rendered or not.
+ * It checks the current path and if it is a hidden route, the navbar will not be rendered.
  * 
  * @returns JSX element of the Navbar.
  */
 const Navbar: Component = () => {
+  const HIDDEN_ROUTES = ["/auth_discord", "/login", "/logout", "/register"];
+  const [current_path, set_current_path] = createSignal(window.location.pathname);
+
+  const handle_location_change = () => {
+    set_current_path(window.location.pathname);
+  }
+
+  createEffect(() => {
+    window.addEventListener('popstate', handle_location_change);
+    const original_push_state = history.pushState;
+    const original_replace_state = history.replaceState;
+
+    // ... handle location change on push and replace state ...
+    history.pushState = function (data: any, unused: string, url?: string | URL | null) {
+      original_push_state.apply(history, [data, unused, url]);
+      handle_location_change();
+    }
+
+    history.replaceState = function (data: any, unused: string, url?: string | URL | null) {
+      original_replace_state.apply(history, [data, unused, url]);
+      handle_location_change();
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handle_location_change);
+      history.pushState = original_push_state;
+      history.replaceState = original_replace_state;
+    }
+  })
+
+  return (
+    <Show when={!HIDDEN_ROUTES.includes(current_path())}>
+      <NavbarContent />
+    </Show>
+  )
+}
+
+/**
+ * Navbar component that displays the login button and a hide button.
+ * Displays on every page conditionally based on the page routing.
+ * 
+ * @returns JSX element of the Navbar.
+ */
+const NavbarContent: Component = () => {
   const { username, set_username, avatar, discord_id } = useUser();
   const [avatar_url, set_avatar_url] = createSignal("-1");
   const [nav_hidden, set_nav_hidden] = createSignal(false);
@@ -85,6 +129,13 @@ const Navbar: Component = () => {
   )
 }
 
+/**
+ * Login Navbar component that displays the login button and a hide button.
+ * This is used either for when the user has not logged in or when the user
+ * data has not yet been fetched.
+ * 
+ * @returns JSX element of the Login Navbar.
+ */
 const LoginNavbar: Component = () => {
   const [nav_hidden, set_nav_hidden] = createSignal(false);
 

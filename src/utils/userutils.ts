@@ -7,7 +7,7 @@ export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, 
 
 /**
  * Get the user data from the session.
- * @returns UserData object.
+ * @return UserData object.
  */
 function get_cached_user_data(CACHE_DURATION: number, CACHE_KEY: string): UserData | null {
   const cached_data = localStorage.getItem(CACHE_KEY);
@@ -26,7 +26,7 @@ function get_cached_user_data(CACHE_DURATION: number, CACHE_KEY: string): UserDa
  * Fetch the user data from the server.
  * This function sends a GET request to the server to get the user data.
  * @param CACHE_KEY Cache key to store the user data.
- * @returns UserData object.
+ * @return UserData object.
  */
 async function fetch_user_data(CACHE_KEY: string): Promise<UserData | null> {
   const REQUEST_TIMEOUT = 1000;
@@ -84,7 +84,7 @@ async function fetch_user_data(CACHE_KEY: string): Promise<UserData | null> {
  * 
  * @param CACHE_DURATION Duration to cache the user data.
  * @param CACHE_KEY Cache key to store the user data.
- * @returns UserData object containing username and user ID.
+ * @return UserData object containing username and user ID.
  */
 export async function get_user_data_from_session(CACHE_DURATION: number, CACHE_KEY: string): Promise<UserData> {
   const cached_data = get_cached_user_data(CACHE_DURATION, CACHE_KEY);
@@ -100,7 +100,7 @@ export async function get_user_data_from_session(CACHE_DURATION: number, CACHE_K
  * Logs in the user with the given Discord code from the OAuth2 flow.
  * 
  * @param code Discord code from the OAuth2 flow.
- * @returns True if the login is successful, false otherwise.
+ * @return True if the login is successful, false otherwise.
  */
 export async function discord_login(code: string): Promise<boolean> {
   const fetch_options: RequestInit = {
@@ -134,7 +134,7 @@ export async function discord_login(code: string): Promise<boolean> {
  * @param username Username of the user.
  * @param password Password of the user.
  * @param set_error Function to set the error message.
- * @returns Redirects to the home page if the login is successful.
+ * @return Redirects to the home page if the login is successful.
  */
 export async function login(username: string, password: string, set_error: (error: string) => void) {
   const fetch_options: RequestInit = {
@@ -163,11 +163,48 @@ export async function login(username: string, password: string, set_error: (erro
 }
 
 /**
+ * Registers a new user with the given username, email, and password.
+ * 
+ * @param username Username of the user.
+ * @param email Email of the user.
+ * @param password Password of the user.
+ * @param set_error Function to set the error message.
+ * @return true if the registration is successful, false otherwise.
+ */
+export async function register_user(
+  username: string, email: string, password: string, set_error: (error: string) => void
+): Promise<boolean> {
+  const fetch_options: RequestInit = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      username: username, email: email, password: password
+    })
+  }
+
+  const response = await fetch(`/api/user`, {
+    ...fetch_options
+  });
+
+  const data = await response.json();
+  if (data.status == 'ok') {
+    return true;
+  } else {
+    set_error(data.message);
+  }
+  return false;
+}
+
+/**
  * Logs out the user.
  * 
  * @param CACHE_KEY Cache key to store the user data.
  * @param user_id User ID of the user.
- * @returns Redirects to the home page if the logout is successful.
+ * @return true if the logout is successful, false otherwise.
  */
 export async function logout(CACHE_KEY: string) {
   try {

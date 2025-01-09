@@ -19,6 +19,46 @@ class UserHandler : public RequestHandler
     std::string nickname;
   };
 
+
+  /**
+   * Helper function to validate an email input. Does not use regex as usually
+   * thhat's far too restrictive of an approach (and slow for the back-end).
+   *
+   * @param email Email to validate.
+   * @return true if the email is valid, false otherwise.
+   */
+  bool validate_email(std::string email)
+  {
+    if (email.empty()) return false;
+    if (email.length() <= 2) return false;
+
+    size_t at_pos = email.find('@');
+    if (at_pos == std::string::npos) return false;
+    std::string domain = email.substr(at_pos + 1);
+    size_t dot_pos = domain.find('.');
+    size_t dot_count = std::count(domain.begin(), domain.end(), '.');
+
+    if (dot_pos == std::string::npos || dot_pos < 2 || dot_count > 2) {
+      return false;
+    }
+
+    std::vector<std::string> dot_splits;
+    std::istringstream iss(domain);
+    std::string token;
+
+    while (std::getline(iss, token, '.')) {
+      dot_splits.push_back(token);
+    }
+
+    for (const auto& part : dot_splits) {
+      if (part.empty()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   /**
    * Select the ID of a user by username.
    * @param username Username of the user to select.
@@ -53,11 +93,59 @@ class UserHandler : public RequestHandler
     catch (const std::exception &e)
     {
       verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
-    } catch (...)
+    }
+    catch (...)
     {
       verbose && std::cerr << "Unknown error while executing query" << std::endl;
     }
     return -1;
+  }
+
+  /**
+   * Select the email of a user by email. Used to validate if an email is taken or not.
+   *
+   * @param email Email of the user to select.
+   * @param verbose Whether to print messages to stdout.
+   * @return Email of the user if found, empty string otherwise.
+   */
+  std::string select_email(std::string email, bool verbose)
+  {
+    try
+    {
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "select_email", email
+      );
+
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
+
+      if (r.empty())
+      {
+        verbose && std::cout << "Email " << email << " not found" << std::endl;
+        return "";
+      }
+
+      return r[0][0].c_str();
+    }
+    catch (const std::exception & e)
+    {
+      verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
+      return "";
+    }
+    catch (...)
+    {
+      verbose && std::cerr << "Unknown error while executing query" << std::endl;
+      return "";
+    }
+    return "";
   }
 
   /**
@@ -203,7 +291,7 @@ class UserHandler : public RequestHandler
    * @param verbose Whether to print messages to stdout.
    * @return true if the user was registered, false otherwise.
    */
-  bool register_user(std::string username, std::string hashed_password, bool verbose)
+  bool register_user(std::string username, std::string email, std::string hashed_password, bool verbose)
   {
     try
     {
@@ -211,7 +299,7 @@ class UserHandler : public RequestHandler
       pqxx::work & txn = request::begin_transaction(pool);
       pqxx::result r = txn.exec_prepared(
         "insert_user",
-        username, hashed_password, current_time
+        username, email, hashed_password, current_time
       );
       try
       {
@@ -370,22 +458,37 @@ class UserHandler : public RequestHandler
         return request::make_bad_request_response("Invalid JSON", req);
       }
 
-      if (!json_request.contains("username") || !json_request.contains("password"))
+      if (!json_request.contains("username") || !json_request.contains("password") || !json_request.contains("email"))
       {
-        return request::make_bad_request_response("Missing username or password", req);
+        return request::make_bad_request_response("Please fill in all fields", req);
       }
 
-      if (!json_request["username"].is_string() || !json_request["password"].is_string())
+      if (!json_request["username"].is_string() || !json_request["password"].is_string() || !json_request["email"].is_string())
       {
-        return request::make_bad_request_response("Invalid username or password", req);
+        return request::make_bad_request_response("Invalid input", req);
       }
 
       std::string username = json_request["username"].get<std::string>();
       std::string password = json_request["password"].get<std::string>();
+      std::string email = json_request["email"].get<std::string>();
+
+      // ... validate all the inputs ...
+      if (!validate_email(email))
+      {
+        return request::make_bad_request_response("Invalid email", req);
+      }
+      if (password.length() < 8)
+      {
+        return request::make_bad_request_response("Password too short", req);
+      }
 
       if (select_user_id(username, false) != -1)
       {
         return request::make_bad_request_response("Username taken", req);
+      }
+      if (!select_email(email, false).empty())
+      {
+        return request::make_bad_request_response("Email taken", req);
       }
 
       std::string hashed_password = BCrypt::generateHash(password);
@@ -394,7 +497,7 @@ class UserHandler : public RequestHandler
         return request::make_bad_request_response("Failed to hash password", req);
       }
 
-      if (!register_user(username, hashed_password, false))
+      if (!register_user(username, email, hashed_password, false))
       {
         return request::make_bad_request_response("Failed to register user", req);
       }

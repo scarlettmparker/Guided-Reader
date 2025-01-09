@@ -35,7 +35,7 @@ const LoginForm: Component = () => {
     <>
       <div class={styles.login_container}>
         <span class={styles.welcome_text}>Welcome back!</span>
-        <span class={styles.body_text}>Enter your details below to login to your account.</span>
+        <span class={styles.body_text}>Login with your details below.</span>
         <div class={styles.login_form}>
           <input class={`${styles.input_text} ${styles.input_form}`} placeholder="Username"
             value={username()} oninput={(e) => set_username(e.target.value)} />
@@ -59,6 +59,9 @@ const LoginForm: Component = () => {
           <img src={`${icon_path}/discord.png`} class={styles.discord_icon}
             width={EYE_SIZE} height={EYE_SIZE} draggable={false} />
           <a class={styles.highlight_text} href={DISCORD_REDIRECT}>Authenticate with Discord</a>
+        </span>
+        <span class={`${styles.body_text} ${styles.register_text}`}>
+          or <a class={styles.highlight_text} href={"/register"}>Register an account</a>
         </span>
       </div>
     </>

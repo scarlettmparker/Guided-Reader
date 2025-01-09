@@ -111,6 +111,12 @@ namespace postgres
       "WHERE username = $1 "
       "LIMIT 1");
 
+    txn.conn().prepare("select_email",
+      "SELECT email "
+      "FROM public.\"User\" "
+      "WHERE email = $1 "
+      "LIMIT 1");
+
     txn.conn().prepare("select_user_data_by_id",
       "SELECT username, discord_id, avatar, nickname "
       "FROM public.\"User\" "
@@ -131,10 +137,10 @@ namespace postgres
 
     txn.conn().prepare("insert_user",
       "INSERT INTO public.\"User\" ("
-      "username, password, levels, discord_id, account_creation_date, "
+      "username, email, password, levels, discord_id, account_creation_date, "
       "avatar, nickname"
       ") VALUES ("
-      "$1, $2, '{-1}', '-1', $3, '-1', $1"
+      "$1, $2, $3, '{-1}', '-1', $4, '-1', $1"
       ")");
 
     // ... discord user queries ...

@@ -51,8 +51,8 @@
   @media (max-height: 780px) and (min-width: 550px) {
     height: auto;
   }
-
-  @media (max-height: 560px) {
+  
+  @media (max-height: 605px) {
     top: 0;
     transform: translate(-50%, 0);
   }
@@ -72,8 +72,8 @@
 .input_form {
   position: relative;
   height: 52px;
-  width: calc(100% - 20px);
-  padding-left: 20px;
+  width: calc(100% - 40px);
+  padding: 0 20px;
   border-radius: 20px;
 
   /* background and outline */
@@ -83,13 +83,22 @@
 
   @media (max-width: 550px) {
     height: 42px;
+    padding: 0 15px;
+    width: calc(100% - 30px);
   }
+}
+
+.password_form_wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .password_form {
   position: relative;
   margin-top: 1em;
-  margin-bottom: 1em;
 }
 
 .show_password {
@@ -98,6 +107,10 @@
   right: 1rem;
   position: absolute;
   transform: translateY(-50%);
+
+  @media (max-width: 550px) {
+    right: 0.75rem;
+  }
 }
 
 .password_button {
@@ -121,7 +134,7 @@
   margin: auto;
 
   margin-bottom: 0.75em;
-  margin-top: 0.75em;
+  margin-top: 0.5em;
   width: 90%;
   height: 62px;
 
@@ -151,7 +164,13 @@
 }
 
 .login_form {
+  display: flex;
+  flex-direction: column;
   margin-top: 1.75em;
+  gap: 1rem;
+  @media (max-width: 550px) {
+    margin-top: 1.75em;
+  }
 }
 
 .input_text,
@@ -161,9 +180,16 @@
   font-weight: 300;
   color: rgba(81, 69, 68, 0.6);
   user-select: none;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 
   @media (max-width: 550px) {
     font-size: 1.1rem;
+  }
+
+  @media (max-width: 485px) {
+    font-size: 0.9rem;
   }
 }
 
@@ -182,15 +208,11 @@
 
 .forgot_form {
   position: relative;
-  margin-bottom: 1.5em;
+  margin-top: 1em;
   width: 100%;
-
-  @media (max-width: 625px) {
-    display: flex;
-    flex-direction: column-reverse;
-    margin-bottom: 0.5em;
-    align-items: center;
-  }
+  display: flex;
+  flex-direction: column-reverse;
+  margin-bottom: 0.5em;
 }
 
 .forgot_text {
@@ -203,12 +225,8 @@
 }
 
 .error_text {
-  position: absolute;
+  position: relative;
   color: #FA3D66;
-
-  @media (max-width: 625px) {
-    position: relative;
-  }
 }
 
 .highlight_text {

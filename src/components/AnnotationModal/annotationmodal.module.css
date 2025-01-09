@@ -37,7 +37,7 @@
 
 .annotation_modal_header {
   left: 0;
-  top: 22px;
+  top: 21px;
   position: absolute;
 
   @media (max-width: 475px) {

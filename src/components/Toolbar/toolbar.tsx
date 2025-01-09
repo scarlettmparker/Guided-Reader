@@ -233,7 +233,6 @@ const WordReferenceModal: Component = () => {
             ))}
         </div>
       ) : (
-
         <div class={styles.wordreference_answer}>
           <span class={styles.body_text}>
             {search_value().length == 0 ? "Search or select a word to see its definition" : "No results found"}
