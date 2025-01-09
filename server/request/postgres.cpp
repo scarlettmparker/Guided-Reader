@@ -233,7 +233,15 @@ namespace postgres
       "SET description = $1 "
       "WHERE id = $2");
 
+    txn.conn().prepare("delete_annotation_interactions",
+      "DELETE FROM public.\"UserAnnotationInteraction\" "
+      "WHERE annotation_id = $1");
+
     txn.conn().prepare("delete_annotation",
+      "WITH deleted_interactions AS ("
+      "  DELETE FROM public.\"UserAnnotationInteraction\" "
+      "  WHERE annotation_id = $1"
+      ")"
       "DELETE FROM public.\"Annotation\" "
       "WHERE id = $1");
 

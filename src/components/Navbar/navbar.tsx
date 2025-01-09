@@ -34,7 +34,19 @@ export async function set_user_status() {
   }
 }
 
+/**
+ * Build the avatar URL string based on the user's discord_id and avatar.
+ * If the user does not have a discord_id or avatar, the default profile picture is used.
+ * 
+ * @param discord_id Discord ID of the user.
+ * @param avatar Avatar of the user.
+ * @return URL string of the user's profile picture.
+ */
 export function build_avatar_string(discord_id: string, avatar: string): string {
+  if (!discord_id || discord_id == "-1" || !avatar || avatar == "-1")
+  {
+    return "assets/picture/default_pfp.png";
+  }
   return "https://cdn.discordapp.com/avatars/" + discord_id + "/" + avatar + ".png";
 }
 
@@ -86,7 +98,7 @@ const Navbar: Component = () => {
  * Navbar component that displays the login button and a hide button.
  * Displays on every page conditionally based on the page routing.
  * 
- * @returns JSX element of the Navbar.
+ * @return JSX element of the Navbar.
  */
 const NavbarContent: Component = () => {
   const { username, set_username, avatar, discord_id } = useUser();
@@ -134,7 +146,7 @@ const NavbarContent: Component = () => {
  * This is used either for when the user has not logged in or when the user
  * data has not yet been fetched.
  * 
- * @returns JSX element of the Login Navbar.
+ * @return JSX element of the Login Navbar.
  */
 const LoginNavbar: Component = () => {
   const [nav_hidden, set_nav_hidden] = createSignal(false);
@@ -163,7 +175,7 @@ interface HideButtonProps {
  * A button that hides the navbar when clicked on. Appears when
  * hovering on the navbar.
  *
- * @returns JSX element of a hide button.
+ * @return JSX element of a hide button.
  */
 const HideButton: Component<HideButtonProps> = ({ class: class_, hidden: nav_hidden, set_nav_hidden }) => {
   const [hidden, set_hidden] = createSignal(true);

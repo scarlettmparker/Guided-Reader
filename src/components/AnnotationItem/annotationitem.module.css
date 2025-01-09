@@ -10,7 +10,13 @@
   gap: 0.5rem;
 }
 
-.annotation_item p {
+.annotation_item p,
+.annotation_item h1,
+.annotation_item h2,
+.annotation_item h3,
+.annotation_item h4,
+.annotation_item h5,
+.annotation_item h6 {
   margin: 0;
 }
 
