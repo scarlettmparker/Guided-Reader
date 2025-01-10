@@ -1,5 +1,5 @@
 import styles from "./renderutils.module.css";
-import { Annotation } from "~/utils/types";
+import { Annotation, VTTEntry } from "~/utils/types";
 
 /**
  * Helper function for rendering HTML content.
@@ -144,15 +144,15 @@ function process_node(last_index: number, parts: string[], annotations: Annotati
  * @param annotations Annotations to apply to the text.
  * @returns Rendered text with annotations.
  */
-export function render_annotated_text(text: string, annotations: Annotation[]) {
+export function render_annotated_text(text: string, annotations: Annotation[]): string {
   const annotation_map: Record<string, Annotation> = {};
   const parts: string[] = [];
   const last_index = 0;
 
   text = sanitize_text(text, false);
-
   const filtered_annotations = filter_annotations(annotations, annotation_map);
   const temp_div = document.createElement('div');
+
   temp_div.id = "text_content";
   temp_div.innerHTML = text;
 

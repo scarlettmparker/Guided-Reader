@@ -1,8 +1,9 @@
 import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import { render_annotated_text } from "~/utils/render/renderutils";
-import { SelectedText, Position, Annotation } from "~/utils/types";
+import { SelectedText, Position, Annotation, VTTEntry } from "~/utils/types";
 import { get_text_data } from "~/utils/textutils";
 
+import AudioDisplay from '../AudioDisplay';
 import Toolbar from "../Toolbar";
 import TextDisplayProps from "./textdisplayprops";
 import styles from "./textdisplay.module.css";
@@ -229,6 +230,99 @@ function selection_in_text_content(selection: Selection): boolean {
 }
 
 /**
+ * Process the grandparent node to highlight the text content.
+ * This is needed due to the structure of text annotations, where the text content is split into
+ * multiple nodes. This function will find all annotated text elements and restore them to their
+ * original state after highlighting the text content.
+ * 
+ * @param grandparent Grandparent node to process.
+ * @param highlight_text Text to highlight.
+ */
+function process_grandparent_node(grandparent: HTMLElement, highlight_text: string) {
+  // ... find all annotated text elements ...
+  const annotated_elements = Array.from(grandparent.querySelectorAll('[id^="annotated-text-"]'));
+  const annotated_text_map = new Map(
+    annotated_elements.map(el => [el.textContent || '', el.outerHTML])
+  );
+  const text_content = grandparent.textContent || '';
+
+  // ... check if the text content contains the highlight text ...
+  if (text_content.includes(highlight_text) && highlight_text) {
+    const regex = new RegExp(`(\\s*${highlight_text}\\s*)`, 'gi');
+    let highlighted_text = text_content;
+    highlighted_text = highlighted_text.replace(regex, `<span class="${styles.highlighted_text}">$1</span>`);
+
+    // ... restore annotated text ...
+    annotated_text_map.forEach((html, text) => {
+      highlighted_text = highlighted_text.replace(text, html);
+    });
+    grandparent.innerHTML = highlighted_text;
+    return;
+  }
+
+  // ... remove no longer needed highlights ...
+  if (!text_content.includes(highlight_text)) {
+    const highlight_spans = grandparent.querySelectorAll(`.${styles.highlighted_text}`);
+    highlight_spans.forEach(span => {
+      if (!span.querySelector('[id^="annotated-text-"]')) {
+        span.replaceWith(span.textContent || '');
+      }
+    });
+  }
+}
+
+/**
+ * Highlight the text content based on the current VTT entry.
+ * This will highlight the text content based on the current time of the audio,
+ * recursively checking the text content of nodes for matches with the VTT entry text.
+ * 
+ * @param node Node to check for text content.
+ * @param highlight_text Text to highlight.
+ * @param current_entry Current VTT entry to highlight.
+ */
+function highlight_text_node(node: Node, highlight_text: string, current_entry: VTTEntry) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text_content = node.textContent || '';
+
+    // ... check for annotated text ...
+    const parent = (node as ChildNode).parentElement;
+    if (parent?.id?.startsWith('annotated-text-')) {
+      const grandparent = parent.parentElement;
+      if (grandparent) {
+        process_grandparent_node(grandparent, highlight_text);
+      }
+    }
+
+    // ... remove no longer needed highlights ...
+    if (!text_content.includes(highlight_text)) {
+      const parent_element = (node as ChildNode).parentElement;
+      if (parent_element?.classList.contains(styles.highlighted_text)) {
+        parent_element.classList.remove(styles.highlighted_text);
+      }
+    }
+
+    // ... check if the text content contains the highlight text ...
+    if (text_content.includes(highlight_text) && highlight_text) {
+      const parent_element = (node as ChildNode).parentElement;
+      if (parent_element?.classList.contains(styles.highlighted_text)) {
+        return;
+      }
+
+      const regex = new RegExp(`(\\s*${highlight_text}\\s*)`, 'gi');
+      const new_text_content: string = text_content.replace(regex, (match: string) => {
+        return `<span class="${styles.highlighted_text}">${match}</span>`;
+      });
+
+      const span = document.createElement('span');
+      span.innerHTML = new_text_content;
+      (node as ChildNode).replaceWith(...span.childNodes);
+    }
+  } else if (node.nodeType === Node.ELEMENT_NODE) {
+    // ... recursively process child nodes ...
+    node.childNodes.forEach(child => highlight_text_node(child, highlight_text, current_entry));
+  }
+}
+/**
  * Text display component for the Guided Reader.
  * This component displays the text content and any annotations that have been made on the text.
  * 
@@ -246,6 +340,11 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
   const [selected_text, set_selected_text] = createSignal<SelectedText | null>(null);
   const [last_selected_text, set_last_selected_text] = createSignal<SelectedText | null>(empty_text_data);
   const [button_position, set_button_position] = createSignal<Position | null>(null);
+
+  // ... vtt stuff ...
+  const [current_time, set_current_time] = createSignal(0);
+  const [playing, set_playing] = createSignal(false);
+  const [vtt_entries, set_vtt_entries] = createSignal<VTTEntry[]>([]);
 
   const clear = () => {
     set_last_selected_text(empty_text_data);
@@ -299,6 +398,28 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
     props.set_annotations_map(new Map(props.annotations_map().set(current_text!.id, new_annotations)));
   }
 
+
+  createEffect(() => {
+    // ... dispatch the selected text event ...
+    const event = new CustomEvent('select-text', {
+      bubbles: true,
+      detail: { text: selected_text(), position: button_position() }
+    });
+    document.dispatchEvent(event);
+  })
+
+  createEffect(() => {
+    // ... check for updates in the VTT entries & playback status ...
+    // ... use this to highlight the text content based on the current time ...
+    const current_entry = vtt_entries().find(entry => current_time() >= entry.start && current_time() <= entry.end);
+    const highlight_text = current_entry ? current_entry.text.trim() : '';
+    const text_content = document.getElementById('text_content');
+
+    if (playing() && text_content && current_entry) {
+      highlight_text_node(text_content!, highlight_text, current_entry!);
+    }
+  })
+
   onMount(() => {
     window.addEventListener('mouseup', handle_mouse_up);
     window.addEventListener('create-annotation', reload_annotations);
@@ -308,15 +429,6 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
       window.removeEventListener('create-annotation', reload_annotations);
       window.removeEventListener('delete-no-annotations', reload_annotations);
     }
-  })
-
-  createEffect(() => {
-    // ... dispatch the selected text event ...
-    const event = new CustomEvent('select-text', {
-      bubbles: true,
-      detail: { text: selected_text(), position: button_position() }
-    });
-    document.dispatchEvent(event);
   })
 
   return (
@@ -329,14 +441,17 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
         fallback={<div>Select a text to begin</div>}>
         <Show when={!props.loading_texts().has(props.current_text())}
           fallback={<div>Loading...</div>}>
-          <div class={styles.text_content}>
-            <div id="text_content" class={styles.text_content} innerHTML={
-              render_annotated_text(props.get_current_text()?.text!,
-                props.annotations_map().get(props.current_text()) || [])
+          <div id="text_content" class={styles.text_content}
+            style={props.get_current_text()?.audio ? { "padding-bottom": "4rem" } : undefined} innerHTML={
+              render_annotated_text(props.get_current_text()?.text!, props.annotations_map().get(props.current_text())
+                || [])
             } />
-          </div>
         </Show>
       </Show>
+      {props.get_current_text()?.audio && (
+        <AudioDisplay audio={props.get_current_text()?.audio!} set_vtt_entries={set_vtt_entries}
+          set_current_time={set_current_time} set_playing={set_playing} />
+      )}
     </div>
   );
 }

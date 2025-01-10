@@ -1,3 +1,4 @@
+// ... text types ...
 export type TextTitle = {
   id: number;
   title: string;
@@ -6,11 +7,12 @@ export type TextTitle = {
 }
 
 export type Text = {
-  annotations: Annotation[];
   id: number;
   text: string;
   language: string;
   text_object_id: number;
+  audio: Audio;
+  annotations: Annotation[];
 }
 
 export type TextBrief = {
@@ -30,6 +32,21 @@ type Group = {
   group_url: string;
 }
 
+export type Audio = {
+  id: number;
+  audio_file: string;
+  vtt_file: string;
+  submission_group: string;
+  submission_url: string;
+}
+
+export type VTTEntry = {
+  start: number;
+  end: number;
+  text: string;
+}
+
+// ... annotation types ...
 export type Annotation = {
   id: number;
   start: number;
@@ -45,7 +62,6 @@ export type NewAnnotation = {
   description: string;
 }
 
-// ... displaying annotations ...
 export type AnnotationData = {
   annotation: Annotation;
   description: string;

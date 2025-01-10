@@ -1,0 +1,76 @@
+.audio_display {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  left: 50%;
+  width: 40%;
+  height: 4.5rem;
+  bottom: 0;
+  padding: 0 15px;
+
+  background-color: #FBFBFB;
+  border-radius: 15px 15px 0 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: none;
+  transform: translateX(-50%);
+}
+
+.hidden {
+  display: none;
+}
+
+.hide_button_container {
+  position: absolute;
+  cursor: pointer;
+  width: 29%;
+  height: 4px;
+  z-index: 2;
+
+  left: 50%;
+  bottom: 0%;
+  transform: translateX(-50%);
+
+  opacity: 0;
+  border-radius: 20px 20px 0px 0px;
+  background-color: #c0c0c0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.hide_button_container::before,
+.audio_hidden::before {
+  content: '';
+  position: absolute;
+
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border-radius: 30px;
+}
+
+.alt_text {
+  position: relative;
+  width: fit-content;
+  z-index: 20;
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
+
+  padding: 5px 10px;
+  border-radius: 10px;
+  background-color: #252525;
+  color: white;
+
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+.alt_text.visible,
+.hide_button_container.visible {
+  opacity: 1;
+}
