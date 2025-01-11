@@ -10,6 +10,7 @@ import Index from "./routes";
 import Login from "./routes/login";
 import Logout from "./routes/logout";
 import Register from "./routes/register";
+import PolicyAccept from "./components/PolicyAccept";
 
 render(
   () => (
@@ -23,6 +24,7 @@ render(
           <Route path="/logout" component={Logout} />
           <Route path="/register" component={Register} />
         </Router>
+        <PolicyAccept />
       </MetaProvider>
     </UserProvider>
   ),

@@ -17,6 +17,7 @@ class UserHandler : public RequestHandler
     std::string discord_id;
     std::string avatar;
     std::string nickname;
+    bool accepted_policy;
   };
 
 
@@ -183,7 +184,8 @@ class UserHandler : public RequestHandler
         r[0][0].as<std::string>(),
         r[0][1].as<std::string>(),
         r[0][2].as<std::string>(),
-        r[0][3].as<std::string>()
+        r[0][3].as<std::string>(),
+        r[0][4].as<bool>()
       };
     }
     catch (const std::exception &e)

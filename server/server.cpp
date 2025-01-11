@@ -366,20 +366,47 @@ namespace server
   }
 
   /**
+   * Close the connection with the client.
+   */
+  void Session::do_close()
+  {
+    if (closed_) return;
+    closed_ = true;
+
+    beast::error_code ec;
+    socket_.shutdown(tcp::socket::shutdown_send, ec);
+    if (ec)
+    {
+      std::cerr << "Shutdown error: " << ec.message() << std::endl;
+    }
+    socket_.close(ec);
+  }
+
+  /**
    * Read a request from the client.
    */
   void Session::do_read()
   {
+    if (closed_) return ;
+
+    buffer_.consume(buffer_.size());
+    req_ = {};
+
     auto self(shared_from_this());
     http::async_read(socket_, buffer_, req_, [this, self](beast::error_code ec, std::size_t)
     {
-      if (!ec)
+      if (ec == http::error::end_of_stream)
       {
-        boost::asio::ip::address ip_address = socket_.remote_endpoint().address();
-        std::string ip_str = ip_address.to_string();
-        http::response<http::string_body> res = handle_request(req_, ip_str);
-        do_write(std::move(res));
+        return do_close();
       }
+      if (ec) {
+        std::cerr << "Read error: " << ec.message() << std::endl;
+        return do_close();
+      }
+      boost::asio::ip::address ip_address = socket_.remote_endpoint().address();
+      std::string ip_str = ip_address.to_string();
+      http::response<http::string_body> res = handle_request(req_, ip_str);
+      do_write(std::move(res));
     });
   }
 
@@ -389,11 +416,23 @@ namespace server
    */
   void Session::do_write(http::response<http::string_body> res)
   {
+    if (closed_) return;
+
     auto self(shared_from_this());
     auto sp = std::make_shared<http::response<http::string_body>>(std::move(res));
-    http::async_write(socket_, *sp, [this, self, sp](beast::error_code ec, std::size_t)
+
+    http::async_write(socket_, * sp, [this, self, sp](beast::error_code ec, std::size_t)
     {
-      socket_.shutdown(tcp::socket::shutdown_send, ec);
+      if (ec)
+      {
+        std::cerr << "Write error: " << ec.message() << std::endl;
+        return do_close();
+      }
+      if (sp->need_eof())
+      {
+        return do_close();
+      }
+      do_read();
     });
   }
   

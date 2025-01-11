@@ -2,8 +2,8 @@
 
 namespace postgres
 {
-  static ConnectionPool* global_pool = nullptr;
-  std::unordered_map<pqxx::connection*, ConnectionMetadata> connection_metadata;
+  static ConnectionPool * global_pool = nullptr;
+  std::unordered_map<pqxx::connection *, ConnectionMetadata> connection_metadata;
 
   /**
    * Create a new connection for the connection pool.
@@ -125,7 +125,7 @@ namespace postgres
       "LIMIT 1");
 
     txn.conn().prepare("select_user_data_by_id",
-      "SELECT username, discord_id, avatar, nickname "
+      "SELECT username, discord_id, avatar, nickname, accepted_policy "
       "FROM public.\"User\" "
       "WHERE id = $1 "
       "LIMIT 1");
@@ -141,14 +141,17 @@ namespace postgres
       "FROM public.\"User\" "
       "WHERE username = $1 "
       "LIMIT 1");
+    
+    txn.conn().prepare("select_accepted_policy",
+      "SELECT accepted_policy "
+      "FROM public.\"User\" "
+      "WHERE id = $1 "
+      "LIMIT 1");
 
-    txn.conn().prepare("insert_user",
-      "INSERT INTO public.\"User\" ("
-      "username, email, password, levels, discord_id, account_creation_date, "
-      "avatar, nickname"
-      ") VALUES ("
-      "$1, $2, $3, '{-1}', '-1', $4, '-1', $1"
-      ")");
+    txn.conn().prepare("set_accepted_policy",
+      "UPDATE public.\"User\" "
+      "SET accepted_policy = $2 "
+      "WHERE id = $1");
 
     // ... discord user queries ...
     txn.conn().prepare("select_user_id_by_discord_id",
@@ -156,6 +159,14 @@ namespace postgres
       "FROM public.\"User\" "
       "WHERE discord_id = $1 "
       "LIMIT 1");
+    
+    txn.conn().prepare("insert_user",
+      "INSERT INTO public.\"User\" ("
+      "username, email, password, levels, discord_id, account_creation_date, "
+      "avatar, nickname"
+      ") VALUES ("
+      "$1, $2, $3, '{-1}', '-1', $4, '-1', $1"
+      ")");
 
     txn.conn().prepare("register_with_discord",
       "INSERT INTO public.\"User\" ("

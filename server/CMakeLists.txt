@@ -102,7 +102,7 @@ find_library(REDIS_PLUS_PLUS_LIB redis++)
 
 # <------------- compile api directory files ------------->
 
-file(GLOB API_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/api/*.cpp")
+file(GLOB_RECURSE API_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/api/*.cpp")
 foreach(SOURCE_FILE ${API_SOURCES})
   get_filename_component(LIB_NAME ${SOURCE_FILE} NAME_WE)
   add_library(${LIB_NAME} SHARED ${SOURCE_FILE}

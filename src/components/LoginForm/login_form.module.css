@@ -13,7 +13,7 @@
   width: calc(100% - 170px);
   max-width: 640px;
   height: auto;
-  padding: 60px 90px 60px 80px;
+  padding: 70px 90px 60px 80px;
 
   border-radius: 20px;
   background-color: #fbfbfb;
@@ -52,8 +52,10 @@
     height: auto;
   }
 
-  @media (max-height: 560px) {
+  @media (max-height: 570px) {
     top: 0;
+    height: fit-content;
+    justify-content: flex-start;
     transform: translate(-50%, 0);
   }
 }

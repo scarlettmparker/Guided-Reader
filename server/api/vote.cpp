@@ -193,7 +193,7 @@ class VoteHandler : public RequestHandler
   }
 
   public:
-  VoteHandler(ConnectionPool& connection_pool) : pool(connection_pool) {}
+  VoteHandler(ConnectionPool & connection_pool) : pool(connection_pool) {}
 
   std::string get_endpoint() const override
   {
@@ -296,6 +296,10 @@ class VoteHandler : public RequestHandler
       if (real_user_id != user_id)
       {
         return request::make_bad_request_response("User ID mismatch. This incident has been reported", req);
+      }
+      if (!middleware::user_accepted_policy(user_id, false))
+      {
+        return request::make_unauthorized_response("User has not accepted the privacy policy", req);
       }
 
       std::string interaction_type = select_annotation_interaction_type(annotation_id, user_id, false);

@@ -1,5 +1,6 @@
 #include "middleware.hpp"
 
+using namespace postgres;
 namespace middleware
 {
   std::mutex rate_limit_mutex;
@@ -67,6 +68,56 @@ namespace middleware
     }
 
     data.last_request = now;
+    return false;
+  }
+
+  /**
+   * Check if a user has accepted the privacy policy. This is used to block
+   * usage of certain API endpoints until the user has accepted the policy.
+   *
+   * @param user_id ID of the user to check.
+   * @param verbose Whether to print messages to stdout.
+   * @return true if the user has accepted the policy, false otherwise.
+   */
+  bool user_accepted_policy(const int user_id, bool verbose)
+  {
+    try
+    {
+      auto & pool = get_connection_pool();
+      pqxx::work & txn = request::begin_transaction(pool);
+
+      pqxx::result r = txn.exec_prepared(
+        "select_accepted_policy",
+        user_id
+      );
+
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
+
+      if (r.empty())
+      {
+        return false;
+      }
+      if (r[0][0].as<bool>())
+      {
+        return true;
+      }
+      return false;
+    }
+    catch (const std::exception & e)
+    {
+      verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
+    } catch (...)
+    {
+      verbose && std::cerr << "Unknown error while executing query" << std::endl;
+    }
     return false;
   }
 }

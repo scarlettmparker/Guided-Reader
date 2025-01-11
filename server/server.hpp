@@ -75,12 +75,14 @@ namespace server {
     tcp::socket socket_;
     beast::flat_buffer buffer_;
     http::request<http::string_body> req_;
+    bool closed_ = false;
 
     public:
       explicit Session(tcp::socket socket);
       void run();
 
     private:
+      void do_close();
       void do_read();
       void do_write(http::response<http::string_body> res);
   };

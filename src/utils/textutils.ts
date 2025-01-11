@@ -138,7 +138,11 @@ export async function get_text_data(id: number, language: string, data_type: str
       clearTimeout(timeout_id);
     }
   }
-  return { annotations: [], id: -1, text: '', language: '', text_object_id: -1 };
+  return {
+    annotations: [],
+    audio: { id: -1, audio_file: '', vtt_file: '', submission_group: '', submission_url: '' },
+    id: -1, text: '', language: '', text_object_id: -1,
+  };
 }
 
 /**

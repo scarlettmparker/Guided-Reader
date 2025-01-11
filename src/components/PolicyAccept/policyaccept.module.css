@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.page_wrapper {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  z-index: 1001;
+  backdrop-filter: blur(10px);
+}
+
+.policy_accept {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  
+  left: 50%;
+  top: 50%;
+  width: calc(100% - 40px);
+  max-width: 320px;
+  height: fit-content;
+  transform: translate(-50%, -50%);
+
+  padding: 20px;
+  z-index: 999;
+  border-radius: 20px;
+  background-color: #fbfbfb;
+  font-family: "Inter";
+  font-weight: 300;
+
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  gap: 1rem;
+}
+
+.header {
+  position: relative;
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin-top: -20px;
+  background-color: #272121;
+  color: white;
+  width: 100%;
+  text-align: center;
+  margin-left: -20px;
+  margin-right: -20px; 
+  padding: 10px 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px; 
+}
+
+.accept {
+  display: flex;
+  flex-direction: column;
+  max-width: 280px;
+  width: 100%;
+}
+
+
+.accept_button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.9rem;
+  z-index: 1;
+  padding: 6px 10px;
+  max-width: 100px;
+  width: 100%;
+  border-radius: 15px;
+  cursor: pointer;
+  background-color: #252525;
+  border: 1px solid #272121;
+  color: white;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.accept_button:hover {
+  border: 1px solid #CF3A5F;
+  background-color: #ECECEC;
+  color: #CF3A5F;
+}
+
+.accept_button:disabled {
+  background-color: #ECECEC;
+  color: #272121;
+  border: 1px solid #C0C0C0;
+  cursor: not-allowed;
+}
+
+.body_text {
+  hyphens: auto;
+  text-align: center;
+}
+
+.accept_text {
+  font-size: 0.9rem;
+  color: #272121;
+  font-weight: 400;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.body_text a {
+  color: rgb(207, 58, 95);
+  text-decoration: underline dotted rgba(37, 37, 37, 0.4);
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+}
+
+.body_text a:hover {
+  color: rgb(124, 16, 49);
+  text-decoration: underline dotted rgba(80, 27, 40, 0.6);
+}

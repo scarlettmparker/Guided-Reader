@@ -1,4 +1,5 @@
-import { UserData, MAX_RETRIES, BASE_DELAY, CacheData } from "./const";
+import { MAX_RETRIES, BASE_DELAY, CacheData } from "./const";
+import { UserData } from "./types";
 
 /**
  * Delay the execution of a function.
@@ -93,7 +94,7 @@ export async function get_user_data_from_session(CACHE_DURATION: number, CACHE_K
   const fetched_data = await fetch_user_data(CACHE_KEY);
   if (fetched_data) return fetched_data;
 
-  return { id: -1, username: "", avatar: "", discord_id: "", nickname: "" };
+  return { id: -1, username: "", avatar: "", discord_id: "", nickname: "", accepted_policy: false };
 }
 
 /**

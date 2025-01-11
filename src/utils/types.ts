@@ -1,3 +1,12 @@
+export type UserData = {
+  id: number;
+  username: string;
+  avatar: string;
+  discord_id: string;
+  nickname: string;
+  accepted_policy: boolean;
+}
+
 // ... text types ...
 export type TextTitle = {
   id: number;

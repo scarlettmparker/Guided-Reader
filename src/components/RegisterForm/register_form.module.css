@@ -13,7 +13,7 @@
   width: calc(100% - 170px);
   max-width: 640px;
   height: auto;
-  padding: 60px 90px 60px 80px;
+  padding: 70px 90px 60px 80px;
 
   border-radius: 20px;
   background-color: #fbfbfb;
@@ -51,9 +51,11 @@
   @media (max-height: 780px) and (min-width: 550px) {
     height: auto;
   }
-  
-  @media (max-height: 605px) {
+
+  @media (max-height: 615px) {
     top: 0;
+    height: fit-content;
+    justify-content: flex-start;
     transform: translate(-50%, 0);
   }
 }
@@ -186,10 +188,6 @@
 
   @media (max-width: 550px) {
     font-size: 1.1rem;
-  }
-
-  @media (max-width: 485px) {
-    font-size: 0.9rem;
   }
 }
 

@@ -5,7 +5,9 @@
 #include <string>
 #include <unordered_set>
 #include <stdbool.h>
+
 #include "request.hpp"
+#include "postgres.hpp"
 
 namespace middleware
 {
@@ -21,6 +23,7 @@ namespace middleware
 
   /* bool check_permissions(request::UserPermissions user_permissions, std::string * required_permissions, int num_permissions); */
   bool rate_limited(const std::string & ip_address, const std::string & endpoint, int window_ms);
+  bool user_accepted_policy(const int user_id, bool verbose);
 }
 
 namespace std

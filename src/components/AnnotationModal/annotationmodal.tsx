@@ -1,12 +1,12 @@
-import { Component, createEffect, createSignal, onMount } from "solid-js";
+import { Component, createEffect, createSignal } from "solid-js";
 import { get_annotation_data } from "~/utils/textutils";
 import { Annotation, AnnotationData } from "~/utils/types";
+import { useUser } from "~/usercontext";
 
 import AnnotationModalProps from "./annotationmodalprops";
 import AnnotationItem from "../AnnotationItem";
 import AnnotationModalHeader from "../AnnotationModalHeader";
 import styles from "./annotationmodal.module.css";
-import { useUser } from "~/usercontext";
 
 /**
  * Component for displaying an annotation modal. This modal will display the annotation data.

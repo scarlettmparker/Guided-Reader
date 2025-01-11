@@ -354,7 +354,11 @@ class AnnotationHandler : public RequestHandler
    * @param author_id ID of the author to validate.
    * @return HTTP response if validation fails, empty OK response otherwise.
    */
-  http::response<http::string_body> validate_annotation_author(const http::request<http::string_body>& req, int annotation_id, int author_id) {
+  http::response<http::string_body> validate_annotation_author
+  (
+    const http::request<http::string_body>& req, const std::string_view session_id, int annotation_id, int author_id
+  )
+  {
     // ... validate annotation author ...
     int real_author_id = select_author_id_by_annotation(annotation_id, false);
     if (real_author_id == -1)
@@ -366,9 +370,7 @@ class AnnotationHandler : public RequestHandler
       return request::make_bad_request_response("Author ID mismatch. This incident has been reported", req);
     }
 
-    // ... validate session and user
-    std::string_view session_id = request::get_session_id_from_cookie(req);
-    
+    // ... validate session and user ...    
     if (session_id.empty())
     {
       return request::make_unauthorized_response("Session ID not found", req);
@@ -386,6 +388,10 @@ class AnnotationHandler : public RequestHandler
     if (user_id != real_author_id)
     {
       return request::make_bad_request_response("Author ID mismatch. This incident has been reported", req);
+    }
+    if (!middleware::user_accepted_policy(user_id, false))
+    {
+      return request::make_unauthorized_response("User has not accepted the privacy policy", req);
     }
 
     return http::response<http::string_body>{http::status::ok, req.version()};
@@ -477,6 +483,13 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for author.id | annotation.id", req);
       }
 
+      std::string_view session_id = request::get_session_id_from_cookie(req);
+      http::response<http::string_body> validation_response = validate_annotation_author(req, session_id, annotation_id, author_id);
+      if (validation_response.result() != http::status::ok)
+      {
+        return validation_response;
+      }
+
       if (description.empty())
       {
         return request::make_bad_request_response("Missing description", req);
@@ -488,12 +501,6 @@ class AnnotationHandler : public RequestHandler
       else if (description.length() < 15)
       {
         return request::make_bad_request_response("Description too short. Min 15 characters", req);
-      }
-
-      http::response<http::string_body> validation_response = validate_annotation_author(req, annotation_id, author_id);
-      if (validation_response.result() != http::status::ok)
-      {
-        return validation_response;
       }
 
       if (!update_annotation(annotation_id, description, false))
@@ -553,12 +560,36 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for text_id | user_id | start | end", req);
       }
 
+      std::string_view session_id = request::get_session_id_from_cookie(req);
+      if (session_id.empty())
+      {
+        return request::make_unauthorized_response("Session ID not found", req);
+      }
+      if (!request::validate_session(std::string(session_id), false))
+      {
+        return request::make_unauthorized_response("Invalid session ID", req);
+      }
+
+      // ... check if user is who they say they are, and has accepted policy ...
+      int real_user_id = request::get_user_id_from_session(std::string(session_id), false);
+      if (real_user_id == -1)
+      {
+        return request::make_bad_request_response("User not found", req);
+      }
+      if (real_user_id != user_id)
+      {
+        return request::make_bad_request_response("User ID mismatch. This incident has been reported", req);
+      }
+      if (!middleware::user_accepted_policy(real_user_id, false))
+      {
+        return request::make_unauthorized_response("User has not accepted the privacy policy", req);
+      }
+
       RangeOccupancies ranges = select_annotation_ranges(text_id, false);
       if (!check_valid_ranges(ranges.ranges, ranges.size, start, end))
       {
         return request::make_bad_request_response("Annotation overlaps with existing annotation", req);
       }
-
       if (start > end)
       {
         return request::make_bad_request_response("Start position cannot be greater than end position", req);
@@ -574,16 +605,6 @@ class AnnotationHandler : public RequestHandler
       else if (description.length() < 15)
       {
         return request::make_bad_request_response("Description too short. Min 15 characters", req);
-      }
-
-      std::string_view session_id = request::get_session_id_from_cookie(req);
-      if (session_id.empty())
-      {
-        return request::make_unauthorized_response("Session ID not found", req);
-      }
-      if (!request::validate_session(std::string(session_id), false))
-      {
-        return request::make_unauthorized_response("Invalid session ID", req);
       }
 
       if (!insert_annotation(text_id, user_id, start, end, description, false))
@@ -629,7 +650,8 @@ class AnnotationHandler : public RequestHandler
         return request::make_bad_request_response("Number out of range for author.id | annotation.id", req);
       }
 
-      http::response<http::string_body> validation_response = validate_annotation_author(req, annotation_id, author_id);
+      std::string_view session_id = request::get_session_id_from_cookie(req);
+      http::response<http::string_body> validation_response = validate_annotation_author(req, session_id, annotation_id, author_id);
       if (validation_response.result() != http::status::ok)
       {
         return validation_response;

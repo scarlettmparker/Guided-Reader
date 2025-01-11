@@ -3,10 +3,10 @@ import { marked } from 'marked';
 import { build_avatar_string } from "../Navbar/navbar";
 import { AnnotationData, Interaction } from "~/utils/types";
 import { delete_annotation } from "~/utils/textutils";
-import AnnotationItemProps from "./annotationitemprops";
-import styles from "./annotationitem.module.css";
 import { get_interactions, post_interaction } from "~/utils/interactionutils";
 import { useUser } from "~/usercontext";
+import AnnotationItemProps from "./annotationitemprops";
+import styles from "./annotationitem.module.css";
 
 /**
  * Calculate the time ago from a given timestamp.
