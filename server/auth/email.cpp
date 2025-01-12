@@ -3,6 +3,108 @@
 namespace email
 {
   /**
+   * Validate a recovery code for a user. This is used to recover a lost password.
+   * 
+   * @param user_id ID of the user to validate the recovery code for.
+   * @param recovery_code Recovery code to validate.
+   * @param verbose Whether to print messages to stdout.
+   * @return true if the recovery code is valid, false otherwise.
+   */
+  bool validate_recovery_code(int user_id, const std::string & recovery_code, bool verbose)
+  {
+    auto & redis = Redis::get_instance();
+    std::string key = "recovery:" + std::to_string(user_id);
+    try
+    {
+      auto val = redis.get(key);
+      if (!val)
+      {
+        verbose && std::cout << "Recovery code for user " << user_id << " not found" << std::endl;
+        return false;
+      }
+      auto ttl = redis.ttl(key);
+      if (ttl < 0)
+      {
+        verbose && std::cerr << "Recovery code for user " << user_id << " has expired" << std::endl;
+        redis.del(key);
+        return false;
+      }
+
+      return * val == recovery_code;
+    }
+    catch (const sw::redis::Error &e)
+    {
+      verbose && std::cerr << "Error retrieving recovery code from Redis: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+      verbose && std::cerr << "Unknown error while retrieving recovery code from Redis" << std::endl;
+    }
+    return false;
+  }
+
+  /**
+   * Insert a recovery code for a user into Redis. This is used to recover a lost password.
+   * It has a TTL (expiration time) of 5 minutes.
+   *
+   * @param user_id ID of the user to insert the recovery code for.
+   * @param recovery_code Recovery code to insert.
+   * @param verbose Whether to print messages to stdout.
+   * @return true if the recovery code was inserted, false otherwise.
+   */
+  bool insert_recovery_code(int user_id, const std::string & recovery_code, bool verbose)
+  {
+    auto & redis = Redis::get_instance();
+    std::string key = "recovery:" + std::to_string(user_id);
+    try
+    {
+      if (!redis.set(key, recovery_code))
+      {
+        return false;
+      }
+      if (!redis.expire(key, 300))
+      {
+        verbose && std::cerr << "Failed to set expiration for recovery code" << std::endl;
+        redis.del(key);
+        return false;
+      }
+      return true;
+    }
+    catch (const sw::redis::Error &e)
+    {
+      verbose && std::cerr << "Error setting recovery code in Redis: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+      verbose && std::cerr << "Unknown error while setting recovery code in Redis" << std::endl;
+    }
+    return false;
+  }
+
+  /**
+   * Generate a random recovery code for a user. This is used to recover a 
+   * lost password and will be sent in an email.
+   *
+   * @return Recovery code as a string.
+   */
+  std::string generate_recovery_code()
+  {
+    unsigned char buffer[8];
+    if (RAND_bytes(buffer, sizeof(buffer)) != 1)
+    {
+      throw std::runtime_error("Failed to generate recovery code");
+    }
+
+    std::stringstream code;
+    for (int i = 0; i < 8; ++i)
+    {
+      code << std::hex << std::setw(2) << std::setfill('0') << (int)buffer[i];
+    }
+
+    return code.str();
+  }
+
+  /**
    * Helper function to get the current date in RFC 822 format.
    * Used to set the Date header in the email.
    *
@@ -14,35 +116,6 @@ namespace email
     std::time_t now = std::time(nullptr);
     std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S %z", std::localtime(&now));
     return buffer;
-  }
-
-  /**
-   * Callback function used by CURL to read the email payload.
-   *
-   * @param ptr Pointer to the buffer where the data should be copied.
-   * @param size Size of each element to be copied.
-   * @param nmemb Number of elements to be copied.
-   * @param userp Pointer to the user data.
-   * @return Number of bytes copied.
-   */
-  static size_t payload_source(char * ptr, size_t size, size_t nmemb, void * userp)
-  {
-    static size_t offset = 0;
-    std::string * payload = static_cast<std::string*>(userp);
-    
-    size_t available = payload->length() - offset;
-    size_t requested = size * nmemb;
-    size_t to_copy = std::min(available, requested);
-    
-    if (to_copy > 0)
-    {
-      std::memcpy(ptr, payload->c_str() + offset, to_copy);
-      offset += to_copy;
-      return to_copy;
-    }
-    
-    offset = 0;
-    return 0;
   }
 
   SMTPClient::SMTPClient(const std::string & host, int port, bool use_tls)
@@ -156,7 +229,6 @@ namespace email
     // ... set options for sending email ...
     curl_easy_setopt(curl_, CURLOPT_MAIL_FROM, from.c_str());
     curl_easy_setopt(curl_, CURLOPT_MAIL_RCPT, recipients);
-    curl_easy_setopt(curl_, CURLOPT_READFUNCTION, payload_source);
     curl_easy_setopt(curl_, CURLOPT_READDATA, & payload);
     curl_easy_setopt(curl_, CURLOPT_UPLOAD, 1L);
     curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 60L);
