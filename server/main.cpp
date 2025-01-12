@@ -1,4 +1,5 @@
 #include "server.hpp"
+#include "auth/email.hpp"
 #include "request/redis.hpp"
 #include "request/postgres.hpp"
 #include "config.h"
@@ -24,8 +25,21 @@ int main()
      * Initialize Redis connection.
      */
     Redis::init_connection();
-    
-    std::cout << "Server started on " << address << ":" << port << std::endl;
+
+    /**
+     * Initialize email service.
+     */
+    email::email_config config
+    {
+      READER_EMAIL_HOST,
+      READER_EMAIL_PORT,
+      READER_EMAIL_ADDRESS,
+      READER_EMAIL_PASSWORD,
+      true
+    };
+
+    auto & service = email::EmailService::get_instance();
+    service.configure(config);
     
     for (std::size_t i = 0; i < std::thread::hardware_concurrency(); ++i)
     {

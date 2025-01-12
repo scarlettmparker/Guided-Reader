@@ -57,6 +57,11 @@ file(WRITE ${PCH_SOURCE} "#include \"${PCH_HEADER}\"\n")
 add_library(pch STATIC ${PCH_SOURCE})
 target_precompile_headers(pch PRIVATE ${PCH_HEADER})
 
+# <------------- add curl packages ------------->
+
+find_package(CURL REQUIRED)
+include_directories(${CURL_INCLUDE_DIRS})
+
 # <------------- add boost packages ------------->
 
 find_package(Boost REQUIRED COMPONENTS system filesystem)
@@ -106,19 +111,21 @@ file(GLOB_RECURSE API_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/api
 foreach(SOURCE_FILE ${API_SOURCES})
   get_filename_component(LIB_NAME ${SOURCE_FILE} NAME_WE)
   add_library(${LIB_NAME} SHARED ${SOURCE_FILE}
-    server.cpp sslstream.cpp auth/session.cpp auth/httpclient.cpp request/redis.cpp
-    request/postgres.cpp request/apikey.cpp request/request.cpp request/middleware.cpp
+    server.cpp sslstream.cpp auth/session.cpp auth/httpclient.cpp auth/email.cpp
+    request/redis.cpp request/postgres.cpp request/apikey.cpp request/request.cpp request/middleware.cpp
   )
   set_target_properties(${LIB_NAME} PROPERTIES OUTPUT_NAME ${LIB_NAME} LIBRARY_OUTPUT_DIRECTORY ".")
   target_link_libraries(
-    ${LIB_NAME} ${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto pthread dl
+    ${LIB_NAME} ${CURL_LIBRARIES} ${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto pthread dl
     ${LIBPQXX_LIB} ${LIBPQ_LIBRARIES} ${BCRYPT_LIB} ${HIREDIS_LIB} ${REDIS_PLUS_PLUS_LIB} pch
   )
 endforeach()
 
-add_executable(ReaderServer main.cpp server.cpp sslstream.cpp request/redis.cpp request/postgres.cpp)
+add_executable(ReaderServer
+  main.cpp server.cpp sslstream.cpp auth/email.cpp request/redis.cpp request/postgres.cpp
+)
 target_link_libraries(
-  ReaderServer ${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto pthread dl
+  ReaderServer ${CURL_LIBRARIES} ${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto pthread dl
   ${LIBPQXX_LIB} ${LIBPQ_LIBRARIES} ${HIREDIS_LIB} ${REDIS_PLUS_PLUS_LIB} pch
 )
 
