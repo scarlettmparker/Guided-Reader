@@ -1,4 +1,4 @@
-import { MAX_RETRIES, BASE_DELAY, CacheData } from "./const";
+import { MAX_RETRIES, BASE_DELAY, CacheData, CACHE_KEY } from "./const";
 import { UserData } from "./types";
 
 /**
@@ -10,7 +10,7 @@ export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, 
  * Get the user data from the session.
  * @return UserData object.
  */
-function get_cached_user_data(CACHE_DURATION: number, CACHE_KEY: string): UserData | null {
+function get_cached_user_data(CACHE_DURATION: number): UserData | null {
   const cached_data = localStorage.getItem(CACHE_KEY);
 
   if (!cached_data) return null;
@@ -29,7 +29,7 @@ function get_cached_user_data(CACHE_DURATION: number, CACHE_KEY: string): UserDa
  * @param CACHE_KEY Cache key to store the user data.
  * @return UserData object.
  */
-async function fetch_user_data(CACHE_KEY: string): Promise<UserData | null> {
+export async function fetch_user_data(): Promise<UserData | null> {
   const REQUEST_TIMEOUT = 1000;
 
   const fetch_options: RequestInit = {
@@ -61,10 +61,13 @@ async function fetch_user_data(CACHE_KEY: string): Promise<UserData | null> {
       const data = await response.json();
       if (data.status === 'ok') {
         const user_data = data.message as UserData;
+
+        // ... set the cache (used for navbar/session) ...
         localStorage.setItem(
           CACHE_KEY,
           JSON.stringify({ data: user_data, timestamp: Date.now() })
         );
+
         return user_data;
       }
     } catch (error) {
@@ -87,11 +90,11 @@ async function fetch_user_data(CACHE_KEY: string): Promise<UserData | null> {
  * @param CACHE_KEY Cache key to store the user data.
  * @return UserData object containing username and user ID.
  */
-export async function get_user_data_from_session(CACHE_DURATION: number, CACHE_KEY: string): Promise<UserData> {
-  const cached_data = get_cached_user_data(CACHE_DURATION, CACHE_KEY);
+export async function get_user_data_from_session(CACHE_DURATION: number): Promise<UserData> {
+  const cached_data = get_cached_user_data(CACHE_DURATION);
   if (cached_data) return cached_data;
 
-  const fetched_data = await fetch_user_data(CACHE_KEY);
+  const fetched_data = await fetch_user_data();
   if (fetched_data) return fetched_data;
 
   return { id: -1, username: "", avatar: "", discord_id: "", nickname: "", accepted_policy: false };
@@ -149,7 +152,7 @@ export async function login(username: string, password: string, set_error: (erro
       username: username, password: password
     })
   }
-  
+
   const response = await fetch(`/api/user`, {
     ...fetch_options
   });

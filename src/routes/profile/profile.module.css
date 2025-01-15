@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.profile_wrapper {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  left: 2rem;
+  top: 15%;
+  transform: translateY(-50%);
+
+  z-index: 1;
+  width: calc(100% - 40px);
+  max-width: 460px;
+  height: auto;
+  padding: 20px;
+
+  border-radius: 20px;
+  background-color: #fbfbfb;
+  font-family: "Inter";
+  font-weight: 300;
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}

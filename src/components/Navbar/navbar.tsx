@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import { useUser } from "~/usercontext";
-import { CACHE_DURATION, CACHE_KEY } from "~/utils/const";
+import { CACHE_DURATION } from "~/utils/const";
 import { get_user_data_from_session } from "~/utils/userutils";
 import { UserData } from "~/utils/types";
 import HiddenRoutesWrapper from "../HiddenRoutesWrapper";
@@ -20,7 +20,7 @@ export async function set_user_status() {
     return;
   }
 
-  const user_data: UserData = await get_user_data_from_session(CACHE_DURATION, CACHE_KEY);
+  const user_data: UserData = await get_user_data_from_session(CACHE_DURATION);
 
   if (user_data.username === "" || user_data.id === -1) {
     localStorage.setItem('logged_in', 'false');

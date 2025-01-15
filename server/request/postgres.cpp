@@ -125,10 +125,13 @@ namespace postgres
       "LIMIT 1");
 
     txn.conn().prepare("select_user_data_by_id",
-      "SELECT username, discord_id, avatar, nickname, accepted_policy "
-      "FROM public.\"User\" "
-      "WHERE id = $1 "
-      "LIMIT 1");
+      "SELECT row_to_json(t) "
+      "FROM ("
+      "  SELECT username, discord_id, avatar, nickname, accepted_policy "
+      "  FROM public.\"User\" "
+      "  WHERE id = $1 "
+      "  LIMIT 1"
+      ") t");
 
     txn.conn().prepare("select_username_by_id",
       "SELECT username "
@@ -152,14 +155,7 @@ namespace postgres
       "UPDATE public.\"User\" "
       "SET accepted_policy = $2 "
       "WHERE id = $1");
-
-    // ... discord user queries ...
-    txn.conn().prepare("select_user_id_by_discord_id",
-      "SELECT id "
-      "FROM public.\"User\" "
-      "WHERE discord_id = $1 "
-      "LIMIT 1");
-    
+        
     txn.conn().prepare("insert_user",
       "INSERT INTO public.\"User\" ("
       "username, email, password, levels, discord_id, account_creation_date, "
@@ -167,6 +163,23 @@ namespace postgres
       ") VALUES ("
       "$1, $2, $3, '{-1}', '-1', $4, '-1', $1"
       ")");
+
+    txn.conn().prepare("update_user_roles",
+      "UPDATE public.\"User\" "
+      "SET levels = $2 "
+      "WHERE id = $1");
+
+    txn.conn().prepare("update_user_data",
+      "UPDATE public.\"User\" "
+      "SET avatar = $2, nickname = $3 "
+      "WHERE id = $1");
+
+    // ... discord user queries ...
+    txn.conn().prepare("select_user_id_by_discord_id",
+      "SELECT id "
+      "FROM public.\"User\" "
+      "WHERE discord_id = $1 "
+      "LIMIT 1");
 
     txn.conn().prepare("register_with_discord",
       "INSERT INTO public.\"User\" ("
@@ -187,15 +200,22 @@ namespace postgres
       "WHERE id = $1"
     );
 
-    txn.conn().prepare("update_user_roles",
-      "UPDATE public.\"User\" "
-      "SET levels = $2 "
-      "WHERE id = $1");
-
-    txn.conn().prepare("update_user_data",
-      "UPDATE public.\"User\" "
-      "SET avatar = $2, nickname = $3 "
-      "WHERE id = $1");
+    // ... profile queries ...
+    txn.conn().prepare("select_profile_data",
+      "SELECT array_to_json(array_agg(row_to_json(t))) "
+      "FROM ("
+      "  SELECT json_build_object("
+      "           'id', u.id,"
+      "           'username', u.username,"
+      "           'discord_id', u.discord_id,"
+      "           'avatar', u.avatar,"
+      "           'nickname', u.nickname,"
+      "           'discord_status', u.discord_status"
+      "         ) as user,"
+      "         u.levels"
+      "  FROM public.\"User\" u"
+      "  WHERE u.id = $1"
+      ") t");
 
     // ... annotation queries ...
     txn.conn().prepare("select_annotation_data",
@@ -438,6 +458,7 @@ namespace postgres
     {
       global_pool = new ConnectionPool(std::max(10u, 2 * std::thread::hardware_concurrency()));
     }
+    std::cout << "Postgres connection pool initialized with " << global_pool->max_size << " connections." << std::endl;
   }
 
   /** 

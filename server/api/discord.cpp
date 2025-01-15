@@ -273,7 +273,7 @@ class DiscordHandler : public RequestHandler
       {
         if (i > 0)
           oss << ",";
-        oss << txn.quote(roles[i]);
+        oss << roles[i];
       }
       oss << "}";
 

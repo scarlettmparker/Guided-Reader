@@ -11,16 +11,6 @@ class UserHandler : public RequestHandler
   private:
   ConnectionPool & pool;
 
-  struct UserData
-  {
-    std::string username;
-    std::string discord_id;
-    std::string avatar;
-    std::string nickname;
-    bool accepted_policy;
-  };
-
-
   /**
    * Helper function to validate an email input. Does not use regex as usually
    * thhat's far too restrictive of an approach (and slow for the back-end).
@@ -151,15 +141,19 @@ class UserHandler : public RequestHandler
 
   /**
    * Select user data by ID. This returns the username, Discord ID, avatar, and nickname of the user.
+   *
    * @param id ID of the user to select.
    * @param verbose Whether to print messages to stdout.
-   * @return UserData struct with the user data if found, otherwise an object of empty strings.
+   * @return JSON of user data.
    */
-  UserData select_user_data_by_id(int id, bool verbose)
+  nlohmann::json select_user_data_by_id(int id, bool verbose)
   {
+    nlohmann::json user_data = nlohmann::json::array();
+
     try
     {
       pqxx::work & txn = request::begin_transaction(pool);
+
       pqxx::result r = txn.exec_prepared(
         "select_user_data_by_id", id
       );
@@ -176,17 +170,10 @@ class UserHandler : public RequestHandler
       if (r.empty())
       {
         verbose && std::cout << "User with ID " << id << " not found" << std::endl;
-        return UserData{"", "", "", ""};
+        return user_data;
       }
 
-      return UserData
-      {
-        r[0][0].as<std::string>(),
-        r[0][1].as<std::string>(),
-        r[0][2].as<std::string>(),
-        r[0][3].as<std::string>(),
-        r[0][4].as<bool>()
-      };
+      user_data = nlohmann::json::parse(r[0][0].as<std::string>());
     }
     catch (const std::exception &e)
     {
@@ -195,7 +182,7 @@ class UserHandler : public RequestHandler
     {
       verbose && std::cerr << "Unknown error while executing query" << std::endl;
     }
-    return UserData{"", "", "", ""};
+    return user_data;
   }
 
   /**
@@ -366,7 +353,6 @@ class UserHandler : public RequestHandler
       {
         return request::make_unauthorized_response("Session ID not found", req);
       }
- 
       if (!request::validate_session(std::string(session_id), false))
       {
         return request::make_unauthorized_response("Invalid session ID", req);
@@ -378,22 +364,13 @@ class UserHandler : public RequestHandler
         return request::make_bad_request_response("User not found", req);
       }
 
-      UserData user_data = select_user_data_by_id(user_id, false);
-      if (user_data.username.empty())
+      nlohmann::json user_data = select_user_data_by_id(user_id, false);
+      if (user_data.empty())
       {
         return request::make_bad_request_response("User not found", req);
       }
-      
-      nlohmann::json user_info =
-      {
-        {"id", user_id},
-        {"username", user_data.username},
-        {"discord_id", user_data.discord_id},
-        {"avatar", user_data.avatar},
-        {"nickname", user_data.nickname}
-      };
 
-      return request::make_json_request_response(user_info, req);
+      return request::make_json_request_response(user_data, req);
     }
     else if (req.method() == http::verb::post)
     {

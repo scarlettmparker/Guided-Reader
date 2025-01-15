@@ -40,11 +40,11 @@ namespace postgres
     std::queue<pqxx::connection*> pool;
     std::mutex pool_mutex;
     std::condition_variable pool_cv;
-    int max_size;
     
     pqxx::connection* create_new_connection();
     int validate_connection(pqxx::connection* c);
   public:
+    int max_size;
     explicit ConnectionPool(int size);
     ~ConnectionPool();
 
