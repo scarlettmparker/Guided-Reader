@@ -133,6 +133,37 @@ export async function discord_login(code: string): Promise<boolean> {
 }
 
 /**
+ * Links the user's Discord account given the Discord code from the OAuth2 flow.
+ * 
+ * @param code Discord code from the OAuth2 flow.
+ * @return True if the linking is successful, false otherwise.
+ */
+export async function discord_link(code: string): Promise<boolean> {
+  const fetch_options: RequestInit = {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      code: code,
+    }),
+  };
+
+  const response = await fetch(`/api/discord`, {
+    ...fetch_options,
+  });
+
+  const data = await response.json();
+  if (data.status === 'ok') {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Logs in the user with the given username and password.
  * 
  * @param username Username of the user.

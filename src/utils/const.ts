@@ -11,6 +11,7 @@ export const ENV = {
   VITE_SERVER_PORT: import.meta.env.VITE_SERVER_PORT,
   VITE_SERVER_DEV: import.meta.env.VITE_SERVER_DEV,
   VITE_DISCORD_REDIRECT_URI: import.meta.env.VITE_DISCORD_REDIRECT_URI,
+  VITE_DISCORD_LINK_REDIRECT_URI: import.meta.env.VITE_DISCORD_LINK_REDIRECT_URI,
 };
 
 export interface CacheData {

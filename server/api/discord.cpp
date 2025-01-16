@@ -359,7 +359,7 @@ class DiscordHandler : public RequestHandler
    * @param discord_id Discord ID to link.
    * @param verbose Whether to print messages to stdout.
    */
-  bool link_user_to_discord(int user_id, int discord_id, bool verbose)
+  bool link_user_to_discord(int user_id, const std::string discord_id, bool verbose)
   {
     try
     {
@@ -386,6 +386,7 @@ class DiscordHandler : public RequestHandler
     {
       verbose && std::cerr << "Unknown error while executing query" << std::endl;
     }
+    return false;
   }
 
   /**
@@ -750,15 +751,11 @@ class DiscordHandler : public RequestHandler
         return request::make_unauthorized_response("Invalid session ID", req);
       }
 
-      // ... ensure the person trying to link is who they say they are ...
-      int real_user_id = request::get_user_id_from_session(std::string(session_id), false);
-      if (real_user_id == -1)
+      // ... get the account of the person trying to link to discord ...
+      user_id = request::get_user_id_from_session(std::string(session_id), false);
+      if (user_id == -1)
       {
         return request::make_bad_request_response("User not found", req);
-      }
-      if (real_user_id != user_id)
-      {
-        return request::make_bad_request_response("User does not match session ID", req);
       }
 
       validate_discord_status(user_id, true, false);
@@ -792,10 +789,11 @@ class DiscordHandler : public RequestHandler
         return request::make_bad_request_response("Failed to verify user roles", req);
       }
 
-      if (!link_user_to_discord(user_id, std::stoi(discord_id), false))
+      if (!link_user_to_discord(user_id, discord_id, true))
       {
         return request::make_bad_request_response("Failed to link user with Discord", req);
       }
+
       return request::make_ok_request_response("User linked with Discord", req);
     }
     else if (req.method() == http::verb::delete_)

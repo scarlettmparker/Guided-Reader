@@ -1,11 +1,11 @@
 import { useLocation } from "@solidjs/router";
-import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
-import { BASE_DELAY, MAX_RETRIES } from "~/utils/const";
+import { Component, createSignal, onMount, Show } from "solid-js";
+import { BASE_DELAY, ENV, MAX_RETRIES } from "~/utils/const";
 import { delay } from '~/utils/userutils';
-import styles from './profile.module.css';
 import { build_avatar_string } from "~/components/Navbar/navbar";
 import { role_level_map } from "~/utils/levelconst/levelconst";
 import { useUser } from "~/usercontext";
+import styles from './profile.module.css';
 
 type ProfileData = {
   levels: string[];
@@ -21,6 +21,12 @@ type UserProfileData = {
   discord_status: boolean;
 }
 
+/**
+ * Fetches the profile data of a user based on the user_id.
+ * 
+ * @param user_id User ID of the user to fetch the profile data for.
+ * @return ProfileData object containing the user's levels and user data.
+ */
 async function fetch_profile_data(user_id: number): Promise<ProfileData | null> {
   const REQUEST_TIMEOUT = 5000;
 
@@ -74,7 +80,6 @@ async function fetch_profile_data(user_id: number): Promise<ProfileData | null> 
  * 
  * @param levels Array of levels to compare.
  * @return Level with the highest index in the role_level_map.
- * 
  */
 function get_best_user_level(levels: string[]): string {
   let best_level = "NL";
@@ -182,6 +187,11 @@ interface VerifiedModuleProps {
 /**
  * Component that displays the verification status of a user.
  * If the profile belongs to the current logged in user, the user can verify their account.
+ * 
+ * @param user_id User ID of the current logged in user.
+ * @param profile_id User ID of the profile being viewed.
+ * @param verified Boolean value indicating if the user is verified.
+ * @return JSX element of the VerifiedModule component.
  */
 const VerifiedModule: Component<VerifiedModuleProps> = (props) => {
   return (
@@ -192,7 +202,7 @@ const VerifiedModule: Component<VerifiedModuleProps> = (props) => {
         <>
           {props.user_id == props.profile_id ? (
             <span class={styles.unverified_text}>
-              <a href='/auth_discord?verify=true&redirect=profile?user_id=1'>unverified</a>
+              <a href={ENV.VITE_DISCORD_LINK_REDIRECT_URI}>unverified</a>
             </span>
           ) : (
             <span class={styles.unverified_text}>unverified</span>

@@ -25,6 +25,8 @@ namespace server
 
     ctx.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
     ctx.set_verify_depth(4);
+
+    SSL_CTX_set_session_cache_mode(ctx.native_handle(), SSL_SESS_CACHE_SERVER);
     
     try
     {
@@ -332,6 +334,7 @@ namespace server
       res.set(http::field::access_control_allow_methods, allowed_methods);
       res.set(http::field::access_control_allow_headers, "Content-Type, Authorization, Access-Control-Allow-Origin");
       res.set(http::field::access_control_allow_credentials, "true");
+      res.set(http::field::connection, "keep-alive");
       return res;
     }
 
@@ -355,7 +358,7 @@ namespace server
     res.set(http::field::access_control_allow_methods, allowed_methods);
     res.set(http::field::access_control_allow_headers, "Content-Type, Authorization");
     res.set(http::field::access_control_allow_credentials, "true");
-    
+    res.set(http::field::connection, "keep-alive");
     return res;
   }
 
@@ -373,6 +376,8 @@ namespace server
     if (closed_) return;
     closed_ = true;
 
+    auto self(shared_from_this());
+    
     beast::error_code ec;
     socket_.shutdown(tcp::socket::shutdown_send, ec);
     if (ec)
@@ -421,11 +426,19 @@ namespace server
     auto self(shared_from_this());
     auto sp = std::make_shared<http::response<http::string_body>>(std::move(res));
 
+    if (req_.keep_alive()) {
+      sp->set(http::field::connection, "keep-alive");
+    }
+
     http::async_write(socket_, * sp, [this, self, sp](beast::error_code ec, std::size_t)
     {
       if (ec)
       {
         std::cerr << "Write error: " << ec.message() << std::endl;
+        return do_close();
+      }
+      if (!req_.keep_alive())
+      {
         return do_close();
       }
       if (sp->need_eof())
@@ -436,7 +449,7 @@ namespace server
     });
   }
   
-  Listener::Listener(net::io_context& ioc, tcp::endpoint endpoint) : ioc_(ioc),
+  Listener::Listener(net::io_context & ioc, tcp::endpoint endpoint) : ioc_(ioc),
     acceptor_(net::make_strand(ioc)), ctx_(init_ssl_context())
   {
     beast::error_code ec;
@@ -452,6 +465,34 @@ namespace server
     if (ec)
     {
       std::cerr << "Set option error: " << ec.message() << std::endl;
+      return;
+    }
+
+    acceptor_.set_option(net::socket_base::receive_buffer_size(65536), ec);
+    if (ec)
+    {
+      std::cerr << "Set receive buffer size error: " << ec.message() << std::endl;
+      return;
+    }
+
+    acceptor_.set_option(net::socket_base::send_buffer_size(65536), ec);
+    if (ec)
+    {
+      std::cerr << "Set send buffer size error: " << ec.message() << std::endl;
+      return;
+    }
+
+    acceptor_.set_option(net::socket_base::reuse_address(true), ec);
+    if (ec)
+    {
+      std::cerr << "Set reuse address error: " << ec.message() << std::endl;
+      return;
+    }
+
+    acceptor_.set_option(tcp::no_delay(true), ec);
+    if (ec)
+    {
+      std::cerr << "Set no delay error: " << ec.message() << std::endl;
       return;
     }
 
@@ -481,8 +522,8 @@ namespace server
     {
       if (!ec)
       {
-        // std::make_shared<Session>(std::move(socket))->run();
-        std::make_shared<SSLSession>(std::move(socket), ctx_)->run();
+        std::make_shared<Session>(std::move(socket))->run();
+        // std::make_shared<SSLSession>(std::move(socket), ctx_)->run();
       }
       do_accept();
     });
