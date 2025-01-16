@@ -2,18 +2,10 @@ import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { TextBrief } from "~/utils/types";
 import { get_text_brief } from "~/utils/textutils";
 import { build_avatar_string } from "../Navbar/navbar";
+import { level_map } from "~/utils/levelconst/levelconst";
 
 import styles from "./textinfo.module.css";
 import TextInfoProps from "./textinfoprops";
-
-const level_map = new Map([
-  ["Α1", "#1b9e52"],
-  ["Α2", "#179992"],
-  ["Β1", "#ba7011"],
-  ["Β2", "#ba1c2c"],
-  ["Γ1", "#b01965"],
-  ["Γ2", "#1b5eb3"],
-]);
 
 /**
  * The TextInfo component displays a brief about a text. This will include the title,

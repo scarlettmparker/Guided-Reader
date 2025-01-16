@@ -73,11 +73,11 @@ const Navbar: Component = () => {
  * @return JSX element of the Navbar.
  */
 const NavbarContent: Component = () => {
+  const MAX_USERNAME_LENGTH = 18;
+
   const { username, set_username, avatar, discord_id } = useUser();
   const [avatar_url, set_avatar_url] = createSignal("-1");
   const [nav_hidden, set_nav_hidden] = createSignal(false);
-
-  let MAX_USERNAME_LENGTH = 18;
 
   const set_user_details = () => {
     if (avatar() !== "-1" && discord_id() !== "-1") {

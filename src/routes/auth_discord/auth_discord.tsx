@@ -23,8 +23,14 @@ const AuthDiscord = () => {
         window.location.href = '/?logged_in=true';
       }
     } else {
-      console.error('No code provided.');
-      navigate('/');
+      const verify = url_params.get('verify');
+      if (verify == 'true') {
+        console.error('No code provided.');
+        navigate('/');
+      } else {
+        console.error('No code provided.');
+        navigate('/');
+      }
     }
   });
 

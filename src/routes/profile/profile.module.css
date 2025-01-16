@@ -3,24 +3,86 @@
 .profile_wrapper {
   position: absolute;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   left: 2rem;
-  top: 15%;
+  top: 25%;
   transform: translateY(-50%);
 
   z-index: 1;
   width: calc(100% - 40px);
-  max-width: 460px;
+  max-width: 580px;
   height: auto;
   padding: 20px;
+  gap: 20px;
 
   border-radius: 20px;
   background-color: #fbfbfb;
-  font-family: "Inter";
+  font-family: "Open Sans", sans-serif;
   font-weight: 300;
 
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #272121;
+}
+
+.profile_picture {
+  width: 14rem;
+  height: 14rem;
+  border-radius: 15px;
+}
+
+.profile_info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile_header {
+  display: flex;
+  flex-direction: row;
+  gap: 0.8rem;
+}
+
+.profile_subheader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.header_text {
+  font-weight: 600;
+  font-size: 1.7rem;
+}
+
+.body_text {
+  font-weight: 300;
+  font-size: 1.2rem;
+}
+
+.level_text {
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-top: 7px;
+}
+
+.verified_text,
+.unverified_text {
+  font-weight: 400;
+  color: #CF3A5F;
+}
+
+.unverified_text {
+  color: #696969; /* nice */
+}
+
+.unverified_text a {
+  text-decoration: underline dotted rgba(37, 37, 37, 0.4);
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+}
+
+.unverified_text a:hover {
+  color: #CF3A5F;
 }

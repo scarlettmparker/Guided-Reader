@@ -127,7 +127,7 @@ namespace postgres
     txn.conn().prepare("select_user_data_by_id",
       "SELECT row_to_json(t) "
       "FROM ("
-      "  SELECT username, discord_id, avatar, nickname, accepted_policy "
+      "  SELECT id, username, discord_id, avatar, nickname, accepted_policy "
       "  FROM public.\"User\" "
       "  WHERE id = $1 "
       "  LIMIT 1"
@@ -187,6 +187,11 @@ namespace postgres
       ") VALUES ("
       "$1, $2, $3, $4"
       ")");
+
+    txn.conn().prepare("link_user_to_discord",
+      "UPDATE public.\"User\" "
+      "SET discord_id = $2 "
+      "WHERE id = $1");
     
     txn.conn().prepare("validate_discord_status",
       "UPDATE public.\"User\" "

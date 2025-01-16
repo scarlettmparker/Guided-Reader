@@ -23,14 +23,14 @@ class DiscordHandler : public RequestHandler
    * @param verbose Whether to print messages to stdout.
    * @return JSON response from Discord.
    */
-  std::string make_discord_token_request(const std::string & code, bool verbose)
+  std::string make_discord_token_request(const std::string & code, const std::string redirect_uri, bool verbose)
   {
     std::string body =
       "client_id=" + std::string(READER_DISCORD_CLIENT_ID) +
       "&client_secret=" + std::string(READER_DISCORD_CLIENT_SECRET) +
       "&grant_type=authorization_code" +
       "&code=" + code +
-      "&redirect_uri=" + std::string(READER_DISCORD_REDIRECT_URI);
+      "&redirect_uri=" + redirect_uri;
 
     try
     {
@@ -353,6 +353,42 @@ class DiscordHandler : public RequestHandler
   }
 
   /**
+   * Link a user to Discord. This is used to connect a user's account to their Discord account.
+   *
+   * @param user_id ID of the user to link.
+   * @param discord_id Discord ID to link.
+   * @param verbose Whether to print messages to stdout.
+   */
+  bool link_user_to_discord(int user_id, int discord_id, bool verbose)
+  {
+    try
+    {
+      pqxx::work & txn = request::begin_transaction(pool);
+      pqxx::result r = txn.exec_prepared(
+        "link_user_to_discord",
+        user_id, discord_id
+      );
+      try
+      {
+        txn.commit();
+      }
+      catch (const std::exception & e)
+      {
+        verbose && std::cerr << "Error committing transaction: " << e.what() << std::endl;
+        throw;
+      }
+      return true;
+    }
+    catch (const std::exception & e)
+    {
+      verbose && std::cerr << "Error executing query: " << e.what() << std::endl;
+    } catch (...)
+    {
+      verbose && std::cerr << "Unknown error while executing query" << std::endl;
+    }
+  }
+
+  /**
    * Select the user ID by Discord ID.
    *
    * @param discord_id Discord ID to select.
@@ -515,7 +551,7 @@ class DiscordHandler : public RequestHandler
 
       // ... attempt to get token from Discord ...
       std::string code = json_request["code"].get<std::string>();
-      std::string token_response = make_discord_token_request(code, false);
+      std::string token_response = make_discord_token_request(code, READER_DISCORD_REDIRECT_URI, false);
 
       if (token_response.empty())
       {
@@ -638,7 +674,129 @@ class DiscordHandler : public RequestHandler
     {
       /**
        * Link account with Discord.
+       * A lot of this code is the same with POST but we are all for decoupling
+       * I love repeating code!!!
        */
+      nlohmann::json json_request;
+      try
+      {
+        json_request = nlohmann::json::parse(req.body());
+      } catch (const nlohmann::json::parse_error & e)
+      {
+        return request::make_bad_request_response("Invalid JSON", req);
+      }
+
+      std::string code = json_request["code"].get<std::string>();
+      std::string token_response = make_discord_token_request(code, READER_DISCORD_REDIRECT_LINK_URI, false);
+
+      if (token_response.empty())
+      {
+        return request::make_bad_request_response("Failed to get Discord token", req);
+      }
+      
+      nlohmann::json token_json;
+      try
+      {
+        token_json = nlohmann::json::parse(token_response);
+      } catch (const nlohmann::json::parse_error & e)
+      {
+        return request::make_bad_request_response("Invalid Discord token response", req);
+      }
+
+      std::string access_token = token_json["access_token"].get<std::string>();
+      std::string token_type = token_json["token_type"].get<std::string>();
+
+      // ... attempt to get user data from Discord ...
+      std::string user_data_response = get_discord_user_data(access_token, false);
+      if (user_data_response.empty())
+      {
+        return request::make_bad_request_response("Failed to get Discord user data", req);
+      }
+
+      nlohmann::json user_data_json;
+      try
+      {
+        user_data_json = nlohmann::json::parse(user_data_response);
+      } catch (const nlohmann::json::parse_error & e)
+      {
+        return request::make_bad_request_response("Invalid Discord user data response", req);
+      }
+
+      std::string discord_id = user_data_json["id"].get<std::string>();
+      std::string username = user_data_json["username"].get<std::string>();
+      std::string avatar;
+
+      try
+      {
+        avatar = user_data_json["avatar"].get<std::string>();
+      } catch (const nlohmann::json::type_error & e)
+      {
+        avatar = "-1";
+      }
+
+      int user_id = select_user_id_by_discord_id(discord_id, false);
+      if (user_id != -1)
+      {
+        return request::make_bad_request_response("User already linked with Discord", req);
+      }
+
+      std::string_view session_id = request::get_session_id_from_cookie(req);
+      if (session_id.empty())
+      {
+        return request::make_unauthorized_response("Session ID not found", req);
+      }
+      if (!request::validate_session(std::string(session_id), false))
+      {
+        return request::make_unauthorized_response("Invalid session ID", req);
+      }
+
+      // ... ensure the person trying to link is who they say they are ...
+      int real_user_id = request::get_user_id_from_session(std::string(session_id), false);
+      if (real_user_id == -1)
+      {
+        return request::make_bad_request_response("User not found", req);
+      }
+      if (real_user_id != user_id)
+      {
+        return request::make_bad_request_response("User does not match session ID", req);
+      }
+
+      validate_discord_status(user_id, true, false);
+
+      try
+      {
+        http::response<http::string_body> guild_response = verify_guild_membership(req, access_token);
+        if (guild_response.result() != http::status::ok)
+        {
+          validate_discord_status(user_id, false, false);
+        }
+      }
+      catch (const std::exception & e)
+      {
+        std::cerr << "Failed to verify guild membership: " << e.what() << std::endl;
+        return request::make_bad_request_response("Failed to verify guild membership", req);
+      }
+
+      // ... check the user's roles in the guild ...
+      try
+      {
+        http::response<http::string_body> role_response = verify_user_guild_roles(req, user_id, access_token);
+        if (role_response.result() != http::status::ok)
+        {
+          validate_discord_status(user_id, false, false);
+        }
+      }
+      catch (const std::exception & e)
+      {
+        std::cerr << "Failed to verify user roles: " << e.what() << std::endl;
+        return request::make_bad_request_response("Failed to verify user roles", req);
+      }
+
+      if (!link_user_to_discord(user_id, std::stoi(discord_id), false))
+      {
+        return request::make_bad_request_response("Failed to link user with Discord", req);
+      }
+      return request::make_ok_request_response("User linked with Discord", req);
     }
     else if (req.method() == http::verb::delete_)
     {
