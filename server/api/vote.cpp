@@ -202,6 +202,10 @@ class VoteHandler : public RequestHandler
 
   http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
+    if (middleware::rate_limited(ip_address, "/vote", 100))
+    {
+      return request::make_too_many_requests_response("Too many requests", req);
+    }
     if (req.method() == http::verb::get)
     {
       /**
@@ -240,10 +244,6 @@ class VoteHandler : public RequestHandler
       /**
        * POST a new vote.
        */
-      if (middleware::rate_limited(ip_address, "/vote", 100))
-      {
-        return request::make_too_many_requests_response("Rate limited", req);
-      }
       if (!request::verify_client_certificate(READER_EXPECTED_DOMAIN))
       {
         return request::make_unauthorized_response("Invalid client certificate", req);

@@ -12,7 +12,7 @@ import styles from "./textlistitem.module.css";
  */
 const TextListItem: Component<TextListItemProps> = (props) => {
   return (
-    <div class={props.class!()} onclick={props.onclick} onmouseenter={props.onmouseenter}>
+    <div class={props.class!()} onclick={props.onclick} onmouseenter={props.onmouseenter} data-text-id={props.text.id}>
       <span class={styles.text_list_item_title}>{props.text.title}</span>
     </div>
   );

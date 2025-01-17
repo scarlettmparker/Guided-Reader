@@ -342,6 +342,10 @@ class UserHandler : public RequestHandler
 
   http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
+    if (middleware::rate_limited(ip_address, "/user", 100))
+    {
+      return request::make_too_many_requests_response("Too many requests", req);
+    }
     if (req.method() == http::verb::get)
     {
       /**
@@ -427,7 +431,10 @@ class UserHandler : public RequestHandler
       /**
        * PUT new user.
        */
-
+      if (middleware::rate_limited(ip_address, "/register", 24 * 60 * 60 * 1000))
+      {
+        return request::make_too_many_requests_response("You may only register a new account once per day", req);
+      }
       nlohmann::json json_request;
       try
       {

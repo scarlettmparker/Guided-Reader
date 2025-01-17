@@ -407,6 +407,10 @@ class AnnotationHandler : public RequestHandler
 
   http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
+    if (middleware::rate_limited(ip_address, "/annotation", 100))
+    {
+      return request::make_too_many_requests_response("Too many requests", req);
+    }
     if (req.method() == http::verb::get)
     {
       /**
@@ -450,7 +454,6 @@ class AnnotationHandler : public RequestHandler
       /**
        * UPDATE annotation details.
        */
-
       nlohmann::json json_request;
       try
       {
@@ -619,7 +622,6 @@ class AnnotationHandler : public RequestHandler
       /**
        * DELETE annotation.
        */
-
       nlohmann::json json_request;
       try
       {

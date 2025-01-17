@@ -45,8 +45,7 @@ export async function set_user_status() {
  * @return URL string of the user's profile picture.
  */
 export function build_avatar_string(discord_id: string, avatar: string): string {
-  if (!discord_id || discord_id == "-1" || !avatar || avatar == "-1")
-  {
+  if (!discord_id || discord_id == "-1" || !avatar || avatar == "-1") {
     return "assets/picture/default_pfp.png";
   }
   return "https://cdn.discordapp.com/avatars/" + discord_id + "/" + avatar + ".png";
@@ -75,9 +74,9 @@ const Navbar: Component = () => {
 const NavbarContent: Component = () => {
   const MAX_USERNAME_LENGTH = 18;
 
-  const { username, set_username, avatar, discord_id } = useUser();
+  const { user_id, username, set_username, avatar, discord_id } = useUser();
   const [avatar_url, set_avatar_url] = createSignal("-1");
-  const [nav_hidden, set_nav_hidden] = createSignal(false);
+  const [nav_hidden, set_nav_hidden] = createSignal(localStorage.getItem('nav_hidden') === 'true');
 
   const set_user_details = () => {
     if (avatar() !== "-1" && discord_id() !== "-1") {
@@ -105,7 +104,9 @@ const NavbarContent: Component = () => {
         :
         <div class={styles.navbar}>
           <img src={avatar_url()} alt="Profile Picture" class={styles.profile_picture} />
-          <span class={`${styles.body_text} ${styles.user_button}`}>{username()}</span>
+          <a href={`/profile?user_id=${user_id()}`}>
+            <span class={`${styles.body_text} ${styles.user_button}`}>{username()}</span>
+          </a>
           <a href="/logout" class={`${styles.body_text} ${styles.login_button}`}>Logout</a>
           <HideButton class={styles.hide_button_container} hidden={false} set_nav_hidden={set_nav_hidden} />
         </div>}
@@ -162,8 +163,13 @@ const HideButton: Component<HideButtonProps> = ({ class: class_, hidden: nav_hid
     });
   })
 
+  const set_nav_hidden_wrapper = (value: boolean) => {
+    set_nav_hidden(value);
+    localStorage.setItem('nav_hidden', value.toString());
+  }
+
   return (
-    <div ref={hide_button!} class={class_!} onclick={() => set_nav_hidden(!nav_hidden)}>
+    <div ref={hide_button!} class={class_!} onclick={() => set_nav_hidden_wrapper(!nav_hidden)}>
       <div class={`${styles.alt_text} ${!hidden() ? styles.visible : ''}`}>{
         nav_hidden ? "Show Profile" : "Hide Profile"
       }</div>

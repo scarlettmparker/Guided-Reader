@@ -8,8 +8,11 @@ import { useUser } from "~/usercontext";
 import styles from './profile.module.css';
 
 type ProfileData = {
-  levels: string[];
   user: UserProfileData;
+  levels: string[];
+  annotation_count: number;
+  like_count: number;
+  dislike_count: number;
 }
 
 type UserProfileData = {
@@ -162,9 +165,22 @@ const Profile: Component = () => {
                   <span class={styles.body_text}>{
                     cut_username(profile_data()!.user.username, MAX_USERNAME_LENGTH)
                   }</span>
-                  <VerifiedModule user_id={user_id()} profile_id={profile_data()!.user.id}
-                    verified={profile_data()!.user.discord_status} />
+                  {profile_data()!.user.discord_status ? (
+                    <span class={`${styles.verified_text} ${styles.body_text}`}>Verified</span>
+                  ) : (
+                    <span class={`${styles.unverified_text} ${styles.body_text}`}>Unverified</span>
+                  )}
                 </div>
+                <div class={styles.annotation_count}>
+                  <span class={`${styles.body_text} ${styles.annotation_text}`}>
+                    <b>{profile_data()!.annotation_count}</b> Annotations
+                    <br></br>
+                    <b>{profile_data()!.like_count - profile_data()!.dislike_count}</b> Rating
+                  </span>
+                </div>
+                {profile_data()!.user.id === user_id() && (
+                  <ProfileFooter discord_id={profile_data()!.user.discord_id} />
+                )}
               </div>
             </div>
           </Show>
@@ -178,38 +194,20 @@ const Profile: Component = () => {
   );
 }
 
-interface VerifiedModuleProps {
-  user_id: number;
-  profile_id: number;
-  verified: boolean;
+interface ProfileFooterProps {
+  discord_id: string
 }
 
-/**
- * Component that displays the verification status of a user.
- * If the profile belongs to the current logged in user, the user can verify their account.
- * 
- * @param user_id User ID of the current logged in user.
- * @param profile_id User ID of the profile being viewed.
- * @param verified Boolean value indicating if the user is verified.
- * @return JSX element of the VerifiedModule component.
- */
-const VerifiedModule: Component<VerifiedModuleProps> = (props) => {
+const ProfileFooter: Component<ProfileFooterProps> = (props) => {
   return (
-    <span class={`${styles.verified_text} ${styles.body_text}`}>
-      {props.verified ? (
-        "verified"
-      ) : (
-        <>
-          {props.user_id == props.profile_id ? (
-            <span class={styles.unverified_text}>
-              <a href={ENV.VITE_DISCORD_LINK_REDIRECT_URI}>unverified</a>
-            </span>
-          ) : (
-            <span class={styles.unverified_text}>unverified</span>
-          )}
-        </>
+    <div class={styles.profile_footer}>
+      <button class={styles.delete_button}>Delete Account</button>
+      {props.discord_id == "-1" && (
+        <button class={styles.connect_button} onclick={() => window.location.href = ENV.VITE_DISCORD_LINK_REDIRECT_URI}>
+          Connect Discord
+        </button>
       )}
-    </span>
+    </div>
   )
 }
 export default Profile;

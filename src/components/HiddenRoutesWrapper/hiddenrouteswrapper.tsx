@@ -8,7 +8,7 @@ import HiddenRoutesWrapperProps from "./hiddenrouteswrapperprops";
  * @returns JSX element of the children if the current path is not in the hidden routes list.
  */
 const HiddenRoutesWrapper: Component<HiddenRoutesWrapperProps> = (props) => {
-  const HIDDEN_ROUTES = ["/auth_discord", "/login", "/logout", "/register"];
+  const HIDDEN_ROUTES = ["/auth_discord", "/login", "/logout", "/register", "/consent/privacy", "/consent/retention", "/consent/tos"];
   const [current_path, set_current_path] = createSignal(window.location.pathname);
 
   const handle_location_change = () => {

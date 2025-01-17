@@ -13,6 +13,9 @@ import Login from "./routes/login";
 import Logout from "./routes/logout";
 import Register from "./routes/register";
 import Profile from "./routes/profile";
+import TOS from "./routes/consent/tos";
+import Retention from "./routes/consent/retention";
+import Privacy from "./routes/consent/privacy";
 
 render(
   () => (
@@ -26,6 +29,9 @@ render(
           <Route path="/logout" component={Logout} />
           <Route path="/profile" component={Profile} />
           <Route path="/register" component={Register} />
+          <Route path="/consent/privacy" component={Privacy} />
+          <Route path="/consent/retention" component={Retention} />
+          <Route path="/consent/tos" component={TOS} />
         </Router>
         <PolicyAccept />
       </MetaProvider>

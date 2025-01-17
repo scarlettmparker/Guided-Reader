@@ -1,5 +1,5 @@
 import { Title } from '@solidjs/meta';
-import { createEffect, createMemo, createSignal, onCleanup, onMount, type Component } from 'solid-js';
+import { createEffect, createMemo, createSignal, on, onCleanup, onMount, type Component } from 'solid-js';
 import { TextTitle, Text, Annotation, AnnotationData, SelectedData } from '~/utils/types';
 import { handle_annotation_click } from '~/utils/render/renderutils';
 import { get_titles, get_annotation_data, get_text_data } from '~/utils/textutils';
@@ -167,6 +167,8 @@ interface ReaderProps {
  * @returns JSX Element for the Guided Reader.
  */
 const Reader: Component<ReaderProps> = (props) => {
+  const [initial_scroll_complete, set_initial_scroll_complete] = createSignal(false);
+
   const [list_displayed, set_list_displayed] = createSignal(true);
   const [current_text, set_current_text] = createSignal(-1);
 
@@ -177,6 +179,7 @@ const Reader: Component<ReaderProps> = (props) => {
 
   // .. state for text and text data (titles, texts, annotations) ...
   const [titles, set_titles] = createSignal<TextTitle[]>([]);
+  const [loading_titles, set_loading_titles] = createSignal(true);
   const [texts, set_texts] = createSignal<Text[]>([]);
   const [annotations_map, set_annotations_map] = createSignal<Map<number, Annotation[]>>(new Map());
 
@@ -198,9 +201,14 @@ const Reader: Component<ReaderProps> = (props) => {
 
   onMount(() => {
     if (!reached_end()) {
-      get_titles(page(), PAGE_SIZE, SORT, set_reached_end).then((new_titles) => {
-        set_titles(prev => [...prev, ...new_titles]);
-      });
+      set_loading_titles(true);
+      get_titles(page(), PAGE_SIZE, SORT, set_reached_end)
+        .then((new_titles) => {
+          set_titles(prev => [...prev, ...new_titles]);
+        })
+        .finally(() => {
+          set_loading_titles(false);
+        });
     }
 
     document.addEventListener("click", (e) => handle_annotation_click(e, set_current_annotation_id));
@@ -220,6 +228,46 @@ const Reader: Component<ReaderProps> = (props) => {
       set_annotation_data([]);
     }
   })
+
+  // ... parse query params for text id and scroll it into view ...
+  createEffect(on(
+    () => [loading_titles(), initial_scroll_complete()],
+    ([is_loading, is_complete]) => {
+      if (!is_loading && !is_complete) {
+        // ... parse the text id from the query string ...
+        const query_string = window.location.search;
+        const url_params = new URLSearchParams(query_string);
+        const text_id = url_params.get('text_id');
+
+        if (text_id && find_text_index(parseInt(text_id)) >= 0) {
+          set_current_text(parseInt(text_id));
+          set_inner_text(parseInt(text_id), DEFAULT_LANGUAGE);
+
+          queueMicrotask(() => {
+            const text_list = document.getElementById("text_list");
+            const text_element = document.querySelector(`[data-text-id="${text_id}"]`);
+
+            // ... scroll to the text element ...
+            if (text_list && text_element) {
+              text_list.scrollTo({
+              top: (text_element as HTMLElement).offsetTop - text_list.offsetTop,
+              behavior: 'auto'
+              });
+            }
+            set_initial_scroll_complete(true);
+          });
+
+        } else {
+          set_initial_scroll_complete(true);
+        }
+      }
+    },
+    { defer: true }
+  ));
+
+  const find_text_index = (id: number): number => {
+    return titles().findIndex(title => title.id == id);
+  }
 
   // ... checks if a text is already loaded ...
   const existing_text = (id: number, language: string) => {
@@ -300,6 +348,11 @@ const Reader: Component<ReaderProps> = (props) => {
     set_current_annotation_id(-1);
     set_current_text(id);
 
+    // ... update the query params ...
+    const url = new URL(window.location.href);
+    url.searchParams.set('text_id', id.toString());
+    window.history.pushState({}, '', url.toString());
+
     if (!loading_annotations().has(id)) {
       load_annotations(id, language);
     }
@@ -324,6 +377,9 @@ const Reader: Component<ReaderProps> = (props) => {
       }
       <div class={styles.text_display_wrapper} id="text_display_wrapper">
         <Header>
+          {!list_displayed() &&
+            <span class={styles.text_list_hide} onclick={() => set_list_displayed(true)}>{"<"}</span>
+          }
         </Header>
         <TextDisplay current_text={current_text} loading_texts={loading_texts} error={error}
           annotations_map={annotations_map} set_annotations_map={set_annotations_map} get_current_text={get_current_text} />

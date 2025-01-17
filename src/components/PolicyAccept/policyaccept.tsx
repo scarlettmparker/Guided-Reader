@@ -3,6 +3,7 @@ import { useUser } from "~/usercontext";
 import { UserData } from "~/utils/types";
 import { CACHE_KEY, MAX_RETRIES } from "~/utils/const";
 import styles from './policyaccept.module.css';
+import HiddenRoutesWrapper from "../HiddenRoutesWrapper";
 
 /**
  * Send a POST request to the server to accept the policy.
@@ -79,7 +80,7 @@ const PolicyAccept: Component = () => {
   };
 
   return (
-    <>
+    <HiddenRoutesWrapper>
       {(user_id() !== -1 && !accepted_policy()) && (
         <div class={styles.page_wrapper}>
           <div class={styles.policy_accept}>
@@ -87,7 +88,7 @@ const PolicyAccept: Component = () => {
               Important
             </div>
             <span class={styles.body_text}>
-              Before continuing, please accept the <a href="/policy">Privacy Policy</a> and <a href="/tos">Terms of Service</a>.
+              Before continuing, please accept the <a href="/consent/privacy" target="_blank">Privacy Policy</a> and <a href="/consent/tos" target="_blank">Terms of Service</a>.
             </span>
             <div class={styles.accept}>
               <label>
@@ -112,7 +113,7 @@ const PolicyAccept: Component = () => {
           </div>
         </div>
       )}
-    </>
+    </HiddenRoutesWrapper>
   );
 };
 

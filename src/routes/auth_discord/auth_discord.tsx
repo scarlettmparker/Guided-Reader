@@ -2,6 +2,7 @@ import { onMount } from 'solid-js';
 import { discord_link, discord_login } from '~/utils/userutils';
 import { useNavigate } from '@solidjs/router';
 import Index from '..';
+import { CACHE_KEY } from '~/utils/const';
 
 const AuthDiscord = () => {
   const navigate = useNavigate();
@@ -28,6 +29,10 @@ const AuthDiscord = () => {
       
       if (!success) {
         console.error('Failed to link Discord.');
+      } else {
+        localStorage.setItem('logged_in', 'true');
+        localStorage.removeItem(CACHE_KEY); // load new user data (pfp)
+        window.location.href = '/?logged_in=true';
       }
       navigate('/');
     } else {

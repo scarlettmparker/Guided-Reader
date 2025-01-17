@@ -31,7 +31,7 @@ const TextList: Component<TextListProps<TextTitle>> = (props) => {
   })
 
   return (
-    <div class={styles.text_list}>
+    <div class={styles.text_list} id="text_list">
       <For each={props.items()}>
         {props.children}
       </For>
