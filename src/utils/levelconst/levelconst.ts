@@ -1,6 +1,6 @@
 export const level_map = new Map([
-  ["Non Learner", "#E6E061"],
-  ["Native", "#4B847FC"],
+  ["NL", "#E6E061"],
+  ["GR", "#4B847FC"],
   ["Α1", "#1b9e52"],
   ["Α2", "#179992"],
   ["Β1", "#ba7011"],

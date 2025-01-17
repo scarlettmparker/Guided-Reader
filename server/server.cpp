@@ -260,17 +260,36 @@ namespace server
 
     auto self = shared_from_this();
 
+    if (!stream_.next_layer().is_open())
+    {
+      state_ = State::CLOSED;
+      return;
+    }
+
     stream_.async_shutdown(
     [this, self](beast::error_code ec)
     {
-      if (ec && ec != net::error::eof && ec != net::error::operation_aborted && ec != beast::error::timeout)
+      if (ec == net::error::eof ||
+          ec == net::error::operation_aborted ||
+          ec == beast::error::timeout ||
+          ec == net::error::not_connected)
+      {
+        state_ = State::CLOSED;
+        return;
+      }
+
+      if (ec)
       {
         std::cerr << "Shutdown error: " << ec.message() << std::endl;
       }
 
       beast::error_code err;
-      stream_.next_layer().shutdown(tcp::socket::shutdown_both, err);
-      stream_.next_layer().close(err);
+      if (stream_.next_layer().is_open())
+      {
+        stream_.next_layer().shutdown(tcp::socket::shutdown_both, err);
+        stream_.next_layer().close(err);
+      }
+      
       state_ = State::CLOSED;
     });
   }
@@ -377,14 +396,23 @@ namespace server
     closed_ = true;
 
     auto self(shared_from_this());
-    
     beast::error_code ec;
-    socket_.shutdown(tcp::socket::shutdown_send, ec);
-    if (ec)
+
+    if (socket_.is_open())
     {
-      std::cerr << "Shutdown error: " << ec.message() << std::endl;
+      socket_.shutdown(tcp::socket::shutdown_send, ec);
+
+      if (ec && ec != beast::errc::not_connected)
+      {
+        std::cerr << "Shutdown error: " << ec.message() << std::endl;
+      }
     }
+
     socket_.close(ec);
+    if (ec && ec != beast::errc::not_connected)
+    {
+      std::cerr << "Close error: " << ec.message() << std::endl;
+    }
   }
 
   /**
@@ -392,26 +420,33 @@ namespace server
    */
   void Session::do_read()
   {
-    if (closed_) return ;
+    if (closed_) return;
 
     buffer_.consume(buffer_.size());
     req_ = {};
 
     auto self(shared_from_this());
-    http::async_read(socket_, buffer_, req_, [this, self](beast::error_code ec, std::size_t)
-    {
-      if (ec == http::error::end_of_stream)
+
+    http::async_read(socket_, buffer_, req_, 
+      [this, self](beast::error_code ec, std::size_t)
       {
-        return do_close();
-      }
-      if (ec) {
-        std::cerr << "Read error: " << ec.message() << std::endl;
-        return do_close();
-      }
-      boost::asio::ip::address ip_address = socket_.remote_endpoint().address();
-      std::string ip_str = ip_address.to_string();
-      http::response<http::string_body> res = handle_request(req_, ip_str);
-      do_write(std::move(res));
+        if (ec == http::error::end_of_stream ||
+            ec == net::error::connection_reset ||
+            ec == net::error::operation_aborted ||
+            ec == net::error::connection_aborted)
+        {
+          return do_close();
+        }
+
+        if (ec) {
+          std::cerr << "Read error: " << ec.message() << std::endl;
+          return do_close();
+        }
+        
+        boost::asio::ip::address ip_address = socket_.remote_endpoint().address();
+        std::string ip_str = ip_address.to_string();
+        http::response<http::string_body> res = handle_request(req_, ip_str);
+        do_write(std::move(res));
     });
   }
 
@@ -522,8 +557,8 @@ namespace server
     {
       if (!ec)
       {
-        std::make_shared<Session>(std::move(socket))->run();
-        // std::make_shared<SSLSession>(std::move(socket), ctx_)->run();
+        // std::make_shared<Session>(std::move(socket))->run();
+        std::make_shared<SSLSession>(std::move(socket), ctx_)->run();
       }
       do_accept();
     });
