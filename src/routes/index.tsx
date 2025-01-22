@@ -298,7 +298,7 @@ const Reader: Component<ReaderProps> = (props) => {
     set_loading_texts(prev => new Set([...prev, id]));
 
     try {
-      const new_text = await get_text_data(id, language, "all") as Text;
+      const new_text = await get_text_data(id, language, "text") as Text;
       if (!new_text) throw new Error('Text not found');
       set_texts(prev => [...prev, new_text]);
     } catch (err) {
