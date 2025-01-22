@@ -282,9 +282,9 @@ const Reader: Component<ReaderProps> = (props) => {
   // ... loads a text and its annotations ...
   const load_text_with_annotations = async (id: number, language: string) => {
     await load_text(id, language);
-    if (!annotations_map().has(id)) {
+    /*if (!annotations_map().has(id)) {
       await load_annotations(id, language);
-    }
+    }*/
   }
 
   // ... loads a text to the list of texts to display ...

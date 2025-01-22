@@ -11,7 +11,7 @@ class LogoutHandler : public RequestHandler
 
   http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
-    if (middleware::rate_limited(ip_address, "/logout", 1000))
+    if (middleware::rate_limited(ip_address, "/logout", 1))
     {
       return request::make_too_many_requests_response("Too many requests", req);
     }

@@ -407,7 +407,7 @@ class AnnotationHandler : public RequestHandler
 
   http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
-    if (middleware::rate_limited(ip_address, "/annotation", 20))
+    if (middleware::rate_limited(ip_address, "/annotation", 10))
     {
       return request::make_too_many_requests_response("Too many requests", req);
     }
@@ -518,9 +518,9 @@ class AnnotationHandler : public RequestHandler
       /**
        * PUT a new annotation.
        */
-      if (middleware::rate_limited(ip_address, "/annotation_put", 30000))
+      if (middleware::rate_limited(ip_address, "/annotation_put", 0.05))
       {
-        return request::make_too_many_requests_response("You may only submit an annotation once every 30 seconds", req);
+        return request::make_too_many_requests_response("You may only submit an annotation once every 25 seconds", req);
       }
       if (!request::verify_client_certificate(READER_EXPECTED_DOMAIN))
       {

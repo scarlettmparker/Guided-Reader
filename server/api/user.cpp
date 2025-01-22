@@ -432,7 +432,7 @@ class UserHandler : public RequestHandler
       /**
        * PUT new user.
        */
-      if (middleware::rate_limited(ip_address, "/register", 5000))
+      if (middleware::rate_limited(ip_address, "/register", 0.05))
       {
         return request::make_too_many_requests_response("Too many requests", req);
       }

@@ -13,7 +13,7 @@ namespace middleware
 {
   struct RateLimitData
   {
-    std::chrono::system_clock::time_point last_request;
+    std::deque<int64_t> request_timestamps;
   };
 
   using CacheKey = std::pair<std::string, std::string>;
@@ -22,7 +22,7 @@ namespace middleware
   extern std::unordered_map<CacheKey, RateLimitData> rate_limit_cache;
 
   /* bool check_permissions(request::UserPermissions user_permissions, std::string * required_permissions, int num_permissions); */
-  bool rate_limited(const std::string & ip_address, const std::string & endpoint, int window_ms);
+  bool rate_limited(const std::string & ip_address, const std::string & endpoint, float max_requests_per_second);
   bool user_accepted_policy(const int user_id, bool verbose);
 }
 

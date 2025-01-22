@@ -46,28 +46,38 @@ namespace middleware
    * @param window_ms Time window in milliseconds between allowed requests
    * @return true if the user is rate limited, false otherwise.
    */
-  bool rate_limited(const std::string & ip_address, const std::string & endpoint, int window_ms)
+  /**
+   * Check if a user is being rate limited.
+   * This works by checking if the user is making too many requests per second.
+   *
+   * @param ip_address IP address of the user to check.
+   * @param endpoint The API endpoint being accessed.
+   * @param max_requests_per_second Maximum allowed requests per second.
+   * @return true if the user is rate limited, false otherwise.
+   */
+  bool rate_limited(const std::string & ip_address, const std::string & endpoint, float max_requests_per_second)
   {
     std::lock_guard<std::mutex> guard(rate_limit_mutex);
     auto now = std::chrono::system_clock::now();
     CacheKey key{ip_address, endpoint};
-    auto& data = rate_limit_cache[key];
+    auto & data = rate_limit_cache[key];
 
-    if (data.last_request.time_since_epoch().count() == 0)
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+      now.time_since_epoch()
+    ).count();
+
+    while (!data.request_timestamps.empty() && 
+           now_ms - data.request_timestamps.front() >= 1000)
     {
-      data.last_request = now;
-      return false;
+      data.request_timestamps.pop_front();
     }
 
-    // ... check that enough time has passed since last requests ...
-    auto seconds_since_last = std::chrono::duration_cast<std::chrono::milliseconds>
-      (now - data.last_request).count();    
-    if (seconds_since_last < window_ms)
+    if (data.request_timestamps.size() >= max_requests_per_second)
     {
       return true;
     }
 
-    data.last_request = now;
+    data.request_timestamps.push_back(now_ms);
     return false;
   }
 
