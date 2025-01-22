@@ -1,8 +1,8 @@
 import { onMount } from 'solid-js';
 import { discord_link, discord_login } from '~/utils/userutils';
 import { useNavigate } from '@solidjs/router';
-import Index from '..';
 import { CACHE_KEY } from '~/utils/const';
+import Index from '..';
 
 const AuthDiscord = () => {
   const navigate = useNavigate();

@@ -1,36 +1,160 @@
-## Usage
+# [Guided Reader](https://reader.scarlettparker.co.uk)
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+## Overview
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
+**Guided Reader** is a highly performant and responsive annotation tool that allows users to explore and annotate texts from τράπεζα κειμένων ([Greek Text Bank](https://www.greek-language.gr/certification/dbs/teachers/index.html)) in a style similar to Genius.com.
 
-```bash
-$ npm install # or pnpm install or yarn install
+The application is built with:
+- **SolidJS** for the front-end.
+- **C++** for the back-end.
+
+## Features
+
+- **Text annotation**: Annotate texts interactively, with a word reference button that uses the [wordreference](https://www.npmjs.com/package/wordreference) npm package to display Greek-to-English dictionary entries for words.
+- **Authentication via Discord OAuth2**.
+- **Integration with PostgreSQL and Redis** for data and session management.
+
+---
+
+## Getting Started
+
+### Back-End Setup
+
+#### Prerequisites
+- CMake (>= 3.10)
+- PostgreSQL
+- Redis
+- C++ compiler with C++17 support
+- Dependencies:
+  - Curl
+  - Boost
+  - OpenSSL
+  - Libpq
+  - Libpqxx
+  - Bcrypt ([hilch/Bcrypt.cpp](https://github.com/hilch/Bcrypt.cpp))
+  - hiredis
+  - redis-plus-plus
+
+#### Environment Variables
+Create a `.env` file in `server/env/.env` with the following:
+
+```env
+READER_SECRET_KEY=Secret key for session ID signing
+READER_EXPECTED_DOMAIN=Expected domain for client requests (optional SAN header validation)
+READER_LOCAL_HOST=Set to true to allow self-signed certificates in SSL web server mode
+READER_DB_USERNAME=PostgreSQL username
+READER_DB_PASSWORD=PostgreSQL password
+READER_DB_HOST=PostgreSQL host address
+READER_DB_PORT=PostgreSQL port
+READER_DB_NAME=PostgreSQL database name
+READER_REDIS_HOST=Redis server host
+READER_REDIS_PORT=Redis server port
+READER_SESSION_EXPIRE_LENGTH=Expiration time for session IDs in Redis
+READER_DISCORD_REDIRECT_URI=Discord OAuth2 redirect URI for login/registration
+READER_DISCORD_REDIRECT_LINK_URI=Discord OAuth2 redirect URI for linking accounts
+READER_DISCORD_CLIENT_SECRET=Discord OAuth2 client secret
+READER_DISCORD_CLIENT_ID=Discord OAuth2 client ID
+READER_GREEK_LEARNING_GUILD=Greek Learning Server Guild ID
+READER_DISCORD_USER_URL=Discord API endpoint for user info
+READER_DISCORD_USER_GUILDS_URL=Discord API endpoint for user guilds
+READER_DISCORD_TOKEN_URL=Discord API endpoint for token management
+READER_EMAIL_HOST=SMTP host for email verification (e.g., smtp.gmail.com)
+READER_EMAIL_PORT=SMTP port for email (e.g., 465)
+READER_EMAIL_ADDRESS=Email address for SMTP
+READER_EMAIL_PASSWORD=Password for SMTP
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+#### Building the Back-End
+1. Navigate to the back-end directory:
+   ```bash
+   cd server
+   ```
+2. Create a build directory and navigate into it:
+   ```bash
+   mkdir build && cd build
+   ```
+3. Run CMake:
+   ```bash
+   cmake ..
+   ```
+4. Build the server:
+   ```bash
+   make -j$(nproc)
+   ```
+5. Run the server (requires root privileges as server runs on port 443):
+   ```bash
+   sudo ./ReaderServer
+   ```
 
-## Available Scripts
+#### Notes
+- The back-end uses PostgreSQL for its primary database and Redis for session management.
+- PostgreSQL connection pool dynamically allocates connections based on the number of CPU threads:
+  ```cpp
+  global_pool = new ConnectionPool(std::max(10u, 2 * std::thread::hardware_concurrency()));
+  ```
+- Redis has a fixed pool size of 10 connections.
+- API endpoints can be added by creating a new file in `server/api/` and following the existing naming conventions. These files are automatically detected and linked during compilation.
 
-In the project directory, you can run:
+#### Database Schema
+The database schema dump is located at:
+```
+server/database_schema.sql
+```
 
-### `npm run dev` or `npm start`
+---
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Front-End Setup
 
-The page will reload if you make edits.<br>
+#### Prerequisites
+- Node.js
 
-### `npm run build`
+#### Environment Variables
+Create a `.env` file in the front-end directory with the following:
 
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
+```env
+VITE_SERVER_HOST=Back-end server host
+VITE_SERVER_PORT=Back-end server port
+VITE_SERVER_DEV=Set to true to enable HTTPS agents for the proxy to the back-end server
+VITE_DISCORD_REDIRECT_URI=Discord OAuth2 callback URL for login/registration
+VITE_DISCORD_LINK_REDIRECT_URI=Discord OAuth2 callback URL for linking accounts
+```
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+#### Running the Front-End
+1. Navigate to the front-end directory:
+   ```bash
+   cd client
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. To build for production:
+   ```bash
+   npm run build
+   ```
+5. Serve the production build:
+   ```bash
+   npm run serve
+   ```
 
-## Deployment
+---
 
-You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+## License
 
-## This project was created with the [Solid CLI](https://solid-cli.netlify.app)
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Additional Information
+- Discord Guild ID for the Greek Learning Server: **350234668680871946**
+- Discord API Endpoints:
+  - **User Info:** `/api/users/@me`
+  - **User Guilds:** `/api/users/@me/guilds`
+  - **Token:** `/api/oauth2/token`
+
+For more details, visit the website at [reader.scarlettparker.co.uk](https://reader.scarlettparker.co.uk).
+

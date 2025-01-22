@@ -6,6 +6,7 @@
 #include <ctime>
 
 using namespace postgres;
+
 class UserHandler : public RequestHandler
 {
   private:

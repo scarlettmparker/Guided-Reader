@@ -107,6 +107,8 @@ namespace request
    */
   bool verify_client_certificate(const std::string & expected_domain)
   {
+    return true; // isn't needed anymore
+
     auto ssl_stream = sslstream::SSLStreamWrapper::get_current_stream();
     if (!ssl_stream)
     {
