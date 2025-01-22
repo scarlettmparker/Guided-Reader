@@ -36,6 +36,7 @@ export default defineConfig(({ mode }) => {
 
   const is_dev = env.VITE_SERVER_DEV === "true";
   const https_agent = cert && key && ca ? create_https_agent(!is_dev) : undefined;
+  const allowed_hosts = env.VITE_ALLOWED_HOSTS ? env.VITE_ALLOWED_HOSTS.split(',') : [];
 
   return {
     plugins: [solidPlugin()],
@@ -60,10 +61,12 @@ export default defineConfig(({ mode }) => {
       },
       host: env.VITE_CLIENT_HOST,
       port: parseInt(env.VITE_CLIENT_PORT),
+      allowedHosts: allowed_hosts,
     },
     preview: {
       host: env.VITE_CLIENT_HOST,
       port: parseInt(env.VITE_CLIENT_PORT),
+      allowedHosts: allowed_hosts,
     },
     build: {
       target: 'esnext',

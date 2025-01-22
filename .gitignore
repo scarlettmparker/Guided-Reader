@@ -12,6 +12,7 @@ app.config.timestamp_*.js
 /server/env/.env
 /server/build
 /server/key
+/server/lib/libbcrypt.a
 /src/key
 
 .env

@@ -31,7 +31,7 @@ The application is built with:
   - OpenSSL
   - Libpq
   - Libpqxx
-  - Bcrypt ([hilch/Bcrypt.cpp](https://github.com/hilch/Bcrypt.cpp))
+  - Bcrypt ([hilch/Bcrypt.cpp](https://github.com/hilch/Bcrypt.cpp)). You will need to build it and place the .a file into /server/lib 
   - hiredis
   - redis-plus-plus
 
@@ -121,6 +121,7 @@ Create a `.env` file in the front-end directory with the following:
 ```env
 VITE_CLIENT_HOST=Front-end host address
 VITE_CLIENT_PORT=Front-end port
+VITE_ALLOWED_HOSTS=List of hosts permitted to connect to the front-end
 VITE_CLIENT_CERT=Location of client certificate file
 VITE_CLIENT_KEY=Location of client private key file
 VITE_CLIENT_CA=Location of client certificate authority file
@@ -167,6 +168,10 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
   - **User Info:** `/api/users/@me`
   - **User Guilds:** `/api/users/@me/guilds`
   - **Token:** `/api/oauth2/token`
+- Discord OAuth2 Permissions:
+  - identify, guilds, guilds.members.read
+- Discord Redirect URI: **client/auth_discord**
+- Discord Link Redirect URI: **client/auth_discord?verify=true**
 
 For more details, visit the website at [reader.scarlettparker.co.uk](https://reader.scarlettparker.co.uk).
 
