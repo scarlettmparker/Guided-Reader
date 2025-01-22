@@ -5,7 +5,6 @@ namespace server
   /**
    * Initialize the SSL context for the server.
    * This is used to set up the server's SSL context with the appropriate certificates and keys.
-   * Currently it's mainly used to check the source of a request to prevent CSRF attacks with annotations.
    *
    * @return SSL context for the server.
    */
@@ -31,10 +30,10 @@ namespace server
     try
     {
       // ... load certificates and keys ...
-      ctx.use_certificate_chain_file("../key/server.crt.pem");
-      ctx.use_private_key_file("../key/server.key.pem", ssl::context::pem);
-      ctx.use_tmp_dh_file("../key/dhparam.pem");
-      ctx.load_verify_file("../key/server.chain.crt.pem");
+      ctx.use_certificate_chain_file(READER_FULL_CHAIN);
+      ctx.use_private_key_file(READER_PRIVATE_KEY, ssl::context::pem);
+      ctx.use_tmp_dh_file(READER_DH_PARAM);
+      ctx.load_verify_file(READER_CHAIN);
 
       ctx.set_verify_callback(
         [](bool preverified, ssl::verify_context& ctx)
@@ -557,8 +556,11 @@ namespace server
     {
       if (!ec)
       {
-        // std::make_shared<Session>(std::move(socket))->run();
-        std::make_shared<SSLSession>(std::move(socket), ctx_)->run();
+        if (READER_SERVER_DEV == "true") {
+          std::make_shared<Session>(std::move(socket))->run();
+        } else {
+          std::make_shared<SSLSession>(std::move(socket), ctx_)->run();
+        }
       }
       do_accept();
     });

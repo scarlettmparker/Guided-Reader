@@ -8,8 +8,10 @@ int main()
 {
   try
   {
-    auto const address = net::ip::make_address("0.0.0.0");
-    unsigned short port = 443;
+    auto const address = net::ip::make_address(READER_SERVER_HOST);
+    unsigned short port = static_cast<unsigned short>(READER_SERVER_PORT);
+
+    std::cout << "Starting server on " << address << ":" << port << std::endl;
 
     net::io_context ioc;
     std::vector<std::thread> threads;

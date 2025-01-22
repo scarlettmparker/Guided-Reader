@@ -1,5 +1,5 @@
 #include "api.hpp"
-#include "bcrypt/BCrypt.hpp"
+#include "bcrypt.h"
 #include "../auth/session.hpp"
 
 #include <openssl/rand.h>
@@ -330,7 +330,7 @@ class UserHandler : public RequestHandler
     {
       return false;
     }
-    return BCrypt::validatePassword(password, stored_password);
+    return bcrypt::validatePassword(password, stored_password);
   }
 
   public:
@@ -343,7 +343,7 @@ class UserHandler : public RequestHandler
 
   http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
-    if (middleware::rate_limited(ip_address, "/user", 100))
+    if (middleware::rate_limited(ip_address, "/user", 20))
     {
       return request::make_too_many_requests_response("Too many requests", req);
     }
@@ -432,9 +432,9 @@ class UserHandler : public RequestHandler
       /**
        * PUT new user.
        */
-      if (middleware::rate_limited(ip_address, "/register", 24 * 60 * 60 * 1000))
+      if (middleware::rate_limited(ip_address, "/register", 5000))
       {
-        return request::make_too_many_requests_response("You may only register a new account once per day", req);
+        return request::make_too_many_requests_response("Too many requests", req);
       }
       nlohmann::json json_request;
       try
@@ -478,7 +478,7 @@ class UserHandler : public RequestHandler
         return request::make_bad_request_response("Email taken", req);
       }
 
-      std::string hashed_password = BCrypt::generateHash(password);
+      std::string hashed_password = bcrypt::generateHash(password);
       if (hashed_password.empty())
       {
         return request::make_bad_request_response("Failed to hash password", req);

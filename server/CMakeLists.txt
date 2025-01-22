@@ -86,15 +86,6 @@ if (NOT LIBPQXX_LIB)
     message(FATAL_ERROR "libpqxx not found")
 endif()
 
-#bcrypt
-
-# <------------- add bcrypt ------------->
-
-find_library(BCRYPT_LIB NAMES bcrypt PATHS /usr/local/lib)
-if (NOT BCRYPT_LIB)
-    message(FATAL_ERROR "bcrypt not found")
-endif()
-
 # <------------ add hiredis --------------->
 
 find_path(HIREDIS_HEADER hiredis)
@@ -106,6 +97,8 @@ find_path(REDIS_PLUS_PLUS_HEADER sw)
 find_library(REDIS_PLUS_PLUS_LIB redis++)
 
 # <------------- compile api directory files ------------->
+link_directories("lib")
+include_directories("lib/include")
 
 file(GLOB_RECURSE API_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/api/*.cpp")
 foreach(SOURCE_FILE ${API_SOURCES})
@@ -117,7 +110,7 @@ foreach(SOURCE_FILE ${API_SOURCES})
   set_target_properties(${LIB_NAME} PROPERTIES OUTPUT_NAME ${LIB_NAME} LIBRARY_OUTPUT_DIRECTORY ".")
   target_link_libraries(
     ${LIB_NAME} ${CURL_LIBRARIES} ${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto pthread dl
-    ${LIBPQXX_LIB} ${LIBPQ_LIBRARIES} ${BCRYPT_LIB} ${HIREDIS_LIB} ${REDIS_PLUS_PLUS_LIB} pch
+    ${LIBPQXX_LIB} ${LIBPQ_LIBRARIES} ${HIREDIS_LIB} ${REDIS_PLUS_PLUS_LIB} pch bcrypt
   )
 endforeach()
 

@@ -39,9 +39,16 @@ The application is built with:
 Create a `.env` file in `server/env/.env` with the following:
 
 ```env
+READER_SERVER_HOST=Back-end server host
+READER_SERVER_PORT=Back-end server port
+READER_SERVER_DEV=Set to true to enable SSL on the server
 READER_SECRET_KEY=Secret key for session ID signing
 READER_EXPECTED_DOMAIN=Expected domain for client requests (optional SAN header validation)
 READER_LOCAL_HOST=Set to true to allow self-signed certificates in SSL web server mode
+READER_FULL_CHAIN=Location of full chain certificate file
+READER_PRIVATE_KEY=Location of private key file
+READER_DH_PARAM=Location of Diffie-Hellman parameters file
+READER_CHAIN=Location of chain file
 READER_DB_USERNAME=PostgreSQL username
 READER_DB_PASSWORD=PostgreSQL password
 READER_DB_HOST=PostgreSQL host address
@@ -112,6 +119,11 @@ server/database_schema.sql
 Create a `.env` file in the front-end directory with the following:
 
 ```env
+VITE_CLIENT_HOST=Front-end host address
+VITE_CLIENT_PORT=Front-end port
+VITE_CLIENT_CERT=Location of client certificate file
+VITE_CLIENT_KEY=Location of client private key file
+VITE_CLIENT_CA=Location of client certificate authority file
 VITE_SERVER_HOST=Back-end server host
 VITE_SERVER_PORT=Back-end server port
 VITE_SERVER_DEV=Set to true to enable HTTPS agents for the proxy to the back-end server

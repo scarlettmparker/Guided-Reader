@@ -407,7 +407,7 @@ class AnnotationHandler : public RequestHandler
 
   http::response<http::string_body> handle_request(const http::request<http::string_body> & req, const std::string & ip_address)
   {
-    if (middleware::rate_limited(ip_address, "/annotation", 100))
+    if (middleware::rate_limited(ip_address, "/annotation", 20))
     {
       return request::make_too_many_requests_response("Too many requests", req);
     }

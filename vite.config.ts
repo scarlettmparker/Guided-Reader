@@ -5,34 +5,34 @@ import fs from 'fs';
 import solidPlugin from 'vite-plugin-solid';
 import tls from 'node:tls';
 
-const cert = fs.readFileSync('./src/key/client.crt.pem');
-const key = fs.readFileSync('./src/key/client.key.pem'); 
-const ca = fs.readFileSync('./src/key/client.chain.crt.pem');
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const cert = fs.readFileSync(env.VITE_CLIENT_CERT);
+  const key = fs.readFileSync(env.VITE_CLIENT_KEY);
+  const ca = fs.readFileSync(env.VITE_CLIENT_CA);
 
-const ticket_keys = tls.createSecureContext().context.getTicketKeys();
-
-const create_https_agent = (rejectUnauthorized: boolean) => new https.Agent({
-  cert: cert,
-  key: key,
-  ca: ca,
-  ciphers: "AES256-GCM-SHA384",
-  rejectUnauthorized,
-  keepAlive: true,
-  keepAliveMsecs: 1000,
-  maxSockets: 50,
-  maxCachedSessions: 100,
-  sessionTimeout: 3600,
-  secureContext: tls.createSecureContext({
+  const ticket_keys = tls.createSecureContext().context.getTicketKeys();
+  const create_https_agent = (rejectUnauthorized: boolean) => new https.Agent({
     cert: cert,
     key: key,
     ca: ca,
-    ticketKeys: ticket_keys
-  })
-});
+    ciphers: "AES256-GCM-SHA384",
+    rejectUnauthorized,
+    keepAlive: true,
+    keepAliveMsecs: 1000,
+    maxSockets: 50,
+    maxCachedSessions: 100,
+    sessionTimeout: 3600,
+    secureContext: tls.createSecureContext({
+      cert: cert,
+      key: key,
+      ca: ca,
+      ticketKeys: ticket_keys
+    })
+  });
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-  const https_agent = create_https_agent(env.VITE_SERVER_DEV !== "true");
+  const is_dev = env.VITE_SERVER_DEV === "true";
+  const https_agent = create_https_agent(!is_dev);
 
   return {
     plugins: [solidPlugin()],
@@ -42,20 +42,25 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      https: {
+      https: !is_dev ? {
         cert: cert,
         key: key,
         ca: ca,
-      },
+      } : undefined,
       proxy: {
         '/api': {
-          target: `https://${env.VITE_SERVER_HOST}:${env.VITE_SERVER_PORT}`,
+          target: `${is_dev ? 'http' : 'https'}://${env.VITE_SERVER_HOST}:${env.VITE_SERVER_PORT}`,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
-          agent: https_agent,
+          agent: !is_dev ? https_agent : undefined,
         }
       },
-      port: 3000,
+      host: env.VITE_CLIENT_HOST,
+      port: parseInt(env.VITE_CLIENT_PORT),
+    },
+    preview: {
+      host: env.VITE_CLIENT_HOST,
+      port: parseInt(env.VITE_CLIENT_PORT),
     },
     build: {
       target: 'esnext',
