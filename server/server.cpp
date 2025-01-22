@@ -66,7 +66,7 @@ namespace server
     catch (const std::exception & e)
     {
       std::cerr << "SSL error: " << e.what() << std::endl;
-      throw;
+      ctx.set_verify_mode(ssl::verify_none);
     }
 
     return ctx;

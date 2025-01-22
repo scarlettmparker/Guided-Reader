@@ -9,7 +9,7 @@ app.config.timestamp_*.js
 /node_modules
 
 # build
-/server/env
+/server/env/.env
 /server/build
 /server/key
 /src/key

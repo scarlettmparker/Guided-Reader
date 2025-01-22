@@ -7,11 +7,14 @@ import tls from 'node:tls';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const cert = fs.readFileSync(env.VITE_CLIENT_CERT);
-  const key = fs.readFileSync(env.VITE_CLIENT_KEY);
-  const ca = fs.readFileSync(env.VITE_CLIENT_CA);
+  const certPath = env.VITE_CLIENT_CERT;
+  const keyPath = env.VITE_CLIENT_KEY;
+  const caPath = env.VITE_CLIENT_CA;
 
-  const ticket_keys = tls.createSecureContext().context.getTicketKeys();
+  const cert = fs.existsSync(certPath) ? fs.readFileSync(certPath) : undefined;
+  const key = fs.existsSync(keyPath) ? fs.readFileSync(keyPath) : undefined;
+  const ca = fs.existsSync(caPath) ? fs.readFileSync(caPath) : undefined;
+
   const create_https_agent = (rejectUnauthorized: boolean) => new https.Agent({
     cert: cert,
     key: key,
@@ -27,12 +30,12 @@ export default defineConfig(({ mode }) => {
       cert: cert,
       key: key,
       ca: ca,
-      ticketKeys: ticket_keys
+      ticketKeys: tls.createSecureContext().context.getTicketKeys()
     })
   });
 
   const is_dev = env.VITE_SERVER_DEV === "true";
-  const https_agent = create_https_agent(!is_dev);
+  const https_agent = cert && key && ca ? create_https_agent(!is_dev) : undefined;
 
   return {
     plugins: [solidPlugin()],
@@ -42,7 +45,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      https: !is_dev ? {
+      https: cert && key && ca ? {
         cert: cert,
         key: key,
         ca: ca,
@@ -52,7 +55,7 @@ export default defineConfig(({ mode }) => {
           target: `${is_dev ? 'http' : 'https'}://${env.VITE_SERVER_HOST}:${env.VITE_SERVER_PORT}`,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
-          agent: !is_dev ? https_agent : undefined,
+          agent: https_agent,
         }
       },
       host: env.VITE_CLIENT_HOST,
