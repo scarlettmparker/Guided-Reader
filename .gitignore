@@ -1,30 +1,28 @@
-dist
-.solid
-.output
-.vercel
-.netlify
-.vinxi
-app.config.timestamp_*.js
+client/dist
+client/.solid
+client/.output
+client/.vercel
+client/.netlify
+client/.vinxi
+client/app.config.timestamp_*.js
+client/public/assets/guidedreader/audios
 
-/node_modules
+client/node_modules
 
 # build
-/server/env/.env
-/server/build
-/server/key
-/server/lib/libbcrypt.a
-/src/key
+server/env/.env
+server/build
+server/key
+server/lib/libbcrypt.a
+src/key
 
-.env
-.env*.local
+client/.env
 
 /.idea
 .project
 .classpath
 *.launch
 .settings/
-
-gitignore
 
 .DS_Store
 Thumbs.db

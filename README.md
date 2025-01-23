@@ -36,7 +36,7 @@ The application is built with:
   - redis-plus-plus
 
 #### Environment Variables
-Create a `.env` file in `server/env/.env` with the following:
+Create a `.env` file in `server/env/` with the following:
 
 ```env
 READER_SERVER_HOST=Back-end server host
