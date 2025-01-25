@@ -338,21 +338,37 @@ namespace server
     * @param req HTTP request to handle.
     * @return HTTP response.
     */
-  http::response<http::string_body> handle_request(http::request<http::string_body> const& req, const std::string& ip_address)
+  http::response<http::string_body> handle_request(http::request<http::string_body> const & req, const std::string & ip_address)
   {
     static std::vector<std::unique_ptr<RequestHandler>> handlers = load_handlers(".");
     http::response<http::string_body> res;
     std::string allowed_methods = "DELETE, GET, OPTIONS, PATCH, POST, PUT";
 
-    // handle CORS preflight request
+    std::string origin = req["Origin"].to_string();
+    bool is_origin_allowed = (origin == READER_ALLOWED_ORIGIN || READER_ALLOWED_ORIGIN == "*");
+
+    // ... handle CORS preflight request ...
     if (req.method() == http::verb::options)
     {
       res = {http::status::no_content, req.version()};
-      res.set(http::field::access_control_allow_origin, req["Origin"].to_string());
-      res.set(http::field::access_control_allow_methods, allowed_methods);
-      res.set(http::field::access_control_allow_headers, "Content-Type, Authorization, Access-Control-Allow-Origin");
-      res.set(http::field::access_control_allow_credentials, "true");
+      if (is_origin_allowed)
+      {
+        res.set(http::field::access_control_allow_origin, READER_ALLOWED_ORIGIN);
+        res.set(http::field::access_control_allow_methods, allowed_methods);
+        res.set(http::field::access_control_allow_headers, "Content-Type, Authorization, Access-Control-Allow-Origin");
+        res.set(http::field::access_control_allow_credentials, "true");
+      }
       res.set(http::field::connection, "keep-alive");
+      return res;
+    }
+
+    // ... reject requests from disallowed origins ...
+    if (!is_origin_allowed)
+    {
+      res = {http::status::forbidden, req.version()};
+      res.set(http::field::content_type, "text/plain");
+      res.body() = "Forbidden: Origin not allowed";
+      res.prepare_payload();
       return res;
     }
 
@@ -371,11 +387,14 @@ namespace server
       res = {http::status::not_found, req.version()};
     }
 
-    // set CORS headers
-    res.set(http::field::access_control_allow_origin, req["Origin"].to_string());
-    res.set(http::field::access_control_allow_methods, allowed_methods);
-    res.set(http::field::access_control_allow_headers, "Content-Type, Authorization");
-    res.set(http::field::access_control_allow_credentials, "true");
+    // ... set CORS headers ...
+    if (is_origin_allowed)
+    {
+      res.set(http::field::access_control_allow_origin, READER_ALLOWED_ORIGIN);
+      res.set(http::field::access_control_allow_methods, allowed_methods);
+      res.set(http::field::access_control_allow_headers, "Content-Type, Authorization");
+      res.set(http::field::access_control_allow_credentials, "true");
+    }
     res.set(http::field::connection, "keep-alive");
     return res;
   }

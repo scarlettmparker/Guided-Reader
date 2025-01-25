@@ -42,6 +42,7 @@ Create a `.env` file in `server/env/` with the following:
 READER_SERVER_HOST=Back-end server host
 READER_SERVER_PORT=Back-end server port
 READER_SERVER_DEV=Set to true to enable SSL on the server
+READER_ALLOWED_ORIGIN=Allowed origin for CORS (only single domain allowed)
 READER_SECRET_KEY=Secret key for session ID signing
 READER_EXPECTED_DOMAIN=Expected domain for client requests (optional SAN header validation)
 READER_LOCAL_HOST=Set to true to allow self-signed certificates in SSL web server mode
