@@ -345,7 +345,7 @@ namespace server
     std::string allowed_methods = "DELETE, GET, OPTIONS, PATCH, POST, PUT";
 
     std::string origin = req["Origin"].to_string();
-    bool is_origin_allowed = (origin == READER_ALLOWED_ORIGIN || READER_ALLOWED_ORIGIN == "*");
+    bool is_origin_allowed = (origin.empty() || origin == READER_ALLOWED_ORIGIN || READER_ALLOWED_ORIGIN == "*");
 
     // ... handle CORS preflight request ...
     if (req.method() == http::verb::options)
