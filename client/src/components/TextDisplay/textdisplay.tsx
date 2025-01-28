@@ -422,11 +422,15 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
 
   onMount(() => {
     window.addEventListener('mouseup', handle_mouse_up);
+    window.addEventListener('pointerup', handle_mouse_up);
+    window.addEventListener('touchstart', (e) => { e.preventDefault() })
     window.addEventListener('touchend', handle_mouse_up);
     window.addEventListener('create-annotation', reload_annotations);
     window.addEventListener('delete-no-annotations', reload_annotations);
     return () => {
       window.removeEventListener('mouseup', handle_mouse_up);
+      window.removeEventListener('pointerup', handle_mouse_up);
+      window.removeEventListener('touchstart', (e) => { e.preventDefault() })
       window.removeEventListener('touchend', handle_mouse_up);
       window.removeEventListener('create-annotation', reload_annotations);
       window.removeEventListener('delete-no-annotations', reload_annotations);
