@@ -352,20 +352,25 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
     set_button_position(null);
   }
 
-  const handle_mouse_up = (event: MouseEvent | TouchEvent) => {
+  const handle_mouse_up = (event: Event) => {
     // ... ensure the annotate button can still be clicked ...
     if ((event.target as HTMLElement).id === "annotate_button") {
       return;
     }
 
     // ... clear the selection if it is not within the text content ...
-    const selection = window.getSelection();
+    const selection = document.getSelection();
     if (!selection_in_text_content(selection!)) {
       set_selected_text(null);
       set_button_position(null);
     }
 
-    if (selection && selection.toString().length > 0) {
+    const range = selection!.getRangeAt(0);
+
+    if (selection &&
+      selection.toString().length > 0 &&
+      selection.toString().length < SELECTION_LIMIT &&
+      !is_intersecting_annotation(range)) {
       const new_position = handle_text_selection(
         props.get_current_text()?.text!, props.current_text(), set_selected_text
       )
@@ -382,8 +387,6 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
         if (!same_selection) {
           set_button_position(new_position);
           set_last_selected_text(selected_text());
-        } else {
-          clear();
         }
       }
     } else {
@@ -421,17 +424,11 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
   })
 
   onMount(() => {
-    window.addEventListener('mouseup', handle_mouse_up);
-    window.addEventListener('pointerup', handle_mouse_up);
-    window.addEventListener('touchstart', handle_mouse_up)
-    window.addEventListener('touchend', handle_mouse_up);
+    document.addEventListener('selectionchange', handle_mouse_up);
     window.addEventListener('create-annotation', reload_annotations);
     window.addEventListener('delete-no-annotations', reload_annotations);
     return () => {
-      window.removeEventListener('mouseup', handle_mouse_up);
-      window.removeEventListener('pointerup', handle_mouse_up);
-      window.removeEventListener('touchstart', handle_mouse_up)
-      window.removeEventListener('touchend', handle_mouse_up);
+      document.removeEventListener('selectionchange', handle_mouse_up);
       window.removeEventListener('create-annotation', reload_annotations);
       window.removeEventListener('delete-no-annotations', reload_annotations);
     }
