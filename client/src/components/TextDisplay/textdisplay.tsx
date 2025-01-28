@@ -352,7 +352,7 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
     set_button_position(null);
   }
 
-  const handle_mouse_up = (event: MouseEvent) => {
+  const handle_mouse_up = (event: MouseEvent | TouchEvent) => {
     // ... ensure the annotate button can still be clicked ...
     if ((event.target as HTMLElement).id === "annotate_button") {
       return;
@@ -422,10 +422,12 @@ const TextDisplay: Component<TextDisplayProps> = (props) => {
 
   onMount(() => {
     window.addEventListener('mouseup', handle_mouse_up);
+    window.addEventListener('touchend', handle_mouse_up);
     window.addEventListener('create-annotation', reload_annotations);
     window.addEventListener('delete-no-annotations', reload_annotations);
     return () => {
       window.removeEventListener('mouseup', handle_mouse_up);
+      window.removeEventListener('touchend', handle_mouse_up);
       window.removeEventListener('create-annotation', reload_annotations);
       window.removeEventListener('delete-no-annotations', reload_annotations);
     }
