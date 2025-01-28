@@ -348,6 +348,10 @@ const Reader: Component<ReaderProps> = (props) => {
     set_current_annotation_id(-1);
     set_current_text(id);
 
+    if (window.innerWidth < 750) {
+      set_list_displayed(false);
+    }
+
     // ... update the query params ...
     const url = new URL(window.location.href);
     url.searchParams.set('text_id', id.toString());

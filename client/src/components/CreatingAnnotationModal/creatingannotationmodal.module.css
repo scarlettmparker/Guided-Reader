@@ -90,16 +90,19 @@
 
   font-family: 'Open Sans', sans-serif;
   font-size: 1rem;
+  touch-action: manipulation;
   transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
 .preview_button {
   margin-left: auto;
   width: 91px;
+  touch-action: manipulation;
 }
 
 .cancel_button {
   margin-right: auto;
+  touch-action: manipulation;
 }
 
 .annotation_modal_button:hover {

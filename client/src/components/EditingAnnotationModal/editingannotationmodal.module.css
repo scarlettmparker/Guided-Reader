@@ -97,6 +97,7 @@
   background-color: #FBFBFB;
   cursor: pointer;
   user-select: none;
+  touch-action: manipulation;
 
   font-family: 'Open Sans', sans-serif;
   font-size: 1rem;
@@ -106,10 +107,12 @@
 .preview_button {
   margin-left: auto;
   width: 91px;
+  touch-action: manipulation;
 }
 
 .cancel_button {
   margin-right: auto;
+  touch-action: manipulation;
 }
 
 .annotation_modal_button:hover {

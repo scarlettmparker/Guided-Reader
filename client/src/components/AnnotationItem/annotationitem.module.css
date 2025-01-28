@@ -34,6 +34,7 @@
   user-select: none;
   cursor: pointer;
   gap: 2px;
+  touch-action: manipulation;
 }
 
 .annotation_profile_name {

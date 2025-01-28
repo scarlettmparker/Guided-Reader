@@ -88,6 +88,7 @@
   cursor: pointer;
   user-select: none;
   font-size: 1.2rem;
+  touch-action: manipulation;
   transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 

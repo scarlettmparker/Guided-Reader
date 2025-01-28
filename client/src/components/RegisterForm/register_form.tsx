@@ -101,31 +101,33 @@ const LoginForm: Component = () => {
   });
 
   return (
-    <div class={styles.login_container}>
-      <span class={styles.welcome_text}>Welcome!</span>
-      <span class={styles.body_text}>Register with your details below.</span>
-      <div class={styles.login_form}>
-        <input class={`${styles.input_text} ${styles.input_form}`} placeholder="Username"
-          value={username()} oninput={(e) => set_username(e.target.value)} />
-        <input class={`${styles.input_text} ${styles.input_form}`} placeholder="Email"
-          value={email()} oninput={(e) => set_email(e.target.value)} />
+    <div class={styles.wrapper}>
+      <div class={styles.login_container}>
+        <span class={styles.welcome_text}>Welcome!</span>
+        <span class={styles.body_text}>Register with your details below.</span>
+        <div class={styles.login_form}>
+          <input class={`${styles.input_text} ${styles.input_form}`} placeholder="Username"
+            value={username()} oninput={(e) => set_username(e.target.value)} />
+          <input class={`${styles.input_text} ${styles.input_form}`} placeholder="Email"
+            value={email()} oninput={(e) => set_email(e.target.value)} />
+        </div>
+        <div class={styles.password_form_wrapper}>
+          <PasswordInput placeholder={"Password"} password={password} set_password={set_password} />
+          <PasswordInput placeholder={"Confirm Password"} password={confirm_password} set_password={set_confirm_password} />
+        </div>
+        <div class={styles.forgot_form}>
+          <span class={`${styles.body_text} ${styles.error_text}`}>{error()}</span>
+        </div>
+        <button class={`${styles.form_button} ${styles.button_text}`} onclick={register_handler}>Register</button>
+        <span class={`${styles.body_text} ${styles.discord_account_text}`}>
+          <img src={`${icon_path}/discord.png`} class={styles.discord_icon}
+            width={EYE_SIZE} height={EYE_SIZE} draggable={false} />
+          <a class={styles.highlight_text} href={DISCORD_REDIRECT}>Register with Discord</a>
+        </span>
+        <span class={`${styles.body_text} ${styles.register_text}`}>
+          or <a class={styles.highlight_text} href={"/login"}>Login to your account</a>
+        </span>
       </div>
-      <div class={styles.password_form_wrapper}>
-        <PasswordInput placeholder={"Password"} password={password} set_password={set_password} />
-        <PasswordInput placeholder={"Confirm Password"} password={confirm_password} set_password={set_confirm_password} />
-      </div>
-      <div class={styles.forgot_form}>
-        <span class={`${styles.body_text} ${styles.error_text}`}>{error()}</span>
-      </div>
-      <button class={`${styles.form_button} ${styles.button_text}`} onclick={register_handler}>Register</button>
-      <span class={`${styles.body_text} ${styles.discord_account_text}`}>
-        <img src={`${icon_path}/discord.png`} class={styles.discord_icon}
-          width={EYE_SIZE} height={EYE_SIZE} draggable={false} />
-        <a class={styles.highlight_text} href={DISCORD_REDIRECT}>Register with Discord</a>
-      </span>
-      <span class={`${styles.body_text} ${styles.register_text}`}>
-        or <a class={styles.highlight_text} href={"/login"}>Login to your account</a>
-      </span>
     </div>
   )
 }

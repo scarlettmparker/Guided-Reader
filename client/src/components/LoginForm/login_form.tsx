@@ -32,7 +32,7 @@ const LoginForm: Component = () => {
   });
 
   return (
-    <>
+    <div class={styles.wrapper}>
       <div class={styles.login_container}>
         <span class={styles.welcome_text}>Welcome back!</span>
         <span class={styles.body_text}>Login with your details below.</span>
@@ -64,7 +64,7 @@ const LoginForm: Component = () => {
           or <a class={styles.highlight_text} href={"/register"}>Register an account</a>
         </span>
       </div>
-    </>
+    </div>
   )
 }
 

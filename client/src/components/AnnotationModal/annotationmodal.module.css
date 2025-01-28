@@ -81,6 +81,7 @@
   padding: 5px 10px;
   border-radius: 15px;
   transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+  touch-action: manipulation;
 }
 
 .verified_button {
@@ -88,6 +89,7 @@
   background-color: #252525;
   border: 1px solid #272121;
   color: white;
+  touch-action: manipulation;
 }
 
 .verified_button:hover {
@@ -99,6 +101,7 @@
 .info_button {
   border: 1px solid #C0C0C0;
   color: #272121;
+  touch-action: manipulation;
 
   @media (max-width: 475px) {
     display: none;
@@ -130,6 +133,7 @@
   text-underline-offset: 4px;
   cursor: pointer;
   transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+  touch-action: manipulation;
 }
 
 .new_annotation_button:hover {

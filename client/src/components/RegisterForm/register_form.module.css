@@ -1,12 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-.login_container {
-  position: absolute;
+.wrapper {
   display: flex;
   flex-direction: column;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding-top: 4rem;
+}
+
+.login_container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  transform: translateY(-2rem);
 
   /* container styling */
   z-index: 1;
@@ -40,23 +48,13 @@
     padding: 40px 40px 40px 40px;
     border-radius: 0;
     height: 100%;
+    border: none;
   }
 
   @media (max-width: 345px) {
     width: calc(100% - 40px);
     padding: 40px 20px 40px 20px;
     align-items: center;
-  }
-
-  @media (max-height: 780px) and (min-width: 550px) {
-    height: auto;
-  }
-
-  @media (max-height: 615px) {
-    top: 0;
-    height: fit-content;
-    justify-content: flex-start;
-    transform: translate(-50%, 0);
   }
 }
 
@@ -82,6 +80,7 @@
   outline: none;
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid #C0C0C0;
+  touch-action: manipulation;
 
   @media (max-width: 550px) {
     height: 42px;
@@ -96,10 +95,13 @@
   justify-content: space-between;
   gap: 0.75rem;
   width: 100%;
+  touch-action: manipulation;
 }
 
 .password_form {
   position: relative;
+  display: flex;
+  align-items: center;
   margin-top: 1em;
 }
 
@@ -109,6 +111,7 @@
   right: 1rem;
   position: absolute;
   transform: translateY(-50%);
+  touch-action: manipulation;
 
   @media (max-width: 550px) {
     right: 0.75rem;
@@ -120,6 +123,7 @@
   border: none;
   padding: 0;
   height: fit-content;
+  touch-action: manipulation;
 
   /* hover styling */
   user-select: none;
@@ -147,6 +151,7 @@
   user-select: none;
   cursor: pointer;
   transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+  touch-action: manipulation;
 
   @media (max-width: 550px) {
     height: 52px;
@@ -163,6 +168,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5em;
+  touch-action: manipulation;
 }
 
 .login_form {
@@ -170,6 +176,8 @@
   flex-direction: column;
   margin-top: 1.75em;
   gap: 1rem;
+  touch-action: manipulation;
+
   @media (max-width: 550px) {
     margin-top: 1.75em;
   }
@@ -211,6 +219,7 @@
   display: flex;
   flex-direction: column-reverse;
   margin-bottom: 0.5em;
+  touch-action: manipulation;
 }
 
 .forgot_text {
@@ -233,6 +242,7 @@
   text-underline-offset: 4px;
   cursor: pointer;
   transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+  touch-action: manipulation;
 }
 
 .highlight_text:hover {

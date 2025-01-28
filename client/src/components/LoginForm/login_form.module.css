@@ -1,12 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-.login_container {
-  position: absolute;
+.wrapper {
   display: flex;
   flex-direction: column;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding-top: 4rem;
+}
+
+.login_container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  transform: translateY(-2rem);
 
   /* container styling */
   z-index: 1;
@@ -40,23 +48,13 @@
     padding: 40px 40px 40px 40px;
     border-radius: 0;
     height: 100%;
+    border: none;
   }
 
   @media (max-width: 345px) {
     width: calc(100% - 40px);
     padding: 40px 20px 40px 20px;
     align-items: center;
-  }
-
-  @media (max-height: 780px) and (min-width: 550px) {
-    height: auto;
-  }
-
-  @media (max-height: 570px) {
-    top: 0;
-    height: fit-content;
-    justify-content: flex-start;
-    transform: translate(-50%, 0);
   }
 }
 
@@ -77,6 +75,7 @@
   width: calc(100% - 20px);
   padding-left: 20px;
   border-radius: 20px;
+  touch-action: manipulation;
 
   /* background and outline */
   outline: none;
@@ -90,8 +89,11 @@
 
 .password_form {
   position: relative;
+  display: flex;
+  align-items: center;
   margin-top: 1em;
   margin-bottom: 1em;
+  touch-action: manipulation;
 }
 
 .show_password {
@@ -107,6 +109,7 @@
   border: none;
   padding: 0;
   height: fit-content;
+  touch-action: manipulation;
 
   /* hover styling */
   user-select: none;
@@ -134,6 +137,7 @@
   user-select: none;
   cursor: pointer;
   transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+  touch-action: manipulation;
 
   @media (max-width: 550px) {
     height: 52px;
@@ -150,6 +154,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5em;
+  touch-action: manipulation;
 }
 
 .login_form {
@@ -186,6 +191,7 @@
   position: relative;
   margin-bottom: 1.5em;
   width: 100%;
+  touch-action: manipulation;
 
   @media (max-width: 625px) {
     display: flex;
@@ -198,6 +204,7 @@
 .forgot_text {
   position: absolute;
   right: 0;
+  touch-action: manipulation;
 
   @media (max-width: 625px) {
     position: relative;
@@ -219,6 +226,7 @@
   text-underline-offset: 4px;
   cursor: pointer;
   transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+  touch-action: manipulation;
 }
 
 .highlight_text:hover {
