@@ -60,7 +60,10 @@ export async function render({
 
   let translations: Record<string, unknown> = {};
   try {
-    const filePath = path.resolve(process.cwd(), `messages/${pageName}/${locale}.json`);
+    const filePath = path.resolve(
+      process.cwd(),
+      `messages/${pageName}/${locale}.json`,
+    );
     if (fs.existsSync(filePath)) {
       translations = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       i18n.addResourceBundle(locale, pageName, translations, true, true);
@@ -73,8 +76,8 @@ export async function render({
   try {
     const result = await fetchPropertySet("ReactApp", "themes", "greek");
     const values = result?.success
-      ? (result.data as { gaiaQueries?: { propertySet?: unknown } })?.gaiaQueries
-          ?.propertySet
+      ? (result.data as { gaiaQueries?: { propertySet?: unknown } })
+          ?.gaiaQueries?.propertySet
       : null;
     if (values && typeof values === "object") {
       theme = values as Record<string, string>;
@@ -110,7 +113,8 @@ export async function render({
         const cssTag = generateCssTag(isProduction, cssContent, clientCss);
         const headers: Record<string, string> = { "Content-Type": "text/html" };
         if (shouldDeleteCookie) {
-          headers["Set-Cookie"] = "invalidate_cache=; Path=/; Max-Age=0; SameSite=Lax;";
+          headers["Set-Cookie"] =
+            "invalidate_cache=; Path=/; Max-Age=0; SameSite=Lax;";
         }
         const prelude = `<!DOCTYPE html>
           <html lang="en">

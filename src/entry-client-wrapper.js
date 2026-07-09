@@ -1,14 +1,3 @@
-import { loadPersistedTheme, applyTheme } from "@sun/themes";
-
-// Apply the server-rendered theme (injected into window.__theme__ by the SSR
-// prelude) before the app mounts so there is no flash.
-const persistedTheme = window.localStorage.getItem("sun:theme");
-if (persistedTheme) {
-  loadPersistedTheme();
-} else if (window.__theme__) {
-  applyTheme(window.__theme__);
-}
-
 if (import.meta.env.DEV) {
   const serverBase = import.meta.env.VITE_SERVER_BASE || "localhost";
 

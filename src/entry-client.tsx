@@ -7,10 +7,19 @@ import { Suspense, useEffect } from "react";
 
 import Layout from "./components/layout";
 import { hydratePageData } from "@sun/ssr";
+import { loadPersistedTheme, applyTheme } from "@sun/themes";
 import "./utils/configure-framework";
 import "@sun/components/style.css";
 
 window.hydratePageDataFromPostlude = hydratePageData;
+
+// Apply the server-rendered theme (window.__theme__) before the app mounts so
+// there is no flash. A persisted user choice takes precedence.
+if (window.localStorage.getItem("sun:theme")) {
+  loadPersistedTheme();
+} else if (window.__theme__) {
+  applyTheme(window.__theme__);
+}
 
 /**
  * Computes the message namespace for a path (its first segment).

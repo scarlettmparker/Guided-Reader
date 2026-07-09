@@ -19,8 +19,6 @@ const Library = () => {
   return (
     <div
       style={{
-        background: "color-mix(in srgb, var(--primary) 25%, transparent)",
-        minHeight: "100vh",
         padding: "var(--xl, 12px)",
         display: "flex",
         flexDirection: "column",
