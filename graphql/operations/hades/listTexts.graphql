@@ -1,0 +1,23 @@
+query listTexts($level: CefrLevel, $sourceId: ID, $type: ReaderTextType, $pagination: PaginationInput) {
+  hadesQueries {
+    texts(level: $level, sourceId: $sourceId, type: $type, pagination: $pagination) {
+      items {
+        id
+        title
+        language
+        level
+        type
+        sourceId
+        status
+      }
+      pageInfo {
+        page
+        size
+        totalPages
+        totalCount
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

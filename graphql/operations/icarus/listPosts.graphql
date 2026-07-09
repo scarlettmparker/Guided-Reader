@@ -1,0 +1,26 @@
+query listPosts($threadId: ID!, $includeHidden: Boolean, $pagination: PaginationInput) {
+  icarusQueries {
+    posts(threadId: $threadId, includeHidden: $includeHidden, pagination: $pagination) {
+      items {
+        id
+        threadId
+        parentId
+        body
+        status
+        upvotes
+        downvotes
+        netScore
+        createdAt
+        updatedAt
+      }
+      pageInfo {
+        page
+        size
+        totalPages
+        totalCount
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

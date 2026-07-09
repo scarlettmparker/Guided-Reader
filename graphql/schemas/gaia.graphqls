@@ -1,0 +1,9 @@
+scalar JSON
+
+type GaiaQueries {
+  propertySet(ownerKey: String!, name: String!, entry: String): JSON
+}
+
+extend type Query {
+  gaiaQueries: GaiaQueries!
+}

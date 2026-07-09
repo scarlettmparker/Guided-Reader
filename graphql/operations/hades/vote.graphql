@@ -1,0 +1,15 @@
+mutation hadesVote($input: VoteInput!) {
+  hadesMutations {
+    vote(input: $input) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+mutation discordLogin($code: String!, $state: String!) {
+  hadesMutations {
+    discordLogin(code: $code, state: $state) {
+      token
+      accountId
+      readerAccountId
+    }
+  }
+}

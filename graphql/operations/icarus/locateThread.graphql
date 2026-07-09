@@ -1,0 +1,12 @@
+query locateThread($id: ID!) {
+  icarusQueries {
+    thread(id: $id) {
+      id
+      title
+      status
+      remoteObject
+      createdAt
+      updatedAt
+    }
+  }
+}

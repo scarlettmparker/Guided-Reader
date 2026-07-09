@@ -1,0 +1,5 @@
+query myVote($targetType: ReaderVoteTarget!, $targetId: ID!) {
+  hadesQueries {
+    myVote(targetType: $targetType, targetId: $targetId)
+  }
+}

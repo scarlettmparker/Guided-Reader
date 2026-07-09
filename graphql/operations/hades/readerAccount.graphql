@@ -1,0 +1,13 @@
+query readerAccount {
+  hadesQueries {
+    readerAccount {
+      id
+      gaiaAccountId
+      discordId
+      discordUsername
+      globalName
+      avatar
+      cefrLevel
+    }
+  }
+}

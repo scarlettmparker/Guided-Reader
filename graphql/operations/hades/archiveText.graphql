@@ -1,0 +1,15 @@
+mutation archiveText($id: ID!) {
+  hadesMutations {
+    archiveText(id: $id) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

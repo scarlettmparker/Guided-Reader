@@ -1,0 +1,19 @@
+query listAnnotations($textId: ID!, $includeHidden: Boolean) {
+  hadesQueries {
+    annotations(textId: $textId, includeHidden: $includeHidden) {
+      id
+      positionId
+      body
+      status
+      upvotes
+      downvotes
+      netScore
+      position {
+        id
+        textId
+        startOffset
+        endOffset
+      }
+    }
+  }
+}

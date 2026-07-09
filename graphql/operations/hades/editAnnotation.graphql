@@ -1,0 +1,15 @@
+mutation editAnnotation($id: ID!, $body: String!) {
+  hadesMutations {
+    editAnnotation(id: $id, body: $body) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

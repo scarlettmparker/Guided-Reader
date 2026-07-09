@@ -1,0 +1,15 @@
+mutation createSource($name: String!, $url: String!) {
+  hadesMutations {
+    createSource(name: $name, url: $url) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

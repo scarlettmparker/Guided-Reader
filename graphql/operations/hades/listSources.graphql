@@ -1,0 +1,9 @@
+query listSources {
+  hadesQueries {
+    sources {
+      id
+      name
+      url
+    }
+  }
+}

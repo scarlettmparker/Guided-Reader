@@ -1,0 +1,26 @@
+query listComments($annotationId: ID!, $includeHidden: Boolean, $pagination: PaginationInput) {
+  hadesQueries {
+    comments(annotationId: $annotationId, includeHidden: $includeHidden, pagination: $pagination) {
+      items {
+        id
+        annotationId
+        parentId
+        body
+        status
+        upvotes
+        downvotes
+        netScore
+        createdAt
+        updatedAt
+      }
+      pageInfo {
+        page
+        size
+        totalPages
+        totalCount
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

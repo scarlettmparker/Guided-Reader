@@ -1,0 +1,84 @@
+type ForumThread {
+  id: String!
+  title: String!
+  status: ThreadStatus!
+  remoteObject: [String!]
+  createdAt: Date
+  updatedAt: Date
+}
+
+type ForumPost {
+  id: String!
+  threadId: ID!
+  parentId: ID
+  body: String!
+  status: PostStatus!
+  upvotes: Int!
+  downvotes: Int!
+  netScore: Int!
+  createdAt: Date
+  updatedAt: Date
+}
+
+type PagedForumThreads {
+  items: [ForumThread!]!
+  pageInfo: PageInfo!
+}
+
+type PagedForumPosts {
+  items: [ForumPost!]!
+  pageInfo: PageInfo!
+}
+
+type ForumObjectReference {
+  id: ID!
+  ownerType: String!
+  ownerId: ID!
+}
+
+enum ThreadStatus { ACTIVE LOCKED ARCHIVED }
+enum PostStatus { ACTIVE HIDDEN DELETED }
+
+input CreateThreadInput {
+  title: String!
+  remoteObject: String!
+}
+
+input CreatePostInput {
+  threadId: ID!
+  parentId: ID
+  body: String!
+}
+
+input ForumVoteInput {
+  postId: ID!
+  value: VoteValue!
+}
+
+type IcarusQueries {
+  thread(id: ID!): ForumThread
+  threadsFor(remoteObject: String!, pagination: PaginationInput): PagedForumThreads!
+  posts(threadId: ID!, includeHidden: Boolean, pagination: PaginationInput): PagedForumPosts!
+  myVote(postId: ID!): VoteValue
+  locateRemoteObjects(ids: [String!]!): [ForumObjectReference!]!
+}
+
+type IcarusMutations {
+  createThread(input: CreateThreadInput!): QueryResult
+  lockThread(id: ID!): QueryResult
+  archiveThread(id: ID!): QueryResult
+  createPost(input: CreatePostInput!): QueryResult
+  editPost(id: ID!, body: String!): QueryResult
+  deletePost(id: ID!): QueryResult
+  vote(input: ForumVoteInput!): QueryResult
+  removeVote(postId: ID!): QueryResult
+  attachObject(source: ID!, target: String!): QueryResult
+}
+
+extend type Query {
+  icarusQueries: IcarusQueries!
+}
+
+extend type Mutation {
+  icarusMutations: IcarusMutations!
+}

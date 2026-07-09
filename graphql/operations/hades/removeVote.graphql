@@ -1,0 +1,15 @@
+mutation removeVote($targetType: ReaderVoteTarget!, $targetId: ID!) {
+  hadesMutations {
+    removeVote(targetType: $targetType, targetId: $targetId) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

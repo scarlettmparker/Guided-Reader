@@ -1,0 +1,20 @@
+query threadsFor($remoteObject: String!) {
+  icarusQueries {
+    threadsFor(remoteObject: $remoteObject) {
+      items {
+        id
+        title
+        status
+        remoteObject
+      }
+      pageInfo {
+        page
+        size
+        totalPages
+        totalCount
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+mutation createAnnotation($input: AnnotationInput!) {
+  hadesMutations {
+    createAnnotation(input: $input) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}
