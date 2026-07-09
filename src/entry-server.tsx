@@ -86,6 +86,14 @@ export async function render({
     // Theme is optional; fall back to the persisted or default theme.
   }
 
+  // Inline the theme as CSS custom-property overrides in the document head so
+  // the first server-rendered paint is already themed.
+  const themeStyle = theme
+    ? `<style>:root{${Object.entries(theme)
+        .map(([key, value]) => `--${key}:${value};`)
+        .join("")}}</style>`
+    : "";
+
   const matches = matchRoutes(routes, url);
   const didMatch = Boolean(matches);
 
@@ -122,6 +130,7 @@ export async function render({
               <meta charset="UTF-8" />
               <meta name="viewport" content="width=device-width, initial-scale=1.0" />
               ${cssTag}
+              ${themeStyle}
               <title>Guided Reader | Scarlet Sun</title>
             </head>
             <script>
