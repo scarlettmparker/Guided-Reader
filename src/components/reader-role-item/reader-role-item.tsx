@@ -31,7 +31,9 @@ const ReaderRoleItem = ({ role, colour }: ReaderRoleItemProps) => {
       className={styles.role}
       style={
         colour
-          ? { color: `color-mix(in srgb, rgb(255, 255, 255), ${colour})` }
+          ? {
+              color: `color-mix(in srgb, var(--text-primary, var(--muted)), ${colour})`,
+            }
           : undefined
       }
     >
