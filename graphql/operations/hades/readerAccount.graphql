@@ -8,7 +8,11 @@ query readerAccount {
       globalName
       avatar
       cefrLevel
-      roles
+      roles {
+        key
+        name
+        cefrLevel
+      }
     }
   }
 }

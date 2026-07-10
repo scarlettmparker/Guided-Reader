@@ -14,6 +14,7 @@ import {
   Form,
 } from "@sun/components";
 import DiscordAvatar from "~/components/discord-avatar";
+import ReaderRoleItem from "~/components/reader-role-item";
 import type { ReaderAccount } from "~/generated/graphql";
 import styles from "./user-menu.module.css";
 
@@ -68,26 +69,22 @@ const UserMenu = () => {
           <CardBody className={styles.body}>
             {user.roles?.length ? (
               <ul className={styles.roles}>
-                {user.roles.map((role) => {
-                  const colour = colours?.[role];
-                  return (
-                    <li key={role} className={styles.role}>
-                      {colour && (
-                        <span
-                          className={styles.role_dot}
-                          style={{ backgroundColor: colour }}
-                        />
-                      )}
-                      {role}
-                    </li>
-                  );
-                })}
+                {user.roles.map((role) => (
+                  <ReaderRoleItem
+                    key={role.key}
+                    role={role}
+                    colour={colours?.[role.key]}
+                  />
+                ))}
               </ul>
             ) : (
               <p className={styles.no_roles}>{t("no-roles")}</p>
             )}
           </CardBody>
-          <CardFooter>
+          <CardFooter className={styles.footer}>
+            <a href="/profile">
+              <Button>{t("manage-profile")}</Button>
+            </a>
             <Form action="/__logout" method="post">
               <Button
                 type="submit"

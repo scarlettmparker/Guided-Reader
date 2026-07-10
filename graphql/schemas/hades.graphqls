@@ -59,7 +59,13 @@ type ReaderAccount {
   globalName: String
   avatar: String
   cefrLevel: CefrLevel
-  roles: [String!]!
+  roles: [ReaderRole!]!
+}
+
+type ReaderRole {
+  key: String!
+  name: String!
+  cefrLevel: CefrLevel
 }
 
 type PagedReaderTexts {
@@ -84,11 +90,30 @@ type ReaderObjectReference {
   ownerId: ID!
 }
 
-enum CefrLevel { A1 A2 B1 B2 C1 C2 }
-enum ReaderTextType { SYSTEM USER }
-enum ReaderTextStatus { ACTIVE ARCHIVED }
-enum ReaderStatus { ACTIVE HIDDEN }
-enum ReaderVoteTarget { ANNOTATION COMMENT }
+enum CefrLevel {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+enum ReaderTextType {
+  SYSTEM
+  USER
+}
+enum ReaderTextStatus {
+  ACTIVE
+  ARCHIVED
+}
+enum ReaderStatus {
+  ACTIVE
+  HIDDEN
+}
+enum ReaderVoteTarget {
+  ANNOTATION
+  COMMENT
+}
 
 input ReaderTextInput {
   title: String!
@@ -122,10 +147,19 @@ type HadesQueries {
   text(id: ID!): ReaderText
   source(id: ID!): ReaderSource
   sources: [ReaderSource!]
-  texts(level: CefrLevel, sourceId: ID, type: ReaderTextType, pagination: PaginationInput): PagedReaderTexts!
+  texts(
+    level: CefrLevel
+    sourceId: ID
+    type: ReaderTextType
+    pagination: PaginationInput
+  ): PagedReaderTexts!
   annotations(textId: ID!, includeHidden: Boolean): [ReaderAnnotation!]!
   annotation(id: ID!): ReaderAnnotation
-  comments(annotationId: ID!, includeHidden: Boolean, pagination: PaginationInput): PagedReaderComments!
+  comments(
+    annotationId: ID!
+    includeHidden: Boolean
+    pagination: PaginationInput
+  ): PagedReaderComments!
   readerAccount: ReaderAccount
   myVote(targetType: ReaderVoteTarget!, targetId: ID!): VoteValue
   locateRemoteObjects(ids: [String!]!): [ReaderObjectReference!]!
