@@ -29,13 +29,14 @@ const ReaderRoleItem = ({ role, colour }: ReaderRoleItemProps) => {
   return (
     <li
       className={styles.role}
-      style={colour ? { color: `color-mix(in srgb, var(--muted), ${colour})` } : undefined}
+      style={
+        colour
+          ? { color: `color-mix(in srgb, rgb(255, 255, 255), ${colour})` }
+          : undefined
+      }
     >
       {colour && (
-        <span
-          className={styles.role_dot}
-          style={{ backgroundColor: colour }}
-        />
+        <span className={styles.role_dot} style={{ backgroundColor: colour }} />
       )}
       {cefrLabel ? `${cefrLabel} (${levelLabel})` : levelLabel}
     </li>
