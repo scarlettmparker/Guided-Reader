@@ -16,3 +16,6 @@ cypress/videos/
 build/
 .idea
 stats.html
+
+# Local crap only 
+scripts/

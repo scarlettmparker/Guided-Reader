@@ -42,7 +42,6 @@ import {
   ReaderVoteTarget,
   VoteValue,
   CefrLevel,
-  ReaderTextType,
   PaginationInput,
   LocateThreadDocument,
   ListPostsDocument,
@@ -236,13 +235,13 @@ export async function fetchGraphQLData<
 export async function fetchTexts(
   level?: CefrLevel,
   sourceId?: string,
-  type?: ReaderTextType,
+  ownerId?: string,
   pagination?: PaginationInput,
 ) {
   return fetchGraphQLData("hadesQueries.texts", {
     level: level ?? null,
     sourceId: sourceId ?? null,
-    type: type ?? null,
+    ownerId: ownerId ?? null,
     pagination: pagination ?? null,
   });
 }
