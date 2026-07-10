@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { BreadcrumbProvider } from "@sun/components";
+import { getBackgroundHex } from "@sun/utils";
+import { ThemeSwitcher, THEME_APPLIED_EVENT, type ThemeOption } from "@sun/themes";
 import styles from "./layout.module.css";
 
 const useIsomorphicLayoutEffect =
@@ -7,37 +9,38 @@ const useIsomorphicLayoutEffect =
 
 type LayoutProps = React.PropsWithChildren;
 
-const PRIMARY_BACKGROUND = "color-mix(in srgb, var(--primary) 15%, transparent)";
-const TERTIARY_BACKGROUND = "color-mix(in srgb, var(--tertiary) 15%, transparent)";
-
 /**
- * App shell wrapping every page with an animated background that crossfades
- * between the themed primary and tertiary colours.
+ * App shell wrapping every page.
  */
 const Layout = ({ children }: LayoutProps) => {
-  const [useTertiary, setUseTertiary] = useState(false);
-  // The 5s background transition is disabled until after the initial colour is
-  // applied, otherwise the first (instant) set fades in over 5s.
-  const [transitionEnabled, setTransitionEnabled] = useState(false);
+  // Computed after mount (not during render) so the SSR HTML and the client's
+  // first render match; getBackgroundHex depends on the wall clock.
+  const [backgroundColour, setBackgroundColour] = useState<string | undefined>(
+    undefined,
+  );
+  const [themes, setThemes] = useState<ThemeOption[]>([]);
 
   useIsomorphicLayoutEffect(() => {
-    const raf = requestAnimationFrame(() => setTransitionEnabled(true));
-    const interval = setInterval(() => setUseTertiary((v) => !v), 5000);
+    const update = () => setBackgroundColour(getBackgroundHex());
+    update();
+    const interval = setInterval(update, 5000);
+    window.addEventListener(THEME_APPLIED_EVENT, update);
     return () => {
-      cancelAnimationFrame(raf);
       clearInterval(interval);
+      window.removeEventListener(THEME_APPLIED_EVENT, update);
     };
   }, []);
 
+  useEffect(() => {
+    setThemes(window.__themes__ ?? []);
+  }, []);
+
   return (
-    <main
-      className={styles.main}
-      style={{
-        backgroundColor: useTertiary ? TERTIARY_BACKGROUND : PRIMARY_BACKGROUND,
-        transitionDuration: transitionEnabled ? undefined : "0s",
-      }}
-    >
+    <main className={styles.main} style={{ backgroundColor: backgroundColour }}>
       <BreadcrumbProvider>{children}</BreadcrumbProvider>
+      <div className={styles.switcher}>
+        <ThemeSwitcher themes={themes} />
+      </div>
     </main>
   );
 };

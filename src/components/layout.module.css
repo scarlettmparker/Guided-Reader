@@ -1,4 +1,10 @@
 .main {
   min-height: 100vh;
-  transition: background-color 5s linear;
+}
+
+.switcher {
+  position: fixed;
+  bottom: var(--lg);
+  right: var(--lg);
+  z-index: 201;
 }

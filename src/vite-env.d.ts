@@ -24,6 +24,10 @@ export declare global {
      */
     __theme__?: Record<string, string>;
     /**
+     * All available themes for the switcher.
+     */
+    __themes__?: { name: string; values: Record<string, string> }[];
+    /**
      * Whether the Vite React refresh preamble has been installed.
      */
     __vite_plugin_react_preamble_installed__?: boolean;

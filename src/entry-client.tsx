@@ -10,6 +10,7 @@ import { hydratePageData } from "@sun/ssr";
 import { loadPersistedTheme, applyTheme } from "@sun/themes";
 import "./utils/configure-framework";
 import "@sun/components/style.css";
+import "@sun/themes/style.css";
 
 window.hydratePageDataFromPostlude = hydratePageData;
 

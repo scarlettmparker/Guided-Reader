@@ -73,15 +73,21 @@ export async function render({
   }
 
   let theme: Record<string, string> | null = null;
+
+  // Fetch all themes and map them to an array of { name, values } objects. The "greek" theme is the default.
+  let themes: { name: string; values: Record<string, string> }[] = [];
   try {
-    const result = await fetchPropertySet("ReactApp", "themes", "greek");
-    const values = result?.success
+    const result = await fetchPropertySet("ReactApp", "themes");
+    const map = result?.success
       ? (result.data as { gaiaQueries?: { propertySet?: unknown } })
           ?.gaiaQueries?.propertySet
       : null;
-    if (values && typeof values === "object") {
-      theme = values as Record<string, string>;
+    if (map && typeof map === "object") {
+      const themeMap = map as Record<string, Record<string, string>>;
+      themes = Object.entries(themeMap).map(([name, values]) => ({ name, values }));
+      theme = themeMap["greek"] ?? null;
     }
+
   } catch {
     // Theme is optional; fall back to the persisted or default theme.
   }
@@ -137,6 +143,7 @@ export async function render({
               window.__translations__ = ${JSON.stringify(translations)};
               window.__locale__ = '${locale}';
               window.__theme__ = ${JSON.stringify(theme)};
+              window.__themes__ = ${JSON.stringify(themes)};
               window.__serverCacheData__ = {};
             </script>
             <body>
