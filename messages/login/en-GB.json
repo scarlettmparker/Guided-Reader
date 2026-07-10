@@ -1,0 +1,16 @@
+{
+  "title": "Guided Reader",
+  "subtitle": "Sign in to continue.",
+  "username": "Username",
+  "username-placeholder": "Enter username",
+  "password": "Password",
+  "password-placeholder": "Enter password",
+  "sign-in-label": "Sign in",
+  "sign-in-title": "Sign in",
+  "error-default": "Invalid credentials",
+  "error-discord": "Discord sign-in failed",
+  "discord-label": "Continue with Discord",
+  "or": "OR",
+  "register-prompt": "No account?",
+  "register-link": "Register"
+}

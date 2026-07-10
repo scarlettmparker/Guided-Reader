@@ -1,4 +1,5 @@
-import { discordClientId, discordGuildId, discordRedirectUri } from "../../config.js";
+import { discordClientId, discordGuildId, discordRedirectUri, discordScopes } from "../../config.js";
+import { fetchGraphQLData } from "./api";
 
 const TOKEN_KEY = "hades_auth_token";
 
@@ -53,3 +54,106 @@ export function newState(): string {
 }
 
 export { discordGuildId };
+
+// --- Server-only (cookie / PRG auth) ---
+
+/** Name of the httpOnly cookie holding the JWT. */
+export const AUTH_COOKIE = "reader_auth";
+/** Short-lived cookie carrying the OAuth state nonce. */
+export const OAUTH_STATE_COOKIE = "oauth_state";
+
+type ReaderAccount = {
+  id: string;
+  gaiaAccountId: string;
+  discordId: string;
+  discordUsername?: string | null;
+  globalName?: string | null;
+};
+
+/**
+ * Reads a named cookie value from a raw Cookie header.
+ */
+export function getCookieValue(
+  cookieHeader: string | undefined,
+  name: string,
+): string | undefined {
+  if (!cookieHeader) return undefined;
+  for (const part of cookieHeader.split(/;\s*/)) {
+    const index = part.indexOf("=");
+    if (index < 0) continue;
+    if (part.slice(0, index).trim() === name) {
+      return decodeURIComponent(part.slice(index + 1));
+    }
+  }
+  return undefined;
+}
+
+/** Builds the Set-Cookie value that stores the JWT. */
+export function buildAuthCookie(token: string, maxAgeSeconds = 60 * 60 * 12): string {
+  return `${AUTH_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${maxAgeSeconds}`;
+}
+
+/** Builds the Set-Cookie value that clears the JWT. */
+export function clearAuthCookie(): string {
+  return `${AUTH_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
+}
+
+/** Builds the Set-Cookie value for the OAuth state nonce. */
+export function buildStateCookie(state: string): string {
+  return `${OAUTH_STATE_COOKIE}=${encodeURIComponent(state)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`;
+}
+
+/** A fresh OAuth state nonce. */
+export function newOAuthState(): string {
+  return crypto.randomUUID();
+}
+
+/** Builds the Discord authorize URL the browser is redirected to. */
+export function buildDiscordAuthUrl(state: string): string {
+  const params = new URLSearchParams({
+    client_id: discordClientId,
+    redirect_uri: discordRedirectUri,
+    response_type: "code",
+    scope: discordScopes,
+    state,
+  });
+  return `https://discord.com/api/oauth2/authorize?${params.toString()}`;
+}
+
+/**
+ * Logs in via gaia and returns the JWT, or null if rejected.
+ */
+export async function loginViaGaia(
+  username: string,
+  password: string,
+): Promise<string | null> {
+  const res = await fetchGraphQLData<{
+    gaiaMutations: { login: { token: string } | null };
+  }>("gaiaMutations.login", { input: { username, password } });
+  if (!res.success || !res.data) return null;
+  return res.data.gaiaMutations.login?.token ?? null;
+}
+
+/** Returns the logged-in reader account for a JWT, or null. */
+export async function getCurrentUser(
+  token: string | undefined,
+): Promise<ReaderAccount | null> {
+  if (!token) return null;
+  const res = await fetchGraphQLData<{
+    hadesQueries: { readerAccount: ReaderAccount | null };
+  }>("hadesQueries.readerAccount", {}, token);
+  if (!res.success || !res.data) return null;
+  return res.data.hadesQueries.readerAccount ?? null;
+}
+
+/** Exchanges a Discord code for a JWT, or null on failure. */
+export async function discordLoginViaCode(
+  code: string,
+  state: string,
+): Promise<string | null> {
+  const res = await fetchGraphQLData<{
+    hadesMutations: { discordLogin: { token: string } | null };
+  }>("hadesMutations.discordLogin", { code, state });
+  if (!res.success || !res.data) return null;
+  return res.data.hadesMutations.discordLogin?.token ?? null;
+}

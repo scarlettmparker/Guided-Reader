@@ -4,6 +4,25 @@ type GaiaQueries {
   propertySet(ownerKey: String!, name: String!, entry: String): JSON
 }
 
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+type AuthResult {
+  token: String!
+  accountId: ID!
+  personId: ID!
+}
+
+type GaiaMutations {
+  login(input: LoginInput!): AuthResult
+}
+
 extend type Query {
   gaiaQueries: GaiaQueries!
+}
+
+extend type Mutation {
+  gaiaMutations: GaiaMutations!
 }

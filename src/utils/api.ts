@@ -34,6 +34,7 @@ import {
   RemoveVoteMutation,
   DiscordLoginDocument,
   DiscordLoginMutation,
+  LoginDocument,
   ReaderTextInput,
   AnnotationInput,
   CommentInput,
@@ -103,6 +104,9 @@ type OperationRegistry = {
   gaiaQueries: {
     propertySet: DocumentNode;
   };
+  gaiaMutations: {
+    login: DocumentNode;
+  };
 };
 
 /**
@@ -144,6 +148,9 @@ const operationRegistry: OperationRegistry = {
   gaiaQueries: {
     propertySet: PropertySetDocument,
   },
+  gaiaMutations: {
+    login: LoginDocument,
+  },
 };
 
 /**
@@ -171,12 +178,13 @@ function getOperation(path: string): DocumentNode | undefined {
  *
  * @param operationName the dot-separated path to the operation
  * @param variables variables for the operation
+ * @param authToken optional JWT sent as Authorization: Bearer (e.g. the SSR httpOnly cookie token)
  * @returns promise resolving to ApiResponse
  */
 export async function fetchGraphQLData<
   T,
   V extends Record<string, unknown> | undefined = Record<string, unknown>,
->(operationName: string, variables?: V): Promise<ApiResponse<T>> {
+>(operationName: string, variables?: V, authToken?: string): Promise<ApiResponse<T>> {
   const endpoint = process.env.GRAPHQL_ENDPOINT || "http://localhost:8083/graphql";
   const query = getOperation(operationName);
   if (!query) {
@@ -184,7 +192,7 @@ export async function fetchGraphQLData<
   }
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = getToken();
+  const token = authToken ?? getToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }

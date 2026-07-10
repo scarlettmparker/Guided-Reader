@@ -30,7 +30,12 @@ export const discordClientId = process.env.DISCORD_CLIENT_ID || "";
 export const discordGuildId = process.env.DISCORD_GUILD_ID || "";
 
 /**
- * The OAuth redirect uri registered with Discord.
+ * The OAuth callback route registered with Discord.
  */
 export const discordRedirectUri =
-  process.env.DISCORD_REDIRECT_URI || "http://localhost:5177/auth/discord/callback";
+  process.env.DISCORD_REDIRECT_URI ||
+  "http://localhost:5178/auth/discord/callback";
+
+/** OAuth scopes requested on authorization. Non-secret. */
+export const discordScopes =
+  process.env.DISCORD_SCOPES || "identify guilds guilds.members.read";
