@@ -80,6 +80,7 @@ const NAMESPACES = [
   "thread",
   "auth",
   "create",
+  "nav",
 ];
 
 i18n
@@ -87,9 +88,9 @@ i18n
   .init({
     lng: locale,
     resources: {
-      [locale]: {
-        [initialPage]: window.__translations__ || {},
-      },
+      [locale]:
+        (window.__translations__ as Record<string, Record<string, unknown>>) ||
+        {},
     },
     interpolation: { escapeValue: false },
     react: { useSuspense: true },

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import { BreadcrumbProvider } from "@sun/components";
 import { getBackgroundHex } from "@sun/utils";
 import { ThemeSwitcher, THEME_APPLIED_EVENT, type ThemeOption } from "@sun/themes";
+import Nav from "./nav";
 import styles from "./layout.module.css";
 
 const useIsomorphicLayoutEffect =
@@ -37,7 +38,10 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <main className={styles.main} style={{ backgroundColor: backgroundColour }}>
-      <BreadcrumbProvider>{children}</BreadcrumbProvider>
+      <BreadcrumbProvider>
+        <Nav />
+        {children}
+      </BreadcrumbProvider>
       <div className={styles.switcher}>
         <ThemeSwitcher themes={themes} />
       </div>

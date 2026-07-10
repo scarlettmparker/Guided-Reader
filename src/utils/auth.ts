@@ -1,4 +1,10 @@
-import { discordClientId, discordGuildId, discordRedirectUri, discordScopes } from "../../config.js";
+import { ReaderAccount } from "~/generated/graphql.js";
+import {
+  discordClientId,
+  discordGuildId,
+  discordRedirectUri,
+  discordScopes,
+} from "../../config.js";
 import { fetchGraphQLData } from "./api";
 
 const TOKEN_KEY = "hades_auth_token";
@@ -55,20 +61,14 @@ export function newState(): string {
 
 export { discordGuildId };
 
-// --- Server-only (cookie / PRG auth) ---
-
-/** Name of the httpOnly cookie holding the JWT. */
+/**
+ * Name of the httpOnly cookie holding the JWT.
+ */
 export const AUTH_COOKIE = "reader_auth";
-/** Short-lived cookie carrying the OAuth state nonce. */
+/*
+ * Short-lived cookie carrying the OAuth state nonce.
+ */
 export const OAUTH_STATE_COOKIE = "oauth_state";
-
-type ReaderAccount = {
-  id: string;
-  gaiaAccountId: string;
-  discordId: string;
-  discordUsername?: string | null;
-  globalName?: string | null;
-};
 
 /**
  * Reads a named cookie value from a raw Cookie header.
@@ -89,7 +89,10 @@ export function getCookieValue(
 }
 
 /** Builds the Set-Cookie value that stores the JWT. */
-export function buildAuthCookie(token: string, maxAgeSeconds = 60 * 60 * 12): string {
+export function buildAuthCookie(
+  token: string,
+  maxAgeSeconds = 60 * 60 * 12,
+): string {
   return `${AUTH_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${maxAgeSeconds}`;
 }
 

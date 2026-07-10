@@ -1,0 +1,21 @@
+.nav {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sm);
+  padding: var(--md) var(--xl);
+  width: calc(100% - var(--xl) * 2);
+}
+
+.link {
+  text-decoration: none;
+}
+
+.button {
+  padding: var(--sm) var(--lg);
+}

@@ -18,6 +18,7 @@ import {
   buildDiscordAuthUrl,
   newOAuthState,
 } from "../src/utils/auth.ts";
+import { seedPageData } from "../src/utils/seed-page-data.ts";
 
 /** Pages that do not require an authenticated session. */
 const PUBLIC_PAGES = new Set(["/login", "/register"]);
@@ -36,7 +37,9 @@ function normalizePath(pathname) {
  * @param {object} vite - The Vite dev server instance (optional, only in development).
  */
 export function setupRoutes(app, vite) {
-  /** Login via PRG: validate against gaia, set the httpOnly cookie, redirect. */
+  /**
+   * Login via PRG: validate against gaia, set the httpOnly cookie, redirect.
+   */
   app.post("/__login", async (request, reply) => {
     const { username, password } = request.body ?? {};
     const token = await loginViaGaia(username, password);
@@ -45,24 +48,33 @@ export function setupRoutes(app, vite) {
     return reply.redirect("/");
   });
 
-  /** Logout via PRG: clear the cookie, redirect to /login. */
+  /**
+   * Logout via PRG: clear the cookie, redirect to /login.
+   */
   app.post("/__logout", async (_request, reply) => {
     reply.header("Set-Cookie", clearAuthCookie());
     return reply.redirect("/login");
   });
 
-  /** Starts Discord OAuth: set a state cookie, redirect to the authorize URL. */
+  /**
+   * Starts Discord OAuth: set a state cookie, redirect to the authorize URL.
+   */
   app.get("/auth/discord", async (_request, reply) => {
     const state = newOAuthState();
     reply.header("Set-Cookie", buildStateCookie(state));
     return reply.redirect(buildDiscordAuthUrl(state));
   });
 
-  /** Discord OAuth callback: verify state, swap the code, set the cookie. */
+  /**
+   * Discord OAuth callback: verify state, swap the code, set the cookie.
+   */
   app.get("/auth/discord/callback", async (request, reply) => {
     const { code, state } = request.query ?? {};
     const expected = getCookieValue(request.headers.cookie, OAUTH_STATE_COOKIE);
-    reply.header("Set-Cookie", `${OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`);
+    reply.header(
+      "Set-Cookie",
+      `${OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`,
+    );
 
     if (!code || !state || !expected || state !== expected) {
       return reply.redirect("/login?error=discord");
@@ -74,7 +86,9 @@ export function setupRoutes(app, vite) {
     return reply.redirect("/");
   });
 
-  /** Catch-all SSR, gated on a session. */
+  /**
+   * Catch-all SSR, gated on a session.
+   */
   app.setNotFoundHandler({ method: ["GET"] }, async (request, reply) => {
     const requestUrl = new URL(request.raw.url, "http://localhost");
     const pathname = normalizePath(requestUrl.pathname);
@@ -89,6 +103,8 @@ export function setupRoutes(app, vite) {
 
     if (!user && !isPublic) return reply.redirect("/login");
     if (user && isPublic) return reply.redirect("/");
+
+    await seedPageData(user);
 
     const mutationPayloadCookie = getCookieValue(
       request.headers.cookie,

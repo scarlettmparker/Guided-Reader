@@ -16,9 +16,9 @@ export declare global {
     __serverCacheData__?: Record<string, Record<string, unknown>>;
     __locale__?: string;
     /**
-     * Current loaded translations.
+     * Loaded translation bundles keyed by namespace (page namespace + globals).
      */
-    __translations__?: Record<string, unknown>;
+    __translations__?: Record<string, Record<string, unknown>>;
     /**
      * Server-rendered theme values keyed by property name.
      */

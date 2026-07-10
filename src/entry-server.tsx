@@ -13,6 +13,11 @@ import { fetchPropertySet } from "./utils/api";
 import fs from "fs";
 import path from "path";
 
+/**
+ * Namespaces loaded on every render, regardless of route.
+ */
+const GLOBAL_NAMESPACES = ["nav"];
+
 type RenderProps = {
   url: string;
   locale: string;
@@ -58,18 +63,21 @@ export async function render({
     interpolation: { escapeValue: false },
   });
 
-  let translations: Record<string, unknown> = {};
-  try {
-    const filePath = path.resolve(
-      process.cwd(),
-      `messages/${pageName}/${locale}.json`,
-    );
-    if (fs.existsSync(filePath)) {
-      translations = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-      i18n.addResourceBundle(locale, pageName, translations, true, true);
+  const translations: Record<string, Record<string, unknown>> = {};
+  for (const ns of [pageName, ...GLOBAL_NAMESPACES]) {
+    try {
+      const filePath = path.resolve(
+        process.cwd(),
+        `messages/${ns}/${locale}.json`,
+      );
+      if (fs.existsSync(filePath)) {
+        const bundle = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+        translations[ns] = bundle;
+        i18n.addResourceBundle(locale, ns, bundle, true, true);
+      }
+    } catch {
+      // namespace optional; fall back to empty
     }
-  } catch {
-    // fallback to empty
   }
 
   let theme: Record<string, string> | null = null;
@@ -84,10 +92,12 @@ export async function render({
       : null;
     if (map && typeof map === "object") {
       const themeMap = map as Record<string, Record<string, string>>;
-      themes = Object.entries(themeMap).map(([name, values]) => ({ name, values }));
+      themes = Object.entries(themeMap).map(([name, values]) => ({
+        name,
+        values,
+      }));
       theme = themeMap["greek"] ?? null;
     }
-
   } catch {
     // Theme is optional; fall back to the persisted or default theme.
   }
