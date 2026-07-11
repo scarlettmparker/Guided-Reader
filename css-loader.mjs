@@ -21,7 +21,7 @@ export async function load(url, context, defaultLoad) {
     return {
       format: "module",
       shortCircuit: true,
-      source: "",
+      source: "export default {};",
     };
   }
   return defaultLoad(url, context);

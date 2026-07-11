@@ -75,6 +75,7 @@ const locale = window.__locale__ || "en";
 const initialPage = getPageName(window.location.pathname);
 const NAMESPACES = [
   "library",
+  "texts",
   "reader",
   "annotation",
   "thread",

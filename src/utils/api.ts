@@ -41,7 +41,6 @@ import {
   VoteInput,
   ReaderVoteTarget,
   VoteValue,
-  CefrLevel,
   PaginationInput,
   LocateThreadDocument,
   ListPostsDocument,
@@ -231,17 +230,9 @@ export async function fetchGraphQLData<
 }
 
 
-/** Lists reader texts, optionally filtered. */
-export async function fetchTexts(
-  level?: CefrLevel,
-  sourceId?: string,
-  ownerId?: string,
-  pagination?: PaginationInput,
-) {
+/** Lists reader texts, filtered via the pagination input's filters. */
+export async function fetchTexts(pagination?: PaginationInput) {
   return fetchGraphQLData("hadesQueries.texts", {
-    level: level ?? null,
-    sourceId: sourceId ?? null,
-    ownerId: ownerId ?? null,
     pagination: pagination ?? null,
   });
 }

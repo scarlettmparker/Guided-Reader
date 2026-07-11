@@ -1,0 +1,12 @@
+.placeholder_body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lg);
+  min-height: 300px;
+}
+
+.text {
+  margin: 0;
+}

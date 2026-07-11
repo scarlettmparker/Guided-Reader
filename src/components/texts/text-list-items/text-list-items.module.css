@@ -1,0 +1,27 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm);
+}
+
+.item {
+  display: block;
+  padding: var(--md) var(--lg);
+  border-radius: var(--sm);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item:hover {
+  background-color: var(--secondary-hover);
+}
+
+.item_active {
+  background-color: var(--secondary);
+}

@@ -1,6 +1,6 @@
-query listTexts($level: CefrLevel, $sourceId: ID, $ownerId: ID, $pagination: PaginationInput) {
+query listTexts($pagination: PaginationInput) {
   hadesQueries {
-    texts(level: $level, sourceId: $sourceId, ownerId: $ownerId, pagination: $pagination) {
+    texts(pagination: $pagination) {
       items {
         id
         title
