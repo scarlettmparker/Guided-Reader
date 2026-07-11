@@ -4,5 +4,14 @@
   "filter-levels": "Filter levels",
   "no-results": "No texts found",
   "select-text": "Select a text to read",
-  "not-found": "Text not found"
+  "not-found": "Text not found",
+  "annotate-prefix": "Annotate",
+  "annotation-placeholder": "Write your annotation...",
+  "annotate": "Click to annotate",
+  "cancel": "Cancel",
+  "annotations": "Annotations",
+  "no-annotations": "No annotations yet",
+  "sign-in-to-annotate": "Sign in to annotate",
+  "vote-up": "Vote up",
+  "vote-down": "Vote down"
 }

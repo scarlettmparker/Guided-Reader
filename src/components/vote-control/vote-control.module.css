@@ -1,0 +1,21 @@
+.vote_control {
+  display: flex;
+  align-items: center;
+  gap: var(--sm);
+}
+
+.vote_control svg {
+  width: var(--text-lg);
+  height: var(--text-lg);
+}
+
+.score {
+  min-width: 1.5em;
+  text-align: center;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.vote_button_active {
+  color: var(--primary);
+}

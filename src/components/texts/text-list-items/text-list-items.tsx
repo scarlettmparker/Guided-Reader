@@ -2,19 +2,10 @@ import { Link, useLocation } from "react-router-dom";
 import { usePageData } from "@sun/ssr/react";
 import { Badge, cn } from "@sun/components";
 import type { ListTextsQuery } from "~/generated/graphql";
+import { CEFR_TO_KEY } from "~/utils/cefr";
 import styles from "./text-list-items.module.css";
 
 type PagedTexts = ListTextsQuery["hadesQueries"]["texts"];
-
-/** Maps CEFR codes to the reader-level-colours property set keys. */
-const CEFR_TO_KEY: Record<string, string> = {
-  A1: "beginner",
-  A2: "elementary",
-  B1: "intermediate",
-  B2: "upper-intermediate",
-  C1: "advanced",
-  C2: "fluent",
-};
 
 type TextListItemsProps = {
   /**

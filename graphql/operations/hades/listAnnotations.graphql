@@ -14,6 +14,18 @@ query listAnnotations($textId: ID!, $includeHidden: Boolean) {
         startOffset
         endOffset
       }
+      author {
+        id
+        discordId
+        discordUsername
+        globalName
+        avatar
+        cefrLevel
+        roles {
+          key
+          name
+        }
+      }
     }
   }
 }

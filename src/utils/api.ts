@@ -298,41 +298,41 @@ export async function mutateArchiveText(id: string) {
 }
 
 /** Creates an annotation on a range. */
-export async function mutateCreateAnnotation(input: AnnotationInput) {
-  return fetchGraphQLData<CreateAnnotationMutation>("hadesMutations.createAnnotation", { input });
+export async function mutateCreateAnnotation(input: AnnotationInput, authToken?: string) {
+  return fetchGraphQLData<CreateAnnotationMutation>("hadesMutations.createAnnotation", { input }, authToken);
 }
 
 /** Updates an annotation's body. */
-export async function mutateEditAnnotation(id: string, body: string) {
-  return fetchGraphQLData<EditAnnotationMutation>("hadesMutations.editAnnotation", { id, body });
+export async function mutateEditAnnotation(id: string, body: string, authToken?: string) {
+  return fetchGraphQLData<EditAnnotationMutation>("hadesMutations.editAnnotation", { id, body }, authToken);
 }
 
 /** Deletes an annotation. */
-export async function mutateDeleteAnnotation(id: string) {
-  return fetchGraphQLData<DeleteAnnotationMutation>("hadesMutations.deleteAnnotation", { id });
+export async function mutateDeleteAnnotation(id: string, authToken?: string) {
+  return fetchGraphQLData<DeleteAnnotationMutation>("hadesMutations.deleteAnnotation", { id }, authToken);
 }
 
 /** Adds a comment to an annotation. */
-export async function mutateAddComment(input: CommentInput) {
-  return fetchGraphQLData<AddCommentMutation>("hadesMutations.addComment", { input });
+export async function mutateAddComment(input: CommentInput, authToken?: string) {
+  return fetchGraphQLData<AddCommentMutation>("hadesMutations.addComment", { input }, authToken);
 }
 
 /** Casts a vote on an annotation or comment. */
-export async function mutateVote(input: VoteInput) {
-  return fetchGraphQLData<HadesVoteMutation>("hadesMutations.vote", { input });
+export async function mutateVote(input: VoteInput, authToken?: string) {
+  return fetchGraphQLData<HadesVoteMutation>("hadesMutations.vote", { input }, authToken);
 }
 
 /** Casts a vote on a forum post. */
-export async function mutateIcarusVote(input: ForumVoteInput) {
-  return fetchGraphQLData<IcarusVoteMutation>("icarusMutations.vote", { input });
+export async function mutateIcarusVote(input: ForumVoteInput, authToken?: string) {
+  return fetchGraphQLData<IcarusVoteMutation>("icarusMutations.vote", { input }, authToken);
 }
 
 /** Removes the caller's vote. */
-export async function mutateRemoveVote(targetType: ReaderVoteTarget, targetId: string) {
+export async function mutateRemoveVote(targetType: ReaderVoteTarget, targetId: string, authToken?: string) {
   return fetchGraphQLData<RemoveVoteMutation>("hadesMutations.removeVote", {
     targetType,
     targetId,
-  });
+  }, authToken);
 }
 
 /** Exchanges a Discord authorization code for a JWT. */

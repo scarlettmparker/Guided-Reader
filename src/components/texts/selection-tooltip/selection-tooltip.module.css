@@ -1,0 +1,7 @@
+.anchor {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}
