@@ -1,4 +1,5 @@
-import { Suspense, useState } from "react";
+import { Suspense, useState, useTransition } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@sun/components";
 import {
@@ -21,28 +22,80 @@ import styles from "./text-list.module.css";
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
 /**
- * Text list with search bar, level filter dropdown, and server-side pagination.
+ * Sets or removes a single search param, preserving the rest.
+ */
+function updateParams(
+  searchParams: URLSearchParams,
+  key: string,
+  value: string | null,
+): URLSearchParams {
+  const next = new URLSearchParams(searchParams);
+  if (value === null || value === "") {
+    next.delete(key);
+  } else {
+    next.set(key, value);
+  }
+  return next;
+}
+
+/**
+ * Text list with search, level filters, and pagination.
  */
 const TextList = () => {
   const { t } = useTranslation("texts");
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
-  const [page, setPage] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  const search = searchParams.get("search") ?? "";
+  const levels = searchParams.get("levels")?.split(",").filter(Boolean) ?? [];
+  const page = Number(searchParams.get("page") ?? "0");
+
+  const [searchInput, setSearchInput] = useState(search);
+  const [, startTransition] = useTransition();
+
+  /**
+   * Sets the search query in the query params and resets the page to 0.
+   * @param value Search query string (empty string to clear)
+   */
   const handleSearch = (value: string) => {
-    setSearch(value);
-    setPage(0);
+    setSearchParams((prev) => {
+      const next = updateParams(prev, "search", value || null);
+      next.delete("page");
+      return next;
+    });
   };
 
+  /**
+   * Sets or removes a CEFR level filter in the query params.
+   * @param level Level to toggle (e.g., "A1", "B2").
+   */
   const toggleLevel = (level: string) => {
-    setSelectedLevels((prev) =>
-      prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level],
-    );
-    setPage(0);
+    setSearchParams((prev) => {
+      const current = prev.get("levels")?.split(",").filter(Boolean) ?? [];
+      const next = current.includes(level)
+        ? current.filter((l) => l !== level)
+        : [...current, level];
+
+      // Update query params with new levels.
+      const updated = updateParams(
+        prev,
+        "levels",
+        next.length > 0 ? next.join(",") : null,
+      );
+      updated.delete("page");
+      return updated;
+    });
   };
 
-  const dataProps = { page, search, levels: selectedLevels };
+  const handlePageChange = (newPage: number) => {
+    // Wrap page change in startTransition to avoid blocking the UI while fetching new data.
+    startTransition(() => {
+      setSearchParams((prev) =>
+        updateParams(prev, "page", newPage > 0 ? String(newPage) : null),
+      );
+    });
+  };
+
+  const pagination = { page, search, levels };
 
   return (
     <>
@@ -72,7 +125,7 @@ const TextList = () => {
                 {LEVELS.map((level) => (
                   <label key={level} className={styles.level_label}>
                     <Checkbox
-                      checked={selectedLevels.includes(level)}
+                      checked={levels.includes(level)}
                       onChange={() => toggleLevel(level)}
                     />
                     {level}
@@ -88,14 +141,14 @@ const TextList = () => {
               </div>
             }
           >
-            <TextListItems {...dataProps} />
+            <TextListItems {...pagination} />
           </Suspense>
         </CardBody>
       </Card>
       <Suspense fallback={null}>
         <TextListPagination
-          {...dataProps}
-          onPageChange={setPage}
+          {...pagination}
+          onPageChange={handlePageChange}
           className={styles.pagination}
         />
       </Suspense>

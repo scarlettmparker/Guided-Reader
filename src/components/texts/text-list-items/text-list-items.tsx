@@ -1,10 +1,20 @@
 import { Link, useLocation } from "react-router-dom";
 import { usePageData } from "@sun/ssr/react";
-import { cn } from "@sun/components";
+import { Badge, cn } from "@sun/components";
 import type { ListTextsQuery } from "~/generated/graphql";
 import styles from "./text-list-items.module.css";
 
 type PagedTexts = ListTextsQuery["hadesQueries"]["texts"];
+
+/** Maps CEFR codes to the reader-level-colours property set keys. */
+const CEFR_TO_KEY: Record<string, string> = {
+  A1: "beginner",
+  A2: "elementary",
+  B1: "intermediate",
+  B2: "upper-intermediate",
+  C1: "advanced",
+  C2: "fluent",
+};
 
 type TextListItemsProps = {
   /**
@@ -29,12 +39,16 @@ type TextListItemsProps = {
  * @param levels selected CEFR levels
  */
 const TextListItems = ({ page, search, levels }: TextListItemsProps) => {
-  const { pathname } = useLocation();
+  const { pathname, search: queryString } = useLocation();
   const { data } = usePageData<PagedTexts>("texts", "texts", {
     page,
     search: search || undefined,
     levels: levels.length > 0 ? levels : undefined,
   });
+  const { data: levelColours } = usePageData<Record<string, string> | null>(
+    "levelColours",
+    "levelColours",
+  );
 
   const items = data?.items ?? [];
 
@@ -42,13 +56,21 @@ const TextListItems = ({ page, search, levels }: TextListItemsProps) => {
     <ul className={styles.list}>
       {items.map((item) => {
         const isActive = pathname === `/texts/${item.id}`;
+        const colour = levelColours?.[CEFR_TO_KEY[item.level]];
         return (
           <li key={item.id}>
             <Link
-              to={`/texts/${item.id}`}
+              to={`/texts/${item.id}${queryString}`}
               className={cn(styles.item, isActive && styles.item_active)}
             >
-              {item.title}
+              <Badge
+                variant="secondary"
+                className={styles.item_level}
+                style={colour ? { backgroundColor: colour } : undefined}
+              >
+                {item.level}
+              </Badge>
+              <span className={styles.item_title}>{item.title}</span>
             </Link>
           </li>
         );

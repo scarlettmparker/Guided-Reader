@@ -8,14 +8,13 @@
 }
 
 .item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--md);
   padding: var(--md) var(--lg);
   border-radius: var(--sm);
   text-decoration: none;
   color: inherit;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .item:hover {
@@ -24,4 +23,13 @@
 
 .item_active {
   background-color: var(--secondary);
+}
+
+.item_level {
+  margin-right: var(--lg);
+}
+
+.item_title {
+  overflow: hidden;
+  white-space: wrap;
 }
