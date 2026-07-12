@@ -141,8 +141,10 @@ export async function render({
     let resolved = false;
     let postludeData = "";
 
+    // Do NOT pass bootstrapModules: React emits them at the end of the stream
+    // (inside #app), before the postlude fills window.__serverCacheData__, so
+    // the client boots too early and crashes on first load.
     const stream = renderToPipeableStream(didMatch ? App : <NotFound />, {
-      bootstrapModules: [clientJs],
       onShellReady() {
         const cssTag = generateCssTag(isProduction, cssContent, clientCss);
         const headers: Record<string, string> = { "Content-Type": "text/html" };
@@ -150,6 +152,17 @@ export async function render({
           headers["Set-Cookie"] =
             "invalidate_cache=; Path=/; Max-Age=0; SameSite=Lax;";
         }
+        // React Refresh is dev-only (HMR); without bootstrapModules we emit the
+        // preamble ourselves.
+        const refreshPreamble = isProduction
+          ? ""
+          : `<script type="module">
+              import RefreshRuntime from '${process.env.VITE_SERVER_BASE}/@react-refresh'
+              RefreshRuntime.injectIntoGlobalHook(window)
+              window.$RefreshReg$ = () => {}
+              window.$RefreshSig$ = () => (type) => type
+              window.__vite_plugin_react_preamble_installed__ = true
+            </script>`;
         const prelude = `<!DOCTYPE html>
           <html lang="en">
             <head>
@@ -157,8 +170,10 @@ export async function render({
               <meta name="viewport" content="width=device-width, initial-scale=1.0" />
               ${cssTag}
               ${themeStyle}
+              <link rel="modulepreload" href="${clientJs}" />
               <title>Guided Reader | Scarlet Sun</title>
             </head>
+            ${refreshPreamble}
             <script>
               window.__translations__ = ${JSON.stringify(translations)};
               window.__locale__ = '${locale}';
