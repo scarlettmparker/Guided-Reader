@@ -30,9 +30,14 @@
   margin-right: var(--lg);
 }
 
+a:has(.item_level) {
+  text-decoration: none !important;
+}
+
 .item_title {
   overflow: hidden;
   white-space: nowrap;
   width: fit-content;
   text-overflow: ellipsis;
+  text-decoration: underline;
 }
