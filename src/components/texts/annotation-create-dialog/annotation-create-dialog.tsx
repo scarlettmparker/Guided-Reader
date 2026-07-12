@@ -11,6 +11,7 @@ import {
   MarkdownEditor,
 } from "@sun/components";
 import { createAnnotation } from "~/server/actions/annotation";
+import styles from "./annotation-create-dialog.module.css";
 
 const TITLE_SNIPPET_LIMIT = 60;
 
@@ -114,6 +115,7 @@ const AnnotationCreateDialog = ({
       onOpenChange={onOpenChange}
       draggable
       position={{ top: selection.top, left: selection.left }}
+      className={styles.dialog}
     >
       <Form onSubmit={handleSubmit}>
         <DialogHeader>

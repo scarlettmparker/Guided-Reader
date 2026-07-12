@@ -26,10 +26,6 @@
   gap: var(--md);
 }
 
-.author {
-  margin-right: var(--sm);
-}
-
 .level {
   margin-left: var(--md);
 }

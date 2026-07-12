@@ -20,7 +20,6 @@ import VoteControl from "~/components/vote-control";
 import AnnotationConfirmDeleteDialog from "../annotation-confirm-delete-dialog";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import {
-  ReaderVoteTarget,
   type ListAnnotationsQuery,
   type ReaderAccount,
 } from "~/generated/graphql";
@@ -48,16 +47,20 @@ export type AnnotationListState = {
    */
   textId: string;
   /**
-   * The annotations sharing the clicked position.
+   * The position whose annotations are shown.
    */
-  annotations: Annotation[];
+  positionId: string;
 };
 
 type AnnotationListDialogProps = {
   /**
-   * Dialog open state, screen position, and the annotations to show.
+   * Dialog open state, screen position, and the position being viewed.
    */
   list: AnnotationListState;
+  /**
+   * The live annotations for the position (refetches after mutations).
+   */
+  annotations: Annotation[];
   /**
    * Called when the open state changes.
    */
@@ -69,6 +72,7 @@ type AnnotationListDialogProps = {
  */
 const AnnotationListDialog = ({
   list,
+  annotations,
   onOpenChange,
 }: AnnotationListDialogProps) => {
   const { t } = useTranslation("texts");
@@ -80,7 +84,7 @@ const AnnotationListDialog = ({
     "currentUser",
     "currentUser",
   );
-  const { open, position, textId, annotations } = list;
+  const { open, position, textId } = list;
   const [items, setItems] = useState<Annotation[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Annotation | null>(null);
 
@@ -174,13 +178,8 @@ const AnnotationListDialog = ({
                     {annotation.body}
                   </MarkdownViewer>
                   <VoteControl
-                    targetType={ReaderVoteTarget.Annotation}
-                    targetId={annotation.id}
-                    netScore={annotation.netScore}
-                    myVote={annotation.myVote ?? undefined}
-                    onVoted={(_vote, netScore) =>
-                      handleVoted(annotation.id, netScore)
-                    }
+                    annotation={annotation}
+                    onVoted={(netScore) => handleVoted(annotation.id, netScore)}
                   />
                 </li>
               );

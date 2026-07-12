@@ -7,7 +7,11 @@ import NotFound from "./routes/not-found";
 import { matchRoutes } from "react-router-dom";
 import { inlineCss, generateCssTag } from "@sun/utils";
 import "./utils/register-loaders";
-import { suspenseCache, invalidateCache, type MutationResult } from "@sun/ssr";
+import {
+  getRequestCache,
+  invalidateCache,
+  type MutationResult,
+} from "@sun/ssr";
 import { createI18nInstance } from "./utils/i18n";
 import { fetchPropertySet } from "./utils/api";
 import fs from "fs";
@@ -49,9 +53,15 @@ export async function render({
     shouldDeleteCookie = invalidateCache(invalidateCacheCookie);
   }
 
-  for (const [key, record] of suspenseCache.entries()) {
+  // Capture the request's cache reference while the request AsyncLocalStorage
+  // is active; stream callbacks (onAllReady) fire outside it, so re-reading the
+  // store there returns the wrong (empty) cache and loses seeded data like
+  // currentUser from the postlude.
+  const requestCache = getRequestCache();
+
+  for (const [key, record] of requestCache.entries()) {
     if (record.status === "rejected") {
-      suspenseCache.delete(key);
+      requestCache.delete(key);
     }
   }
 
@@ -171,7 +181,7 @@ export async function render({
       },
       onAllReady() {
         const serverCacheData: Record<string, unknown> = {};
-        for (const [key, record] of suspenseCache.entries()) {
+        for (const [key, record] of requestCache.entries()) {
           if (record.status === "resolved") {
             serverCacheData[key] = record.result;
           }

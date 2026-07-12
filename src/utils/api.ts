@@ -248,8 +248,16 @@ export async function fetchText(id: string) {
 }
 
 /** Lists annotations for a text. */
-export async function fetchAnnotations(textId: string, includeHidden = false) {
-  return fetchGraphQLData("hadesQueries.annotations", { textId, includeHidden });
+export async function fetchAnnotations(
+  textId: string,
+  includeHidden = false,
+  authToken?: string,
+) {
+  return fetchGraphQLData(
+    "hadesQueries.annotations",
+    { textId, includeHidden },
+    authToken,
+  );
 }
 
 /** Locates an annotation by id. */

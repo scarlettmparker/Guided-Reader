@@ -17,5 +17,5 @@
   "annotation-actions": "Annotation actions",
   "delete": "Delete",
   "delete-annotation-title": "Delete annotation",
-  "delete-annotation-body": "Delete your annotation \"{{snippet}}\"? This can't be undone."
+  "delete-annotation-body": "Delete your annotation \"{{snippet}}\"? This action can't be undone."
 }

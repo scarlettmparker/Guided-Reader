@@ -101,8 +101,25 @@ const AnnotationLayer = ({
     open: false,
     position: { top: 0, left: 0 },
     textId,
-    annotations: [],
+    positionId: "",
   });
+
+  /**
+   * Live annotations for the position being viewed, so the dialog updates after
+   * a delete/vote without holding a stale snapshot.
+   */
+  const listAnnotations = list.open
+    ? byPosition.get(list.positionId) ?? NO_ANNOTATIONS
+    : NO_ANNOTATIONS;
+
+  /**
+   * Closes the list dialog when its position has no annotations left.
+   */
+  useEffect(() => {
+    if (list.open && listAnnotations.length === 0) {
+      setList((prev) => ({ ...prev, open: false }));
+    }
+  }, [list.open, listAnnotations]);
 
   /**
    * Re-injects highlight elements for every annotation position whenever the
@@ -134,7 +151,7 @@ const AnnotationLayer = ({
             open: true,
             position: { top: rect.top, left: rect.right },
             textId,
-            annotations: byPosition.get(positionId) ?? NO_ANNOTATIONS,
+            positionId,
           });
         });
       }
@@ -235,6 +252,7 @@ const AnnotationLayer = ({
 
       <AnnotationListDialog
         list={list}
+        annotations={listAnnotations}
         onOpenChange={(open) => setList((prev) => ({ ...prev, open }))}
       />
     </div>
