@@ -149,7 +149,7 @@ const AnnotationLayer = ({
           setList({
             open: true,
             position: centeredDialogPosition(
-              { top: rect.bottom + 16, left: rect.left + rect.width / 2 },
+              { top: rect.bottom + 8, left: rect.left + rect.width / 2 },
               20,
             ),
             textId,

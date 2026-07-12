@@ -121,7 +121,7 @@ const AnnotationCreateDialog = ({
       onOpenChange={onOpenChange}
       draggable
       position={centeredDialogPosition(
-        { top: selection.bottom + 16, left: selection.left },
+        { top: selection.bottom + 8, left: selection.left },
         24,
       )}
       className={styles.dialog}
