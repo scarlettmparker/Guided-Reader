@@ -5,16 +5,17 @@
   display: flex;
   flex-direction: column;
   gap: var(--sm);
+  width: 100%;
 }
 
 .item {
-  display: flex;
+  display: flex !important;
   align-items: center;
-  gap: var(--md);
   padding: var(--md) var(--lg);
   border-radius: var(--sm);
   text-decoration: none;
   color: inherit;
+  width: calc(100% - var(--lg) * 2) !important;
 }
 
 .item:hover {
@@ -31,5 +32,7 @@
 
 .item_title {
   overflow: hidden;
-  white-space: wrap;
+  white-space: nowrap;
+  width: fit-content;
+  text-overflow: ellipsis;
 }
