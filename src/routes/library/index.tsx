@@ -1,14 +1,10 @@
 import {
   Button,
   Card,
-  CardBody,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-  Checkbox,
-  Input,
-  Label,
   Separator,
 } from "@sun/components";
 

@@ -28,6 +28,14 @@ export declare global {
      */
     __themes__?: { name: string; values: Record<string, string> }[];
     /**
+     * Posthog API key, baked into the HTML at render time.
+     */
+    __posthog_key__?: string;
+    /**
+     * Posthog host, baked into the HTML at render time.
+     */
+    __posthog_host__?: string;
+    /**
      * Whether the Vite React refresh preamble has been installed.
      */
     __vite_plugin_react_preamble_installed__?: boolean;
