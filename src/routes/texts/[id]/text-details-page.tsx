@@ -1,55 +1,20 @@
+import { Suspense } from "react";
 import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { usePageData } from "@sun/ssr/react";
-import {
-  Card,
-  CardBody,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@sun/components";
-import AnnotationLayer from "~/components/texts/annotation-layer";
-import type { LocateTextQuery } from "~/generated/graphql";
+import TextDetailsContent from "~/components/texts/text-details-content";
+import { TextDetailsPageSkeleton } from "~/components/texts/skeletons";
 import styles from "./text-details-page.module.css";
 
-type ReaderText = LocateTextQuery["hadesQueries"]["text"];
-
 /**
- * Text detail page: renders a single text as an annotatable markdown layer.
+ * Text detail page.
  */
 const TextDetailsPage = () => {
-  const { t } = useTranslation("texts");
   const { id } = useParams<{ id: string }>();
-  const { data: text } = usePageData<ReaderText>("text", "texts/:id", {
-    id: id!,
-  });
-
-  if (!text || !id) {
-    return (
-      <Card>
-        <CardBody>
-          <p>{t("not-found")}</p>
-        </CardBody>
-      </Card>
-    );
-  }
+  if (!id) return null;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{text.title}</CardTitle>
-        <CardDescription>
-          {text.level} · {text.language}
-        </CardDescription>
-      </CardHeader>
-      <CardBody>
-        <AnnotationLayer
-          textId={id}
-          content={text.content}
-          className={styles.content}
-        />
-      </CardBody>
-    </Card>
+    <Suspense fallback={<TextDetailsPageSkeleton />}>
+      <TextDetailsContent textId={id} className={styles.content} />
+    </Suspense>
   );
 };
 

@@ -8,6 +8,7 @@ import {
   overlapsExisting,
 } from "~/utils/selection-to-offset";
 import { unwrapCharacterRange, wrapCharacterRange } from "~/utils/wrap-range";
+import { centeredDialogPosition } from "~/utils/dialog-position";
 import type { ListAnnotationsQuery, ReaderAccount } from "~/generated/graphql";
 import AnnotationCreateDialog, {
   type AnnotationCreateState,
@@ -39,8 +40,7 @@ const HIGHLIGHT_ATTR = "data-annotation-pos";
 
 /**
  * Stable empty fallback so the annotations reference doesn't change between
- * renders while loading (which would re-run the highlight effect and collapse
- * the user's text selection via normalize()).
+ * renders while loading.
  */
 const NO_ANNOTATIONS: Annotation[] = [];
 
@@ -109,7 +109,7 @@ const AnnotationLayer = ({
    * a delete/vote without holding a stale snapshot.
    */
   const listAnnotations = list.open
-    ? byPosition.get(list.positionId) ?? NO_ANNOTATIONS
+    ? (byPosition.get(list.positionId) ?? NO_ANNOTATIONS)
     : NO_ANNOTATIONS;
 
   /**
@@ -123,8 +123,7 @@ const AnnotationLayer = ({
 
   /**
    * Re-injects highlight elements for every annotation position whenever the
-   * annotations or content change. Previous highlights are stripped first so
-   * the container can be re-wrapped cleanly.
+   * annotations or content change.
    */
   useEffect(() => {
     const container = containerRef.current;
@@ -149,7 +148,10 @@ const AnnotationLayer = ({
           const rect = mark.getBoundingClientRect();
           setList({
             open: true,
-            position: { top: rect.top, left: rect.right },
+            position: centeredDialogPosition(
+              { top: rect.bottom + 16, left: rect.left + rect.width / 2 },
+              20,
+            ),
             textId,
             positionId,
           });
@@ -199,6 +201,7 @@ const AnnotationLayer = ({
     }
     setSelection({
       top: rect.top + rect.height / 2,
+      bottom: rect.bottom,
       left: rect.left + rect.width / 2,
       selectedText: offsets.text,
       startOffset: offsets.start,

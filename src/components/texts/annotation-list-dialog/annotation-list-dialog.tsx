@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { EllipsisVerticalIcon } from "lucide-react";
 import {
   Badge,
-  Button,
   Dialog,
   DialogBody,
   DialogHeader,
@@ -108,6 +107,7 @@ const AnnotationListDialog = ({
 
   return (
     <Dialog
+      key={open ? "open" : "closed"}
       open={open}
       onOpenChange={onOpenChange}
       draggable

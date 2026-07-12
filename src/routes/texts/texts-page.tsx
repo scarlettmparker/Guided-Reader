@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { useOutlet } from "react-router-dom";
 import TextList from "~/components/texts/text-list";
 import TextDetailPlaceholder from "~/components/texts/text-detail-placeholder";
-import { TextsPageSkeleton, TextDetailsPageSkeleton } from "~/components/texts/skeletons";
+import { TextsPageSkeleton } from "~/components/texts/skeletons";
 import styles from "./texts-page.module.css";
 
 /**
@@ -18,11 +18,7 @@ const TextsPage = () => {
           <TextList />
         </Suspense>
       </div>
-      <div className={styles.detail_panel}>
-        <Suspense fallback={<TextDetailsPageSkeleton />}>
-          {outlet ?? <TextDetailPlaceholder />}
-        </Suspense>
-      </div>
+      <div className={styles.detail_panel}>{outlet ?? <TextDetailPlaceholder />}</div>
     </div>
   );
 };

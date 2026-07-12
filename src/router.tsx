@@ -29,11 +29,7 @@ export const routes: RouteObject[] = [
     children: [
       {
         path: ":id",
-        element: (
-          <Suspense fallback={null}>
-            <TextDetailsPage />
-          </Suspense>
-        ),
+        element: <TextDetailsPage />,
       },
     ],
   },

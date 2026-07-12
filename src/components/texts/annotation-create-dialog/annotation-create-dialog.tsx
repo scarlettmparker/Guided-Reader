@@ -11,6 +11,7 @@ import {
   MarkdownEditor,
 } from "@sun/components";
 import { createAnnotation } from "~/server/actions/annotation";
+import { centeredDialogPosition } from "~/utils/dialog-position";
 import styles from "./annotation-create-dialog.module.css";
 
 const TITLE_SNIPPET_LIMIT = 60;
@@ -23,6 +24,10 @@ export type AnnotationSelection = {
    * Viewport Y of the selection's upper edge.
    */
   top: number;
+  /**
+   * Viewport Y of the selection's lower edge.
+   */
+  bottom: number;
   /**
    * Viewport X of the selection's horizontal centre.
    */
@@ -111,10 +116,14 @@ const AnnotationCreateDialog = ({
 
   return (
     <Dialog
+      key={create.open ? "open" : "closed"}
       open={create.open}
       onOpenChange={onOpenChange}
       draggable
-      position={{ top: selection.top, left: selection.left }}
+      position={centeredDialogPosition(
+        { top: selection.bottom + 16, left: selection.left },
+        24,
+      )}
       className={styles.dialog}
     >
       <Form onSubmit={handleSubmit}>

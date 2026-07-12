@@ -11,11 +11,7 @@ const TextDetailsPageSkeleton = () => (
       <Skeleton className={styles.meta} />
     </CardHeader>
     <CardBody className={styles.body}>
-      <Skeleton className={styles.line_wide} />
-      <Skeleton className={styles.line_wide} />
-      <Skeleton className={styles.line_narrow} />
-      <Skeleton className={styles.line_wide} />
-      <Skeleton className={styles.line_medium} />
+      <Skeleton className={styles.skeleton_body} />
     </CardBody>
   </Card>
 );
