@@ -23,7 +23,7 @@ function seed(key: string, result: Record<string, unknown>): void {
  *
  * @returns the level name to hex colour map, or empty when unreadable
  */
-async function loadLevelColours(): Promise<LevelColours> {
+export async function loadLevelColours(): Promise<LevelColours> {
   const res = await fetchPropertySet("ReactApp", "reader-level-colours");
   if (!res.success || !res.data) {
     return {};
