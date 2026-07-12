@@ -31,7 +31,15 @@
 }
 
 .level {
+  margin-left: var(--md);
+}
+
+.menu_trigger {
   margin-left: auto;
+}
+
+.delete_action {
+  color: var(--destructive);
 }
 
 .body {

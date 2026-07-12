@@ -1,22 +1,31 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { EllipsisVerticalIcon } from "lucide-react";
 import {
   Badge,
+  Button,
   Dialog,
   DialogBody,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   MarkdownViewer,
 } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
 import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
+import AnnotationConfirmDeleteDialog from "../annotation-confirm-delete-dialog";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import {
   ReaderVoteTarget,
   type ListAnnotationsQuery,
+  type ReaderAccount,
 } from "~/generated/graphql";
 import styles from "./annotation-list-dialog.module.css";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"][number];
 
@@ -34,6 +43,10 @@ export type AnnotationListState = {
    * Initial screen position for the draggable dialog.
    */
   position: { top: number; left: number };
+  /**
+   * The text the annotations belong to.
+   */
+  textId: string;
   /**
    * The annotations sharing the clicked position.
    */
@@ -63,8 +76,13 @@ const AnnotationListDialog = ({
     "levelColours",
     "levelColours",
   );
-  const { open, position, annotations } = list;
+  const { data: currentUser } = usePageData<ReaderAccount | null>(
+    "currentUser",
+    "currentUser",
+  );
+  const { open, position, textId, annotations } = list;
   const [items, setItems] = useState<Annotation[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<Annotation | null>(null);
 
   /**
    * Keeps the local list in sync when a different position is opened.
@@ -104,6 +122,10 @@ const AnnotationListDialog = ({
               const colour = author?.cefrLevel
                 ? colours?.[CEFR_TO_KEY[author.cefrLevel]]
                 : undefined;
+              const isOwner =
+                !!author?.id &&
+                !!currentUser?.id &&
+                author.id === currentUser.id;
               return (
                 <li key={annotation.id} className={styles.annotation}>
                   <div className={styles.header}>
@@ -125,6 +147,28 @@ const AnnotationListDialog = ({
                         {author.cefrLevel}
                       </Badge>
                     )}
+                    {isOwner && (
+                      <DropdownMenu className={styles.menu_trigger}>
+                        <DropdownMenuTrigger asChild>
+                          <EllipsisVerticalIcon
+                            width={16}
+                            height={16}
+                            aria-label={t("annotation-actions")}
+                          />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => setDeleteTarget(annotation)}
+                            asChild
+                          >
+                            <span className={styles.delete_action}>
+                              <TrashIcon width={16} height={16} />
+                              {t("delete")}
+                            </span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                   <MarkdownViewer className={styles.body}>
                     {annotation.body}
@@ -133,6 +177,7 @@ const AnnotationListDialog = ({
                     targetType={ReaderVoteTarget.Annotation}
                     targetId={annotation.id}
                     netScore={annotation.netScore}
+                    myVote={annotation.myVote ?? undefined}
                     onVoted={(_vote, netScore) =>
                       handleVoted(annotation.id, netScore)
                     }
@@ -143,6 +188,12 @@ const AnnotationListDialog = ({
           </ul>
         )}
       </DialogBody>
+
+      <AnnotationConfirmDeleteDialog
+        target={deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        textId={textId}
+      />
     </Dialog>
   );
 };

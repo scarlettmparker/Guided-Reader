@@ -84,6 +84,9 @@ export function registerMutations(): void {
           __typename: "StandardError",
           message: result.error || "Failed to delete annotation.",
         }),
+        invalidated: body.textId
+          ? [makeCacheKey("texts/:id:annotations", { id: body.textId as string })]
+          : [],
       };
     },
   );

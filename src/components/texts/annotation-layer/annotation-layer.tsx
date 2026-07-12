@@ -100,6 +100,7 @@ const AnnotationLayer = ({
   const [list, setList] = useState<AnnotationListState>({
     open: false,
     position: { top: 0, left: 0 },
+    textId,
     annotations: [],
   });
 
@@ -132,6 +133,7 @@ const AnnotationLayer = ({
           setList({
             open: true,
             position: { top: rect.top, left: rect.right },
+            textId,
             annotations: byPosition.get(positionId) ?? NO_ANNOTATIONS,
           });
         });

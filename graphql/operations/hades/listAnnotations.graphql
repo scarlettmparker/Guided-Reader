@@ -26,6 +26,7 @@ query listAnnotations($textId: ID!, $includeHidden: Boolean) {
           name
         }
       }
+      myVote
     }
   }
 }

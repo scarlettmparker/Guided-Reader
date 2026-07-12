@@ -15,6 +15,16 @@ export async function createAnnotation(
 }
 
 /**
+ * Deletes an annotation (owner only).
+ */
+export async function deleteAnnotation(
+  id: string,
+  textId: string,
+): Promise<MutationResult> {
+  return executeMutation("hades/deleteAnnotation", { id, textId });
+}
+
+/**
  * Casts a vote on an annotation or comment.
  */
 export async function vote(
