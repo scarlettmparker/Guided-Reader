@@ -1,8 +1,10 @@
-import { pageDataRegistry } from "@sun/ssr";
-import { fetchTexts } from "~/utils/api";
+import { defineLoader } from "@sun/ssr";
+import { executeDocument } from "~/utils/api";
 import {
-  ListTextsQuery,
-  PaginationInput,
+  ListTextsDocument,
+  type ListTextsQuery,
+  type ListTextsQueryVariables,
+  type PaginationInput,
   SortDirection,
   FilterOperator,
 } from "~/generated/graphql";
@@ -22,56 +24,51 @@ const EMPTY_PAGE = {
 /**
  * Server-side paginated texts loader with search and level filters.
  */
-async function getTextsData(
-  params?: Record<string, unknown>,
-): Promise<Record<string, unknown> | null> {
-  const page = Number(params?.page ?? 0);
-  const search = params?.search as string | undefined;
-  const levels = params?.levels as string[] | undefined;
+defineLoader({
+  pattern: "texts",
+  async loader(params) {
+    const page = Number(params.page ?? 0);
+    const search = params.search as string | undefined;
+    const levels = params.levels as string[] | undefined;
 
-  const filters: Array<{
-    field: string;
-    operator: FilterOperator;
-    value: string;
-  }> = [];
-  if (search) {
-    filters.push({
-      field: "title",
-      operator: FilterOperator.Matches,
-      value: search,
-    });
-  }
-  if (levels && levels.length > 0) {
-    filters.push({
-      field: "level",
-      operator: FilterOperator.In,
-      value: levels.join(","),
-    });
-  }
+    const filters: Array<{
+      field: string;
+      operator: FilterOperator;
+      value: string;
+    }> = [];
+    if (search) {
+      filters.push({
+        field: "title",
+        operator: FilterOperator.Matches,
+        value: search,
+      });
+    }
+    if (levels && levels.length > 0) {
+      filters.push({
+        field: "level",
+        operator: FilterOperator.In,
+        value: levels.join(","),
+      });
+    }
 
-  const pagination: PaginationInput = {
-    page,
-    size: 10,
-    sortBy: "level",
-    sortDir: SortDirection.Asc,
-    filters: filters.length > 0 ? filters : undefined,
-  };
+    const pagination: PaginationInput = {
+      page,
+      size: 10,
+      sortBy: "level",
+      sortDir: SortDirection.Asc,
+      filters: filters.length > 0 ? filters : undefined,
+    };
 
-  try {
-    const result = await fetchTexts(pagination);
-    const texts = result?.success
-      ? (result.data as ListTextsQuery).hadesQueries.texts
-      : EMPTY_PAGE;
-    return { texts: texts ?? EMPTY_PAGE };
-  } catch (error) {
-    console.error("Failed to fetch texts:", error);
-    return { texts: EMPTY_PAGE };
-  }
-}
-
-/**
- * Registers the texts list data loader.
- */
-export function registerTextsDataLoader(): void {
-  pageDataRegistry.registerPageDataLoader("texts", getTextsData);
-}
+    try {
+      const result = await executeDocument<ListTextsQuery, ListTextsQueryVariables>(
+        ListTextsDocument,
+        { pagination },
+      );
+      const texts = result.success ? result.data?.hadesQueries.texts : null;
+      return { texts: texts ?? EMPTY_PAGE };
+    } catch (error) {
+      console.error("Failed to fetch texts:", error);
+      return { texts: EMPTY_PAGE };
+    }
+  },
+});

@@ -1,0 +1,66 @@
+{
+  "login": {
+    "title": "Guided Reader",
+    "subtitle": "Sign in to continue.",
+    "username": "Username",
+    "username-placeholder": "Enter username",
+    "password": "Password",
+    "password-placeholder": "Enter password",
+    "sign-in-label": "Sign in",
+    "sign-in-title": "Sign in",
+    "error-default": "Invalid credentials",
+    "error-discord": "Discord sign-in failed",
+    "or": "OR",
+    "discord-label": "Continue with Discord",
+    "register-prompt": "No account?",
+    "register-link": "Register"
+  },
+  "nav": {
+    "home": "Home",
+    "texts": "Texts",
+    "profile": "Profile",
+    "account": "Account",
+    "logout": "Sign out",
+    "manage-profile": "Manage profile",
+    "no-roles": "No roles",
+    "cefr": {
+      "a1": "A1",
+      "a2": "A2",
+      "b1": "B1",
+      "b2": "B2",
+      "c1": "C1",
+      "c2": "C2"
+    },
+    "level": {
+      "non-learner": "Non Learner",
+      "native": "Native",
+      "beginner": "Beginner",
+      "elementary": "Elementary",
+      "intermediate": "Intermediate",
+      "upper-intermediate": "Upper Intermediate",
+      "advanced": "Advanced",
+      "fluent": "Fluent"
+    }
+  },
+  "texts": {
+    "title": "Texts",
+    "search-placeholder": "Search texts...",
+    "filter-levels": "Filter levels",
+    "no-results": "No texts found",
+    "select-text": "Select a text to read",
+    "not-found": "Text not found",
+    "annotate-prefix": "Annotate",
+    "annotation-placeholder": "Write your annotation...",
+    "annotate": "Click to annotate",
+    "cancel": "Cancel",
+    "annotations": "Annotations",
+    "no-annotations": "No annotations yet",
+    "sign-in-to-annotate": "Sign in to annotate",
+    "vote-up": "Vote up",
+    "vote-down": "Vote down",
+    "annotation-actions": "Annotation actions",
+    "delete": "Delete",
+    "delete-annotation-title": "Delete annotation",
+    "delete-annotation-body": "Delete your annotation \"{{snippet}}\"? This action can't be undone."
+  }
+}

@@ -2,8 +2,8 @@
  * @fileoverview Defines and sets up all application routes.
  * @module routes
  */
-import { renderApp } from "../utils/ssr.js";
-import { base, isProduction } from "../config.js";
+import { renderApp } from "@sun/ssr/server";
+import { base, isProduction, manifestPath } from "../config.js";
 import { Buffer } from "buffer";
 import {
   AUTH_COOKIE,
@@ -148,6 +148,7 @@ export function setupRoutes(app, vite) {
           frontendMode,
           mutationPayload,
           invalidateCacheCookie,
+          manifestPath,
         },
         reply.raw,
       );

@@ -1,5 +1,6 @@
 import { RouteObject, useRoutes } from "react-router-dom";
 import { lazy, Suspense } from "react";
+import type { RouteMeta } from "@sun/ssr/server";
 
 const Library = lazy(() => import("./routes/library"));
 const TextsPage = lazy(() => import("./routes/texts"));
@@ -50,6 +51,24 @@ export const routes: RouteObject[] = [
     ),
   },
 ];
+
+/**
+ * Per-route SEO metadata, keyed by the composed route path.
+ */
+export const routeMeta: Record<string, RouteMeta> = {
+  "/": {
+    title: "Guided Reader | Library",
+    description: "Read foreign-language texts with community annotations.",
+  },
+  texts: {
+    title: "Texts | Guided Reader",
+    description: "Browse reader texts by level.",
+  },
+  "texts/:id": {
+    title: "Text | Guided Reader",
+    description: "Read and annotate a text.",
+  },
+};
 
 export const Router = () => {
   return useRoutes(routes);

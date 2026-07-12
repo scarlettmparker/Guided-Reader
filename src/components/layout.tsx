@@ -1,7 +1,11 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { BreadcrumbProvider } from "@sun/components";
 import { getBackgroundHex } from "@sun/utils";
-import { ThemeSwitcher, THEME_APPLIED_EVENT, type ThemeOption } from "@sun/themes";
+import {
+  ThemeSwitcher,
+  THEME_APPLIED_EVENT,
+  type ThemeOption,
+} from "@sun/themes";
 import Nav from "./nav";
 import styles from "./layout.module.css";
 

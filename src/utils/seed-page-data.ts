@@ -28,9 +28,11 @@ export async function loadLevelColours(): Promise<LevelColours> {
   if (!res.success || !res.data) {
     return {};
   }
-  const entries = (res.data as {
-    gaiaQueries?: { propertySet?: Record<string, { colour?: string }> };
-  })?.gaiaQueries?.propertySet;
+  const entries = (
+    res.data as {
+      gaiaQueries?: { propertySet?: Record<string, { colour?: string }> };
+    }
+  )?.gaiaQueries?.propertySet;
   if (!entries) {
     return {};
   }

@@ -5,7 +5,12 @@ import {
   discordRedirectUri,
   discordScopes,
 } from "../../config.js";
-import { fetchGraphQLData } from "./api";
+import { executeDocument } from "./api";
+import {
+  LoginDocument,
+  ReaderAccountDocument,
+  DiscordLoginDocument,
+} from "~/generated/graphql";
 
 const TOKEN_KEY = "hades_auth_token";
 
@@ -88,7 +93,9 @@ export function getCookieValue(
   return undefined;
 }
 
-/** Builds the Set-Cookie value that stores the JWT. */
+/**
+ * Builds the Set-Cookie value that stores the JWT.
+ */
 export function buildAuthCookie(
   token: string,
   maxAgeSeconds = 60 * 60 * 12,
@@ -96,22 +103,30 @@ export function buildAuthCookie(
   return `${AUTH_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${maxAgeSeconds}`;
 }
 
-/** Builds the Set-Cookie value that clears the JWT. */
+/**
+ * Builds the Set-Cookie value that clears the JWT.
+ */
 export function clearAuthCookie(): string {
   return `${AUTH_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 }
 
-/** Builds the Set-Cookie value for the OAuth state nonce. */
+/**
+ * Builds the Set-Cookie value for the OAuth state nonce.
+ */
 export function buildStateCookie(state: string): string {
   return `${OAUTH_STATE_COOKIE}=${encodeURIComponent(state)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`;
 }
 
-/** A fresh OAuth state nonce. */
+/**
+ * A fresh OAuth state nonce.
+ */
 export function newOAuthState(): string {
   return crypto.randomUUID();
 }
 
-/** Builds the Discord authorize URL the browser is redirected to. */
+/**
+ * Builds the Discord authorize URL the browser is redirected to.
+ */
 export function buildDiscordAuthUrl(state: string): string {
   const params = new URLSearchParams({
     client_id: discordClientId,
@@ -130,33 +145,45 @@ export async function loginViaGaia(
   username: string,
   password: string,
 ): Promise<string | null> {
-  const res = await fetchGraphQLData<{
+  const res = await executeDocument<{
     gaiaMutations: { login: { token: string } | null };
-  }>("gaiaMutations.login", { input: { username, password } });
-  if (!res.success || !res.data) return null;
+  }>(LoginDocument, { input: { username, password } });
+  if (!res.success || !res.data) {
+    return null;
+  }
   return res.data.gaiaMutations.login?.token ?? null;
 }
 
-/** Returns the logged-in reader account for a JWT, or null. */
+/**
+ * Returns the logged-in reader account for a JWT, or null.
+ */
 export async function getCurrentUser(
   token: string | undefined,
 ): Promise<ReaderAccount | null> {
-  if (!token) return null;
-  const res = await fetchGraphQLData<{
+  if (!token) {
+    return null;
+  }
+  const res = await executeDocument<{
     hadesQueries: { readerAccount: ReaderAccount | null };
-  }>("hadesQueries.readerAccount", {}, token);
-  if (!res.success || !res.data) return null;
+  }>(ReaderAccountDocument, {}, token);
+  if (!res.success || !res.data) {
+    return null;
+  }
   return res.data.hadesQueries.readerAccount ?? null;
 }
 
-/** Exchanges a Discord code for a JWT, or null on failure. */
+/**
+ * Exchanges a Discord code for a JWT, or null on failure.
+ */
 export async function discordLoginViaCode(
   code: string,
   state: string,
 ): Promise<string | null> {
-  const res = await fetchGraphQLData<{
+  const res = await executeDocument<{
     hadesMutations: { discordLogin: { token: string } | null };
-  }>("hadesMutations.discordLogin", { code, state });
-  if (!res.success || !res.data) return null;
+  }>(DiscordLoginDocument, { code, state });
+  if (!res.success || !res.data) {
+    return null;
+  }
   return res.data.hadesMutations.discordLogin?.token ?? null;
 }

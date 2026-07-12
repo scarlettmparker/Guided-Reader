@@ -14,9 +14,6 @@ import {
 } from "./config.js";
 import { setupRoutes } from "./routes/index.js";
 
-import "./src/utils/register-loaders.ts";
-import "./src/utils/register-mutations.ts";
-
 // Parse native form POST bodies (login/logout use PRG so the browser stores the
 // httpOnly auth cookie, which it won't for a fetch + JS-redirect).
 const configure = async (app) => {

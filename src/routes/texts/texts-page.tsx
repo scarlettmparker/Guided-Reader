@@ -18,7 +18,9 @@ const TextsPage = () => {
           <TextList />
         </Suspense>
       </div>
-      <div className={styles.detail_panel}>{outlet ?? <TextDetailPlaceholder />}</div>
+      <div className={styles.detail_panel}>
+        {outlet ?? <TextDetailPlaceholder />}
+      </div>
     </div>
   );
 };

@@ -51,7 +51,9 @@ export function wrapCharacterRange(
   if (start >= end) return [];
 
   const wrapped: HTMLElement[] = [];
-  for (const { node, start: nodeStart, length } of collectTextNodes(container)) {
+  for (const { node, start: nodeStart, length } of collectTextNodes(
+    container,
+  )) {
     const nodeEnd = nodeStart + length;
     if (nodeEnd <= start || nodeStart >= end || length === 0) continue;
 
@@ -81,7 +83,10 @@ export function wrapCharacterRange(
  * @param container the element previously wrapped
  * @param attr the data attribute used to tag wrapped elements
  */
-export function unwrapCharacterRange(container: HTMLElement, attr: string): void {
+export function unwrapCharacterRange(
+  container: HTMLElement,
+  attr: string,
+): void {
   container.querySelectorAll(`[${attr}]`).forEach((mark) => {
     const parent = mark.parentNode;
     if (!parent) return;
