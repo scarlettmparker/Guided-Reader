@@ -19,14 +19,16 @@ import {
   type RemoveVoteMutationVariables,
 } from "~/generated/graphql";
 
+/**
+ * Creates an annotation on a text range; invalidates that text's annotations.
+ */
 defineMutation({
   path: "hades/createAnnotation",
-  document: CreateAnnotationDocument,
-  async handler(variables, context) {
+  async handler(body: CreateAnnotationMutationVariables, context) {
     const result = await executeDocument<
       CreateAnnotationMutation,
       CreateAnnotationMutationVariables
-    >(CreateAnnotationDocument, variables, tokenFrom(context));
+    >(CreateAnnotationDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.createAnnotation;
     return {
       ...(data ?? {
@@ -34,20 +36,22 @@ defineMutation({
         message: result.error || "Failed to create annotation.",
       }),
       invalidated: [
-        makeCacheKey("texts/:id:annotations", { id: variables.input.textId }),
+        makeCacheKey("texts/:id:annotations", { id: body.input.textId }),
       ],
     };
   },
 });
 
+/**
+ * Updates an annotation's body.
+ */
 defineMutation({
   path: "hades/editAnnotation",
-  document: EditAnnotationDocument,
-  async handler(variables, context) {
+  async handler(body: EditAnnotationMutationVariables, context) {
     const result = await executeDocument<
       EditAnnotationMutation,
       EditAnnotationMutationVariables
-    >(EditAnnotationDocument, variables, tokenFrom(context));
+    >(EditAnnotationDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.editAnnotation;
     return (
       data ?? {
@@ -58,32 +62,42 @@ defineMutation({
   },
 });
 
+/**
+ * Deletes an annotation; invalidates the parent text's annotations.
+ */
 defineMutation({
   path: "hades/deleteAnnotation",
-  document: DeleteAnnotationDocument,
-  async handler(variables, context) {
+  async handler(
+    body: DeleteAnnotationMutationVariables & { textId?: string },
+    context,
+  ) {
     const result = await executeDocument<
       DeleteAnnotationMutation,
       DeleteAnnotationMutationVariables
-    >(DeleteAnnotationDocument, variables, tokenFrom(context));
+    >(DeleteAnnotationDocument, { id: body.id }, tokenFrom(context));
     const data = result.data?.hadesMutations.deleteAnnotation;
     return {
       ...(data ?? {
         __typename: "StandardError" as const,
         message: result.error || "Failed to delete annotation.",
       }),
+      invalidated: body.textId
+        ? [makeCacheKey("texts/:id:annotations", { id: body.textId })]
+        : [],
     };
   },
 });
 
+/**
+ * Casts a vote on an annotation or comment.
+ */
 defineMutation({
   path: "hades/vote",
-  document: HadesVoteDocument,
-  async handler(variables, context) {
+  async handler(body: HadesVoteMutationVariables, context) {
     const result = await executeDocument<
       HadesVoteMutation,
       HadesVoteMutationVariables
-    >(HadesVoteDocument, variables, tokenFrom(context));
+    >(HadesVoteDocument, body, tokenFrom(context));
     return (
       result.data?.hadesMutations.vote ?? {
         __typename: "StandardError" as const,
@@ -93,14 +107,16 @@ defineMutation({
   },
 });
 
+/**
+ * Removes the caller's vote on an annotation or comment.
+ */
 defineMutation({
   path: "hades/removeVote",
-  document: RemoveVoteDocument,
-  async handler(variables, context) {
+  async handler(body: RemoveVoteMutationVariables, context) {
     const result = await executeDocument<
       RemoveVoteMutation,
       RemoveVoteMutationVariables
-    >(RemoveVoteDocument, variables, tokenFrom(context));
+    >(RemoveVoteDocument, body, tokenFrom(context));
     return (
       result.data?.hadesMutations.removeVote ?? {
         __typename: "StandardError" as const,

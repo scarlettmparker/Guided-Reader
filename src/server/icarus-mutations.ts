@@ -9,14 +9,16 @@ import {
   type IcarusVoteMutationVariables,
 } from "~/generated/graphql";
 
+/**
+ * Creates a thread attached to a remote object; redirects to it on success.
+ */
 defineMutation({
   path: "icarus/createThread",
-  document: CreateThreadDocument,
-  async handler(variables) {
+  async handler(body: CreateThreadMutationVariables) {
     const result = await executeDocument<
       CreateThreadMutation,
       CreateThreadMutationVariables
-    >(CreateThreadDocument, variables);
+    >(CreateThreadDocument, body);
     const data = result.data?.icarusMutations.createThread;
     if (data?.__typename === "QuerySuccess" && data.id) {
       throw new ServerRedirectError(`/thread/${data.id}`, []);
@@ -28,14 +30,16 @@ defineMutation({
   },
 });
 
+/**
+ * Casts a vote on a forum post.
+ */
 defineMutation({
   path: "icarus/vote",
-  document: IcarusVoteDocument,
-  async handler(variables) {
+  async handler(body: IcarusVoteMutationVariables) {
     const result = await executeDocument<
       IcarusVoteMutation,
       IcarusVoteMutationVariables
-    >(IcarusVoteDocument, variables);
+    >(IcarusVoteDocument, body);
     return (
       result.data?.icarusMutations.vote ?? {
         __typename: "StandardError" as const,

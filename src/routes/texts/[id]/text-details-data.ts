@@ -15,11 +15,13 @@ defineLoader({
     const id = params.id as string;
     if (!id) return null;
     try {
-      const result = await executeDocument<LocateTextQuery, LocateTextQueryVariables>(
-        LocateTextDocument,
-        { id },
-      );
-      const text = result.success ? result.data?.hadesQueries.text ?? null : null;
+      const result = await executeDocument<
+        LocateTextQuery,
+        LocateTextQueryVariables
+      >(LocateTextDocument, { id });
+      const text = result.success
+        ? (result.data?.hadesQueries.text ?? null)
+        : null;
       return { text };
     } catch (error) {
       console.error("Failed to fetch text:", error);

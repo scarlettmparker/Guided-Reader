@@ -60,10 +60,10 @@ defineLoader({
     };
 
     try {
-      const result = await executeDocument<ListTextsQuery, ListTextsQueryVariables>(
-        ListTextsDocument,
-        { pagination },
-      );
+      const result = await executeDocument<
+        ListTextsQuery,
+        ListTextsQueryVariables
+      >(ListTextsDocument, { pagination });
       const texts = result.success ? result.data?.hadesQueries.texts : null;
       return { texts: texts ?? EMPTY_PAGE };
     } catch (error) {

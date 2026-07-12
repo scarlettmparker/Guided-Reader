@@ -21,14 +21,12 @@ defineLoader({
       AUTH_COOKIE,
     );
     try {
-      const result =
-        await executeDocument<ListAnnotationsQuery, ListAnnotationsQueryVariables>(
-          ListAnnotationsDocument,
-          { textId: id, includeHidden: false },
-          token,
-        );
+      const result = await executeDocument<
+        ListAnnotationsQuery,
+        ListAnnotationsQueryVariables
+      >(ListAnnotationsDocument, { textId: id, includeHidden: false }, token);
       const annotations = result.success
-        ? result.data?.hadesQueries.annotations ?? []
+        ? (result.data?.hadesQueries.annotations ?? [])
         : [];
       return { annotations };
     } catch (error) {
