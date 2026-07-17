@@ -19,11 +19,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { usePageData } from "@sun/ssr/react";
 import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
-import {
-  deletePost,
-  removePostVote,
-  votePost,
-} from "~/server/actions/forum";
+import { deletePost, removePostVote, votePost } from "~/server/actions/forum";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import {
   VoteValue,
@@ -58,7 +54,12 @@ type ForumPostItemProps = {
 /**
  * A single comment on a text discussion.
  */
-const ForumPostItem = ({ post, profile, colours, threadId }: ForumPostItemProps) => {
+const ForumPostItem = ({
+  post,
+  profile,
+  colours,
+  threadId,
+}: ForumPostItemProps) => {
   const { t } = useTranslation("texts");
   const { data: currentUser } = usePageData<ReaderAccount | null>(
     "currentUser",

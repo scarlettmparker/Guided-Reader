@@ -18,9 +18,7 @@ export async function createAnnotation(
 /**
  * Adds a comment (or reply) to an annotation.
  */
-export async function addComment(
-  input: CommentInput,
-): Promise<MutationResult> {
+export async function addComment(input: CommentInput): Promise<MutationResult> {
   return executeMutation("hades/addComment", { input });
 }
 

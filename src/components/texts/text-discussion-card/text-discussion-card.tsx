@@ -15,8 +15,7 @@ import type { ThreadsForQuery } from "~/generated/graphql";
 import ThreadPosts from "../thread-posts";
 import styles from "./text-discussion-card.module.css";
 
-type Thread =
-  ThreadsForQuery["icarusQueries"]["threadsFor"]["items"][number];
+type Thread = ThreadsForQuery["icarusQueries"]["threadsFor"]["items"][number];
 
 /**
  * Title stored on the single thread backing a text discussion. Never shown to

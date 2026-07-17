@@ -14,9 +14,7 @@ import { fetchPropertySet } from "./utils/api";
 import "./utils/configure-framework";
 
 // Colocated loaders and mutation handlers self-register at boot.
-autoDiscoverRegistrations(
-  import.meta.glob("./**/*-data.ts", { eager: true }),
-);
+autoDiscoverRegistrations(import.meta.glob("./**/*-data.ts", { eager: true }));
 autoDiscoverRegistrations(
   import.meta.glob("./**/*-mutations.ts", { eager: true }),
 );

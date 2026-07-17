@@ -33,8 +33,7 @@ import {
 } from "~/generated/graphql";
 import styles from "./comment-item.module.css";
 
-type Comment =
-  ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
+type Comment = ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
 type Profile = Comment["authorProfile"];
 type LevelColours = Record<string, string>;
 

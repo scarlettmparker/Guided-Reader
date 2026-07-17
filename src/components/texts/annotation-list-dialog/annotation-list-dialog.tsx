@@ -20,10 +20,7 @@ import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
 import AnnotationDiscussion from "../annotation-discussion";
 import AnnotationConfirmDeleteDialog from "../annotation-confirm-delete-dialog";
-import {
-  removeVote,
-  vote as castVote,
-} from "~/server/actions/annotation";
+import { removeVote, vote as castVote } from "~/server/actions/annotation";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import {
   ReaderVoteTarget,
@@ -151,7 +148,9 @@ const AnnotationListDialog = ({
                       discordId={profile?.discordId ?? ""}
                       avatar={profile?.avatar}
                       size={28}
-                      alt={profile?.globalName ?? profile?.discordUsername ?? ""}
+                      alt={
+                        profile?.globalName ?? profile?.discordUsername ?? ""
+                      }
                     />
                     <span className={styles.author}>
                       {profile?.globalName ?? profile?.discordUsername}
@@ -197,7 +196,11 @@ const AnnotationListDialog = ({
                     onVoteChange={(next: VoteValue | null) =>
                       next === null
                         ? removeVote(ReaderVoteTarget.Annotation, annotation.id)
-                        : castVote(ReaderVoteTarget.Annotation, annotation.id, next)
+                        : castVote(
+                            ReaderVoteTarget.Annotation,
+                            annotation.id,
+                            next,
+                          )
                     }
                     onVoted={(netScore) => handleVoted(annotation.id, netScore)}
                   />
@@ -211,8 +214,12 @@ const AnnotationListDialog = ({
         )}
       </DialogBody>
       {onSuggestAnnotation && (
-        <DialogFooter>
-          <Button type="button" variant="secondary" onClick={onSuggestAnnotation}>
+        <DialogFooter className={styles.footer}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onSuggestAnnotation}
+          >
             {t("suggest-own-annotation")}
           </Button>
         </DialogFooter>

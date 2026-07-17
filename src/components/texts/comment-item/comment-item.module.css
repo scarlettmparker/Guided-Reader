@@ -1,6 +1,9 @@
 .comment {
   list-style: none;
   padding: var(--sm) 0;
+  gap: var(--md);
+  display: flex;
+  flex-direction: column;
 }
 
 .header {

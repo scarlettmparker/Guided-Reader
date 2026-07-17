@@ -17,11 +17,9 @@ type ThreadPostsProps = {
  * Flat list of posts in a text discussion thread.
  */
 const ThreadPosts = ({ threadId }: ThreadPostsProps) => {
-  const { data: posts } = usePageData<Post[]>(
-    "posts",
-    "threads/:threadId",
-    { threadId },
-  );
+  const { data: posts } = usePageData<Post[]>("posts", "threads/:threadId", {
+    threadId,
+  });
   const { data: colours } = usePageData<LevelColours | null>(
     "levelColours",
     "levelColours",
