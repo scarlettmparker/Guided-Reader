@@ -54,6 +54,10 @@ type CommentItemProps = {
    * Parent annotation, used to invalidate its comment list on delete.
    */
   annotationId: string;
+  /**
+   * Owning text, used to refresh the annotation reply count on delete.
+   */
+  textId: string;
 };
 
 /**
@@ -64,6 +68,7 @@ const CommentItem = ({
   profile,
   colours,
   annotationId,
+  textId,
 }: CommentItemProps) => {
   const { t } = useTranslation("texts");
   const { data: currentUser } = usePageData<ReaderAccount | null>(
@@ -80,7 +85,7 @@ const CommentItem = ({
 
   const confirmDelete = () => {
     startTransition(async () => {
-      await deleteComment(comment.id, annotationId);
+      await deleteComment(comment.id, annotationId, textId);
       setConfirmOpen(false);
     });
   };

@@ -33,6 +33,7 @@ type ReaderAnnotation {
   upvotes: Int!
   downvotes: Int!
   netScore: Int!
+  replyCount: Int!
   remoteObject: [String!]
   author: RemoteUser
   authorProfile: ReaderAccount

@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EllipsisVerticalIcon } from "lucide-react";
 import {
@@ -97,6 +97,7 @@ const AnnotationListDialog = ({
   const { open, position, textId } = list;
   const [items, setItems] = useState<Annotation[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Annotation | null>(null);
+  const [replyOpenId, setReplyOpenId] = useState<string | null>(null);
 
   /**
    * Keeps the local list in sync when a different position is opened.
@@ -118,7 +119,6 @@ const AnnotationListDialog = ({
 
   return (
     <Dialog
-      key={open ? "open" : "closed"}
       open={open}
       onOpenChange={onOpenChange}
       draggable
@@ -141,6 +141,14 @@ const AnnotationListDialog = ({
                 !!profile?.id &&
                 !!currentUser?.id &&
                 profile.id === currentUser.id;
+              const handleVoteChange = (next: VoteValue | null) =>
+                next === null
+                  ? removeVote(ReaderVoteTarget.Annotation, annotation.id)
+                  : castVote(ReaderVoteTarget.Annotation, annotation.id, next);
+              const toggleReply = () =>
+                setReplyOpenId((current) =>
+                  current === annotation.id ? null : annotation.id,
+                );
               return (
                 <li key={annotation.id} className={styles.annotation}>
                   <div className={styles.header}>
@@ -190,23 +198,24 @@ const AnnotationListDialog = ({
                   <MarkdownViewer className={styles.body}>
                     {annotation.body}
                   </MarkdownViewer>
-                  <VoteControl
-                    myVote={annotation.myVote ?? null}
-                    netScore={annotation.netScore}
-                    onVoteChange={(next: VoteValue | null) =>
-                      next === null
-                        ? removeVote(ReaderVoteTarget.Annotation, annotation.id)
-                        : castVote(
-                            ReaderVoteTarget.Annotation,
-                            annotation.id,
-                            next,
-                          )
+                  <div className={styles.actions_row}>
+                    <VoteControl
+                      myVote={annotation.myVote ?? null}
+                      netScore={annotation.netScore}
+                      onVoteChange={handleVoteChange}
+                      onVoted={(netScore) => handleVoted(annotation.id, netScore)}
+                    />
+                    <a onClick={toggleReply}>{t("reply-action")}</a>
+                  </div>
+                  <AnnotationDiscussion
+                    annotationId={annotation.id}
+                    replyCount={annotation.replyCount}
+                    textId={textId}
+                    open={replyOpenId === annotation.id}
+                    onOpenChange={(open) =>
+                      setReplyOpenId(open ? annotation.id : null)
                     }
-                    onVoted={(netScore) => handleVoted(annotation.id, netScore)}
                   />
-                  <Suspense fallback={null}>
-                    <AnnotationDiscussion annotationId={annotation.id} />
-                  </Suspense>
                 </li>
               );
             })}

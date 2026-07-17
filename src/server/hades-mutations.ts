@@ -100,11 +100,14 @@ defineMutation({
  */
 defineMutation({
   path: "hades/addComment",
-  async handler(body: AddCommentMutationVariables, context) {
+  async handler(
+    body: AddCommentMutationVariables & { textId?: string },
+    context,
+  ) {
     const result = await executeDocument<
       AddCommentMutation,
       AddCommentMutationVariables
-    >(AddCommentDocument, body, tokenFrom(context));
+    >(AddCommentDocument, { input: body.input }, tokenFrom(context));
     const data = result.data?.hadesMutations.addComment;
     return {
       ...(data ?? {
@@ -115,6 +118,9 @@ defineMutation({
         makeCacheKey("annotations/:annotationId:comments", {
           annotationId: body.input.annotationId,
         }),
+        ...(body.textId
+          ? [makeCacheKey("texts/:id:annotations", { id: body.textId })]
+          : []),
       ],
     };
   },
@@ -126,7 +132,10 @@ defineMutation({
 defineMutation({
   path: "hades/deleteComment",
   async handler(
-    body: DeleteCommentMutationVariables & { annotationId?: string },
+    body: DeleteCommentMutationVariables & {
+      annotationId?: string;
+      textId?: string;
+    },
     context,
   ) {
     const result = await executeDocument<
@@ -134,18 +143,25 @@ defineMutation({
       DeleteCommentMutationVariables
     >(DeleteCommentDocument, { id: body.id }, tokenFrom(context));
     const data = result.data?.hadesMutations.deleteComment;
+    const invalidated: string[] = [];
+    if (body.annotationId) {
+      invalidated.push(
+        makeCacheKey("annotations/:annotationId:comments", {
+          annotationId: body.annotationId,
+        }),
+      );
+    }
+    if (body.textId) {
+      invalidated.push(
+        makeCacheKey("texts/:id:annotations", { id: body.textId }),
+      );
+    }
     return {
       ...(data ?? {
         __typename: "StandardError" as const,
         message: result.error || "Failed to delete comment.",
       }),
-      invalidated: body.annotationId
-        ? [
-            makeCacheKey("annotations/:annotationId:comments", {
-              annotationId: body.annotationId,
-            }),
-          ]
-        : [],
+      invalidated,
     };
   },
 });

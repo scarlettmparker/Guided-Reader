@@ -116,7 +116,6 @@ const AnnotationCreateDialog = ({
 
   return (
     <Dialog
-      key={create.open ? "open" : "closed"}
       open={create.open}
       onOpenChange={onOpenChange}
       draggable

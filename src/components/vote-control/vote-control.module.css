@@ -2,11 +2,18 @@
   display: flex;
   align-items: center;
   gap: var(--sm);
+  margin-right: var(--lg);
 }
 
 .vote_control svg {
   width: var(--text-lg);
   height: var(--text-lg);
+}
+
+.vote_control button {
+  padding: 0;
+  box-shadow: none;
+  background: transparent;
 }
 
 .score {

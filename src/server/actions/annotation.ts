@@ -18,8 +18,11 @@ export async function createAnnotation(
 /**
  * Adds a comment (or reply) to an annotation.
  */
-export async function addComment(input: CommentInput): Promise<MutationResult> {
-  return executeMutation("hades/addComment", { input });
+export async function addComment(
+  input: CommentInput,
+  textId?: string,
+): Promise<MutationResult> {
+  return executeMutation("hades/addComment", { input, textId });
 }
 
 /**
@@ -38,8 +41,9 @@ export async function deleteAnnotation(
 export async function deleteComment(
   id: string,
   annotationId: string,
+  textId?: string,
 ): Promise<MutationResult> {
-  return executeMutation("hades/deleteComment", { id, annotationId });
+  return executeMutation("hades/deleteComment", { id, annotationId, textId });
 }
 
 /**

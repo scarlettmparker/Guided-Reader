@@ -8,6 +8,7 @@ query listAnnotations($textId: ID!, $includeHidden: Boolean) {
       upvotes
       downvotes
       netScore
+      replyCount
       position {
         id
         textId

@@ -65,6 +65,7 @@
     "comment-action": "Comment",
     "comment-actions": "Comment actions",
     "comment-placeholder": "Write a reply...",
+    "reply-action": "Reply",
     "suggest-own-annotation": "Suggest your own annotation",
     "delete-comment-title": "Delete comment",
     "delete-comment-body": "Delete this comment? This action can't be undone.",

@@ -42,6 +42,12 @@
   margin: 0;
 }
 
+.actions_row {
+  display: flex;
+  align-items: center;
+  gap: var(--sm);
+}
+
 .empty {
   margin: 0;
   color: var(--muted);

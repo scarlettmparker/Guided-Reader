@@ -1,0 +1,38 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--md);
+  margin-top: var(--md) !important;
+}
+
+.row {
+  display: flex;
+  gap: var(--sm);
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md);
+  flex-grow: 1;
+}
+
+.name {
+  width: 8rem;
+  height: 0.75rem;
+}
+
+.line {
+  width: 100%;
+  height: 0.75rem;
+}
