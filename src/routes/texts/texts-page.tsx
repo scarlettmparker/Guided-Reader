@@ -7,8 +7,8 @@ import { TextsPageSkeleton } from "~/components/texts/skeletons";
 import styles from "./texts-page.module.css";
 
 /**
- * Two-panel texts page: list with filters on the left, text detail on the right.
- * A text-level discussion card sits below both panels when a text is selected.
+ * Two-panel texts page: list with filters on the left, text detail on the
+ * right. The text-level discussion sits below the detail when a text is open.
  */
 const TextsPage = () => {
   const outlet = useOutlet();
@@ -21,10 +21,16 @@ const TextsPage = () => {
           <TextList />
         </Suspense>
       </div>
-      <div className={styles.detail_panel}>
-        {outlet ?? <TextDetailPlaceholder />}
+      <div className={styles.detail_column}>
+        <div className={styles.detail_panel}>
+          {outlet ?? <TextDetailPlaceholder />}
+        </div>
+        {id && (
+          <Suspense fallback={null}>
+            <TextDiscussionCard textId={id} />
+          </Suspense>
+        )}
       </div>
-      {id && <TextDiscussionCard textId={id} />}
     </div>
   );
 };

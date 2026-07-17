@@ -1,31 +1,41 @@
 import { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { Badge, Button, MarkdownViewer, cn } from "@sun/components";
-import DiscordAvatar from "~/components/discord-avatar";
+import { EllipsisVerticalIcon } from "lucide-react";
 import {
-  vote as castVote,
+  Badge,
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  MarkdownViewer,
+} from "@sun/components";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { usePageData } from "@sun/ssr/react";
+import DiscordAvatar from "~/components/discord-avatar";
+import VoteControl from "~/components/vote-control";
+import {
+  deleteComment,
   removeVote,
+  vote as castVote,
 } from "~/server/actions/annotation";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import {
   ReaderVoteTarget,
   VoteValue,
-  type CefrLevel,
   type ListCommentsQuery,
+  type ReaderAccount,
 } from "~/generated/graphql";
 import styles from "./comment-item.module.css";
 
-type Comment = ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
-
-type AuthorProfile = {
-  discordId: string;
-  discordUsername?: string | null;
-  globalName?: string | null;
-  avatar?: string | null;
-  cefrLevel?: CefrLevel | null;
-};
-
+type Comment =
+  ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
+type Profile = Comment["authorProfile"];
 type LevelColours = Record<string, string>;
 
 type CommentItemProps = {
@@ -36,33 +46,43 @@ type CommentItemProps = {
   /**
    * The resolved author profile, if found.
    */
-  profile?: AuthorProfile;
+  profile?: Profile;
   /**
-   * CEFR level → colour map for badges.
+   * CEFR level to colour map for badges.
    */
   colours?: LevelColours | null;
+  /**
+   * Parent annotation, used to invalidate its comment list on delete.
+   */
+  annotationId: string;
 };
 
 /**
  * A single reply on an annotation.
  */
-const CommentItem = ({ comment, profile, colours }: CommentItemProps) => {
+const CommentItem = ({
+  comment,
+  profile,
+  colours,
+  annotationId,
+}: CommentItemProps) => {
   const { t } = useTranslation("texts");
-  const [myVote, setMyVote] = useState<VoteValue | null>(comment.myVote ?? null);
+  const { data: currentUser } = usePageData<ReaderAccount | null>(
+    "currentUser",
+    "currentUser",
+  );
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const colour = profile?.cefrLevel
     ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
     : undefined;
+  const isOwner =
+    !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
 
-  const apply = (next: VoteValue) => {
+  const confirmDelete = () => {
     startTransition(async () => {
-      if (myVote === next) {
-        await removeVote(ReaderVoteTarget.Comment, comment.id);
-        setMyVote(null);
-      } else {
-        await castVote(ReaderVoteTarget.Comment, comment.id, next);
-        setMyVote(next);
-      }
+      await deleteComment(comment.id, annotationId);
+      setConfirmOpen(false);
     });
   };
 
@@ -86,37 +106,61 @@ const CommentItem = ({ comment, profile, colours }: CommentItemProps) => {
             {profile.cefrLevel}
           </Badge>
         )}
+        {isOwner && (
+          <DropdownMenu className={styles.menu_trigger}>
+            <DropdownMenuTrigger asChild>
+              <EllipsisVerticalIcon
+                width={16}
+                height={16}
+                aria-label={t("comment-actions")}
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setConfirmOpen(true)} asChild>
+                <span className={styles.delete_action}>
+                  <TrashIcon width={16} height={16} />
+                  {t("delete")}
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
       <MarkdownViewer className={styles.body}>{comment.body}</MarkdownViewer>
-      <div className={styles.vote}>
-        <Button
-          type="button"
-          variant="ghost"
-          title={t("vote-up")}
-          aria-label={t("vote-up")}
-          disabled={pending}
-          onClick={() => apply(VoteValue.Up)}
-        >
-          <ThumbsUp
-            size={16}
-            className={cn(myVote === VoteValue.Up && styles.active)}
-          />
-        </Button>
-        <span className={styles.score}>{comment.netScore}</span>
-        <Button
-          type="button"
-          variant="ghost"
-          title={t("vote-down")}
-          aria-label={t("vote-down")}
-          disabled={pending}
-          onClick={() => apply(VoteValue.Down)}
-        >
-          <ThumbsDown
-            size={16}
-            className={cn(myVote === VoteValue.Down && styles.active)}
-          />
-        </Button>
-      </div>
+      <VoteControl
+        myVote={comment.myVote ?? null}
+        netScore={comment.netScore}
+        onVoteChange={(next: VoteValue | null) =>
+          next === null
+            ? removeVote(ReaderVoteTarget.Comment, comment.id)
+            : castVote(ReaderVoteTarget.Comment, comment.id, next)
+        }
+      />
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogHeader>
+          <DialogTitle>{t("delete-comment-title")}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <p>{t("delete-comment-body")}</p>
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setConfirmOpen(false)}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={pending}
+            onClick={confirmDelete}
+          >
+            {t("delete")}
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </li>
   );
 };

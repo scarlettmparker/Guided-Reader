@@ -19,18 +19,10 @@
   margin: 0 0 var(--xs);
 }
 
-.vote {
-  display: flex;
-  align-items: center;
-  gap: var(--sm);
+.menu_trigger {
+  margin-left: auto;
 }
 
-.score {
-  min-width: 1.5rem;
-  text-align: center;
-  font-size: var(--text-sm);
-}
-
-.active {
-  fill: currentColor;
+.delete_action {
+  color: var(--destructive);
 }

@@ -14,6 +14,9 @@ import {
   AddCommentDocument,
   type AddCommentMutation,
   type AddCommentMutationVariables,
+  DeleteCommentDocument,
+  type DeleteCommentMutation,
+  type DeleteCommentMutationVariables,
   HadesVoteDocument,
   type HadesVoteMutation,
   type HadesVoteMutationVariables,
@@ -113,6 +116,36 @@ defineMutation({
           annotationId: body.input.annotationId,
         }),
       ],
+    };
+  },
+});
+
+/**
+ * Deletes a comment on an annotation; invalidates that annotation's comments.
+ */
+defineMutation({
+  path: "hades/deleteComment",
+  async handler(
+    body: DeleteCommentMutationVariables & { annotationId?: string },
+    context,
+  ) {
+    const result = await executeDocument<
+      DeleteCommentMutation,
+      DeleteCommentMutationVariables
+    >(DeleteCommentDocument, { id: body.id }, tokenFrom(context));
+    const data = result.data?.hadesMutations.deleteComment;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to delete comment.",
+      }),
+      invalidated: body.annotationId
+        ? [
+            makeCacheKey("annotations/:annotationId:comments", {
+              annotationId: body.annotationId,
+            }),
+          ]
+        : [],
     };
   },
 });

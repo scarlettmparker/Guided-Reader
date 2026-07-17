@@ -39,3 +39,13 @@ export async function removePostVote(
 ): Promise<MutationResult> {
   return executeMutation("icarus/removeVote", { postId });
 }
+
+/**
+ * Deletes a post from a thread (owner only).
+ */
+export async function deletePost(
+  postId: string,
+  threadId: string,
+): Promise<MutationResult> {
+  return executeMutation("icarus/deletePost", { id: postId, threadId });
+}

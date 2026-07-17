@@ -40,6 +40,7 @@ const AnnotationDiscussion = ({ annotationId }: AnnotationDiscussionProps) => {
     "levelColours",
   );
   const [body, setBody] = useState("");
+  const [resetKey, setResetKey] = useState(0);
   const [pending, startTransition] = useTransition();
   const items = comments ?? [];
 
@@ -48,12 +49,14 @@ const AnnotationDiscussion = ({ annotationId }: AnnotationDiscussionProps) => {
     const trimmed = body.trim();
     if (!trimmed) return;
     startTransition(async () => {
-      await addComment({
+      const result = await addComment({
         annotationId,
         parentId: null,
         body: trimmed,
       });
+      if (result.__typename !== "QuerySuccess") return;
       setBody("");
+      setResetKey((k) => k + 1);
     });
   };
 
@@ -63,9 +66,7 @@ const AnnotationDiscussion = ({ annotationId }: AnnotationDiscussionProps) => {
         {t("replies", { count: items.length })}
       </AccordionTrigger>
       <AccordionContent>
-        {items.length === 0 ? (
-          <p className={styles.empty}>{t("comment-placeholder")}</p>
-        ) : (
+        {items.length > 0 && (
           <ul className={styles.list}>
             {items.map((comment) => (
               <CommentItem
@@ -73,12 +74,14 @@ const AnnotationDiscussion = ({ annotationId }: AnnotationDiscussionProps) => {
                 comment={comment}
                 profile={comment.authorProfile ?? undefined}
                 colours={colours}
+                annotationId={annotationId}
               />
             ))}
           </ul>
         )}
         <Form onSubmit={submit} className={styles.composer}>
           <MarkdownEditor
+            key={resetKey}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setBody(e.target.value)
             }
@@ -86,9 +89,11 @@ const AnnotationDiscussion = ({ annotationId }: AnnotationDiscussionProps) => {
             aria-label={t("comment-placeholder")}
             rows={3}
           />
-          <Button type="submit" variant="secondary" disabled={pending || !body.trim()}>
-            {t("suggest-improvement")}
-          </Button>
+          <div className={styles.actions}>
+            <Button type="submit" disabled={pending || !body.trim()}>
+              {t("comment-action")}
+            </Button>
+          </div>
         </Form>
       </AccordionContent>
     </Accordion>

@@ -8,14 +8,14 @@
   padding: 0;
 }
 
-.empty {
-  margin: 0 0 var(--sm);
-  color: var(--muted-foreground);
-}
-
 .composer {
   display: flex;
   flex-direction: column;
-  gap: var(--sm);
-  margin-top: var(--sm);
+  gap: var(--lg);
+  margin-top: var(--lg);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
 }

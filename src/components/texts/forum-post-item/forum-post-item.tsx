@@ -1,26 +1,39 @@
 import { useState, useTransition } from "react";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { Badge, Button, MarkdownViewer, cn } from "@sun/components";
+import { EllipsisVerticalIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import {
+  Badge,
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  MarkdownViewer,
+} from "@sun/components";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { usePageData } from "@sun/ssr/react";
 import DiscordAvatar from "~/components/discord-avatar";
-import { votePost, removePostVote } from "~/server/actions/forum";
+import VoteControl from "~/components/vote-control";
+import {
+  deletePost,
+  removePostVote,
+  votePost,
+} from "~/server/actions/forum";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import {
   VoteValue,
-  type CefrLevel,
   type ListPostsQuery,
+  type ReaderAccount,
 } from "~/generated/graphql";
 import styles from "./forum-post-item.module.css";
 
 type Post = ListPostsQuery["icarusQueries"]["posts"]["items"][number];
-
-type AuthorProfile = {
-  discordId: string;
-  discordUsername?: string | null;
-  globalName?: string | null;
-  avatar?: string | null;
-  cefrLevel?: CefrLevel | null;
-};
-
+type Profile = Post["authorProfile"];
 type LevelColours = Record<string, string>;
 
 type ForumPostItemProps = {
@@ -31,32 +44,38 @@ type ForumPostItemProps = {
   /**
    * The resolved author profile, if found.
    */
-  profile?: AuthorProfile;
+  profile?: Profile;
   /**
-   * CEFR level → colour map for badges.
+   * CEFR level to colour map for badges.
    */
   colours?: LevelColours | null;
+  /**
+   * Parent thread, used to invalidate its post list on delete.
+   */
+  threadId: string;
 };
 
 /**
- * A single post in a text-level discussion thread.
+ * A single comment on a text discussion.
  */
-const ForumPostItem = ({ post, profile, colours }: ForumPostItemProps) => {
-  const [myVote, setMyVote] = useState<VoteValue | null>(post.myVote ?? null);
+const ForumPostItem = ({ post, profile, colours, threadId }: ForumPostItemProps) => {
+  const { t } = useTranslation("texts");
+  const { data: currentUser } = usePageData<ReaderAccount | null>(
+    "currentUser",
+    "currentUser",
+  );
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const colour = profile?.cefrLevel
     ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
     : undefined;
+  const isOwner =
+    !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
 
-  const apply = (next: VoteValue) => {
+  const confirmDelete = () => {
     startTransition(async () => {
-      if (myVote === next) {
-        await removePostVote(post.id);
-        setMyVote(null);
-      } else {
-        await votePost(post.id, next);
-        setMyVote(next);
-      }
+      await deletePost(post.id, threadId);
+      setConfirmOpen(false);
     });
   };
 
@@ -80,29 +99,59 @@ const ForumPostItem = ({ post, profile, colours }: ForumPostItemProps) => {
             {profile.cefrLevel}
           </Badge>
         )}
+        {isOwner && (
+          <DropdownMenu className={styles.menu_trigger}>
+            <DropdownMenuTrigger asChild>
+              <EllipsisVerticalIcon
+                width={16}
+                height={16}
+                aria-label={t("comment-actions")}
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setConfirmOpen(true)} asChild>
+                <span className={styles.delete_action}>
+                  <TrashIcon width={16} height={16} />
+                  {t("delete")}
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
       <MarkdownViewer className={styles.body}>{post.body}</MarkdownViewer>
-      <div className={styles.vote}>
-        <Button
-          type="button"
-          variant="ghost"
-          aria-label="vote up"
-          disabled={pending}
-          onClick={() => apply(VoteValue.Up)}
-        >
-          <ThumbsUp size={16} className={cn(myVote === VoteValue.Up && styles.active)} />
-        </Button>
-        <span className={styles.score}>{post.netScore}</span>
-        <Button
-          type="button"
-          variant="ghost"
-          aria-label="vote down"
-          disabled={pending}
-          onClick={() => apply(VoteValue.Down)}
-        >
-          <ThumbsDown size={16} className={cn(myVote === VoteValue.Down && styles.active)} />
-        </Button>
-      </div>
+      <VoteControl
+        myVote={post.myVote ?? null}
+        netScore={post.netScore}
+        onVoteChange={(next: VoteValue | null) =>
+          next === null ? removePostVote(post.id) : votePost(post.id, next)
+        }
+      />
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogHeader>
+          <DialogTitle>{t("delete-comment-title")}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <p>{t("delete-comment-body")}</p>
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setConfirmOpen(false)}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={pending}
+            onClick={confirmDelete}
+          >
+            {t("delete")}
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </li>
   );
 };

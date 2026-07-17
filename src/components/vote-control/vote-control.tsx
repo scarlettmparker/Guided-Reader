@@ -2,21 +2,12 @@ import { useTransition, useState } from "react";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button, cn } from "@sun/components";
-import {
-  vote as castVote,
-  removeVote as removeMyVote,
-} from "~/server/actions/annotation";
-import {
-  ReaderVoteTarget,
-  VoteValue,
-  type ListAnnotationsQuery,
-} from "~/generated/graphql";
+import type { MutationResult } from "@sun/ssr";
+import { VoteValue } from "~/generated/graphql";
 import styles from "./vote-control.module.css";
 
-type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"][number];
-
 /**
- * Net-score delta for every (previous vote → next vote) transition.
+ * Score change applied for each vote transition.
  */
 const NONE = "none";
 const SCORE_DELTA: Record<string, number> = {
@@ -33,28 +24,42 @@ const SCORE_DELTA: Record<string, number> = {
 
 type VoteControlProps = {
   /**
-   * The annotation being voted on.
+   * The caller's current vote, if any.
    */
-  annotation: Annotation;
+  myVote?: VoteValue | null;
   /**
-   * Called with the new net score after a successful vote change, so the parent
-   * can re-sort and re-render.
+   * Current net score.
+   */
+  netScore: number;
+  /**
+   * Casts or removes a vote. The resolved result is checked so the control can
+   * roll back on failure.
+   */
+  onVoteChange: (next: VoteValue | null) => Promise<MutationResult>;
+  /**
+   * Called with the new score after a successful change, for parent re-sort.
    */
   onVoted?: (netScore: number) => void;
-};
+} & React.HTMLAttributes<HTMLDivElement>;
 
 /**
- * Up/down vote control for an annotation.
+ * Up/down vote control with an optimistic score and rollback.
  */
-const VoteControl = ({ annotation, onVoted }: VoteControlProps) => {
+const VoteControl = ({
+  myVote,
+  netScore,
+  onVoteChange,
+  onVoted,
+  className,
+}: VoteControlProps) => {
   const { t } = useTranslation("texts");
-  const [vote, setVote] = useState<VoteValue | null>(annotation.myVote ?? null);
-  const [score, setScore] = useState(annotation.netScore);
+  const [vote, setVote] = useState<VoteValue | null>(myVote ?? null);
+  const [score, setScore] = useState(netScore);
   const [pending, startTransition] = useTransition();
 
   /**
-   * Applies a vote change: casts or removes the caller's vote and updates the
-   * optimistic score, notifying the parent of the new score.
+   * Applies a vote change: updates the optimistic score, notifies the parent,
+   * and rolls back if the mutation fails.
    */
   const applyVote = (next: VoteValue | null) => {
     const delta = SCORE_DELTA[`${vote ?? NONE}-${next ?? NONE}`] ?? 0;
@@ -65,10 +70,7 @@ const VoteControl = ({ annotation, onVoted }: VoteControlProps) => {
     setScore(nextScore);
     onVoted?.(nextScore);
     startTransition(async () => {
-      const result =
-        next === null
-          ? await removeMyVote(ReaderVoteTarget.Annotation, annotation.id)
-          : await castVote(ReaderVoteTarget.Annotation, annotation.id, next);
+      const result = await onVoteChange(next);
       if (result.__typename !== "QuerySuccess") {
         setVote(prevVote);
         setScore(prevScore);
@@ -82,7 +84,7 @@ const VoteControl = ({ annotation, onVoted }: VoteControlProps) => {
     applyVote(vote === VoteValue.Down ? null : VoteValue.Down);
 
   return (
-    <div className={styles.vote_control}>
+    <div className={cn(styles.vote_control, className)}>
       <Button
         type="button"
         variant="secondary"

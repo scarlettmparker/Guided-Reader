@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EllipsisVerticalIcon } from "lucide-react";
 import {
@@ -20,8 +20,14 @@ import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
 import AnnotationDiscussion from "../annotation-discussion";
 import AnnotationConfirmDeleteDialog from "../annotation-confirm-delete-dialog";
+import {
+  removeVote,
+  vote as castVote,
+} from "~/server/actions/annotation";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import {
+  ReaderVoteTarget,
+  VoteValue,
   type ListAnnotationsQuery,
   type ReaderAccount,
 } from "~/generated/graphql";
@@ -68,7 +74,7 @@ type AnnotationListDialogProps = {
    */
   onOpenChange: (open: boolean) => void;
   /**
-   * Called when the user asks to add their own annotation at this position.
+   * Called when the reader wants to add their own annotation at this position.
    */
   onSuggestAnnotation?: () => void;
 };
@@ -186,10 +192,18 @@ const AnnotationListDialog = ({
                     {annotation.body}
                   </MarkdownViewer>
                   <VoteControl
-                    annotation={annotation}
+                    myVote={annotation.myVote ?? null}
+                    netScore={annotation.netScore}
+                    onVoteChange={(next: VoteValue | null) =>
+                      next === null
+                        ? removeVote(ReaderVoteTarget.Annotation, annotation.id)
+                        : castVote(ReaderVoteTarget.Annotation, annotation.id, next)
+                    }
                     onVoted={(netScore) => handleVoted(annotation.id, netScore)}
                   />
-                  <AnnotationDiscussion annotationId={annotation.id} />
+                  <Suspense fallback={null}>
+                    <AnnotationDiscussion annotationId={annotation.id} />
+                  </Suspense>
                 </li>
               );
             })}
@@ -198,13 +212,7 @@ const AnnotationListDialog = ({
       </DialogBody>
       {onSuggestAnnotation && (
         <DialogFooter>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              onSuggestAnnotation();
-            }}
-          >
+          <Button type="button" variant="secondary" onClick={onSuggestAnnotation}>
             {t("suggest-own-annotation")}
           </Button>
         </DialogFooter>

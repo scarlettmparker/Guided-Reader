@@ -2,20 +2,14 @@
   margin-top: var(--lg);
 }
 
-.threads {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sm);
-  margin-bottom: var(--md);
-}
-
-.empty {
-  margin: 0 0 var(--md);
-  color: var(--muted-foreground);
-}
-
 .composer {
   display: flex;
   flex-direction: column;
-  gap: var(--sm);
+  gap: var(--lg);
+  margin-top: var(--lg);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
 }

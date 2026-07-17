@@ -1,0 +1,15 @@
+mutation deleteComment($id: ID!) {
+  hadesMutations {
+    deleteComment(id: $id) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

@@ -1,24 +1,28 @@
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionTrigger,
   Button,
   Card,
   CardBody,
   CardHeader,
   CardTitle,
   Form,
-  Input,
+  MarkdownEditor,
 } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
-import { createThread } from "~/server/actions/forum";
+import { createPost, createThread } from "~/server/actions/forum";
 import type { ThreadsForQuery } from "~/generated/graphql";
 import ThreadPosts from "../thread-posts";
 import styles from "./text-discussion-card.module.css";
 
-type Thread = ThreadsForQuery["icarusQueries"]["threadsFor"]["items"][number];
+type Thread =
+  ThreadsForQuery["icarusQueries"]["threadsFor"]["items"][number];
+
+/**
+ * Title stored on the single thread backing a text discussion. Never shown to
+ * readers; the thread exists only to group the text's posts.
+ */
+const THREAD_TITLE = "Text discussion";
 
 type TextDiscussionCardProps = {
   /**
@@ -28,8 +32,9 @@ type TextDiscussionCardProps = {
 };
 
 /**
- * Text-level discussion: a sibling card listing forum threads for a text, each
- * expanding to its posts and a reply composer.
+ * Flat discussion for a text: existing posts and a composer, rendered below
+ * the text. The backing thread is created on first post, so readers never see
+ * or manage thread titles.
  */
 const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
   const { t } = useTranslation("texts");
@@ -38,20 +43,34 @@ const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
     "texts/:id/discussion",
     { id: textId },
   );
-  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [resetKey, setResetKey] = useState(0);
   const [pending, startTransition] = useTransition();
-  const items = threads ?? [];
+  const threadId = threads?.[0]?.id;
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmed = title.trim();
+    const trimmed = body.trim();
     if (!trimmed) return;
     startTransition(async () => {
-      await createThread(
-        { title: trimmed, remoteObject: `hades:text:${textId}` },
+      let id: string | undefined = threadId;
+      if (!id) {
+        const created = await createThread(
+          { title: THREAD_TITLE, remoteObject: `hades:text:${textId}` },
+          textId,
+        );
+        if (created.__typename === "QuerySuccess") {
+          id = created.id ?? undefined;
+        }
+      }
+      if (!id) return;
+      const result = await createPost(
+        { threadId: id, parentId: null, body: trimmed },
         textId,
       );
-      setTitle("");
+      if (result.__typename !== "QuerySuccess") return;
+      setBody("");
+      setResetKey((k) => k + 1);
     });
   };
 
@@ -61,32 +80,24 @@ const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
         <CardTitle>{t("text-discussion")}</CardTitle>
       </CardHeader>
       <CardBody>
-        {items.length === 0 ? (
-          <p className={styles.empty}>{t("start-thread")}</p>
-        ) : (
-          <div className={styles.threads}>
-            {items.map((thread) => (
-              <Accordion key={thread.id}>
-                <AccordionTrigger>{thread.title}</AccordionTrigger>
-                <AccordionContent>
-                  <ThreadPosts threadId={thread.id} textId={textId} />
-                </AccordionContent>
-              </Accordion>
-            ))}
-          </div>
-        )}
+        <Suspense fallback={null}>
+          {threadId && <ThreadPosts threadId={threadId} />}
+        </Suspense>
         <Form onSubmit={submit} className={styles.composer}>
-          <Input
-            value={title}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setTitle(e.target.value)
+          <MarkdownEditor
+            key={resetKey}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setBody(e.target.value)
             }
-            placeholder={t("thread-title-placeholder")}
-            aria-label={t("thread-title-placeholder")}
+            placeholder={t("comment-placeholder")}
+            aria-label={t("comment-placeholder")}
+            rows={3}
           />
-          <Button type="submit" disabled={pending || !title.trim()}>
-            {t("start-thread")}
-          </Button>
+          <div className={styles.actions}>
+            <Button type="submit" disabled={pending || !body.trim()}>
+              {t("comment-action")}
+            </Button>
+          </div>
         </Form>
       </CardBody>
     </Card>

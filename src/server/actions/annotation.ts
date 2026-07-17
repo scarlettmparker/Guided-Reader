@@ -35,6 +35,16 @@ export async function deleteAnnotation(
 }
 
 /**
+ * Deletes a comment on an annotation (owner only).
+ */
+export async function deleteComment(
+  id: string,
+  annotationId: string,
+): Promise<MutationResult> {
+  return executeMutation("hades/deleteComment", { id, annotationId });
+}
+
+/**
  * Casts a vote on an annotation or comment.
  */
 export async function vote(

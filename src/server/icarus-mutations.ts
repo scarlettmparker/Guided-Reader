@@ -8,6 +8,9 @@ import {
   CreateThreadDocument,
   type CreateThreadMutation,
   type CreateThreadMutationVariables,
+  DeletePostDocument,
+  type DeletePostMutation,
+  type DeletePostMutationVariables,
   IcarusRemoveVoteDocument,
   type IcarusRemoveVoteMutation,
   type IcarusRemoveVoteMutationVariables,
@@ -69,6 +72,32 @@ defineMutation({
           ? [makeCacheKey("texts/:id/discussion:threads", { id: body.textId })]
           : []),
       ],
+    };
+  },
+});
+
+/**
+ * Deletes a post from a thread; invalidates that thread's posts.
+ */
+defineMutation({
+  path: "icarus/deletePost",
+  async handler(
+    body: DeletePostMutationVariables & { threadId?: string },
+    context,
+  ) {
+    const result = await executeDocument<
+      DeletePostMutation,
+      DeletePostMutationVariables
+    >(DeletePostDocument, { id: body.id }, tokenFrom(context));
+    const data = result.data?.icarusMutations.deletePost;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to delete post.",
+      }),
+      invalidated: body.threadId
+        ? [makeCacheKey("threads/:threadId:posts", { threadId: body.threadId })]
+        : [],
     };
   },
 });

@@ -4,6 +4,7 @@
   padding: var(--xl);
   padding-top: calc(var(--xl) * 4);
   justify-content: center;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
 
@@ -13,8 +14,15 @@
   flex-grow: 1;
 }
 
-.detail_panel {
+.detail_column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lg);
   min-width: 350px;
   max-width: 44rem;
   flex-grow: 1;
+}
+
+.detail_panel {
+  min-width: 0;
 }

@@ -123,12 +123,16 @@ const AnnotationLayer = ({
   }, [list.open, listAnnotations]);
 
   /**
-   * Re-opens the create dialog for the position's exact range, so a reader can
-   * add their own annotation alongside existing ones (co-annotation).
+   * Re-opens the create dialog anchored to the position's highlight, so a
+   * reader can add their own annotation alongside existing ones.
    */
   const suggestOwnAnnotation = () => {
     const position = listAnnotations[0]?.position;
     if (!position) return;
+    const mark = containerRef.current?.querySelector<HTMLElement>(
+      `[${HIGHLIGHT_ATTR}="${list.positionId}"]`,
+    );
+    const rect = mark?.getBoundingClientRect();
     const snippet =
       containerRef.current?.textContent?.slice(
         position.startOffset,
@@ -138,9 +142,9 @@ const AnnotationLayer = ({
     setCreate({
       open: true,
       selection: {
-        top: list.position.top,
-        bottom: list.position.top,
-        left: list.position.left,
+        top: rect ? rect.top + rect.height / 2 : list.position.top,
+        bottom: rect ? rect.bottom : list.position.top,
+        left: rect ? rect.left + rect.width / 2 : list.position.left,
         selectedText: snippet,
         startOffset: position.startOffset,
         endOffset: position.endOffset,
