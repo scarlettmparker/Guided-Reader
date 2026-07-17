@@ -61,6 +61,16 @@
     "annotation-actions": "Annotation actions",
     "delete": "Delete",
     "delete-annotation-title": "Delete annotation",
-    "delete-annotation-body": "Delete your annotation \"{{snippet}}\"? This action can't be undone."
+    "delete-annotation-body": "Delete your annotation \"{{snippet}}\"? This action can't be undone.",
+    "suggest-improvement": "Suggest an improvement",
+    "suggest-own-annotation": "Suggest your own annotation",
+    "reply": "Reply",
+    "replies": "{{count}} replies",
+    "comment-placeholder": "Write a reply...",
+    "comments": "Discussion",
+    "text-discussion": "Text discussion",
+    "start-thread": "Start a thread",
+    "thread-title-placeholder": "Thread title",
+    "post-placeholder": "Write a post..."
   }
 }

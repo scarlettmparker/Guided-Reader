@@ -15,16 +15,16 @@ query listAnnotations($textId: ID!, $includeHidden: Boolean) {
         endOffset
       }
       author {
+        type
+        id
+      }
+      authorProfile {
         id
         discordId
         discordUsername
         globalName
         avatar
         cefrLevel
-        roles {
-          key
-          name
-        }
       }
       myVote
     }

@@ -10,6 +10,19 @@ query listComments($annotationId: ID!, $includeHidden: Boolean, $pagination: Pag
         upvotes
         downvotes
         netScore
+        author {
+          type
+          id
+        }
+        authorProfile {
+          id
+          discordId
+          discordUsername
+          globalName
+          avatar
+          cefrLevel
+        }
+        myVote
         createdAt
         updatedAt
       }

@@ -91,3 +91,15 @@ export function overlapsExisting(
 ): boolean {
   return ranges.some((r) => start < r.endOffset && end > r.startOffset);
 }
+
+/**
+ * Checks whether a character range exactly matches one of the given ranges.
+ * Exact matches are allowed (co-annotation); only partial overlaps are blocked.
+ */
+export function equalsExisting(
+  start: number,
+  end: number,
+  ranges: Array<{ startOffset: number; endOffset: number }>,
+): boolean {
+  return ranges.some((r) => start === r.startOffset && end === r.endOffset);
+}

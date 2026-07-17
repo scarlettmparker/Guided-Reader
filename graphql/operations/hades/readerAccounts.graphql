@@ -1,0 +1,17 @@
+query readerAccounts($remoteUsers: [RemoteUserInput!]!) {
+  hadesQueries {
+    readerAccounts(remoteUsers: $remoteUsers) {
+      id
+      gaiaAccountId
+      discordId
+      discordUsername
+      globalName
+      avatar
+      cefrLevel
+      roles {
+        key
+        name
+      }
+    }
+  }
+}

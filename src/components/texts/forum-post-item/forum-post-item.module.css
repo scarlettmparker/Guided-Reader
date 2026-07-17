@@ -1,0 +1,36 @@
+.post {
+  list-style: none;
+  padding: var(--sm) 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--sm);
+  margin-bottom: var(--xs);
+}
+
+.author {
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.body {
+  margin: 0 0 var(--xs);
+}
+
+.vote {
+  display: flex;
+  align-items: center;
+  gap: var(--sm);
+}
+
+.score {
+  min-width: 1.5rem;
+  text-align: center;
+  font-size: var(--text-sm);
+}
+
+.active {
+  fill: currentColor;
+}

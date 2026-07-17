@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { MarkdownViewer } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
 import {
+  equalsExisting,
   getSelectionOffsets,
   overlapsExisting,
 } from "~/utils/selection-to-offset";
@@ -122,6 +123,32 @@ const AnnotationLayer = ({
   }, [list.open, listAnnotations]);
 
   /**
+   * Re-opens the create dialog for the position's exact range, so a reader can
+   * add their own annotation alongside existing ones (co-annotation).
+   */
+  const suggestOwnAnnotation = () => {
+    const position = listAnnotations[0]?.position;
+    if (!position) return;
+    const snippet =
+      containerRef.current?.textContent?.slice(
+        position.startOffset,
+        position.endOffset,
+      ) ?? "";
+    setList((prev) => ({ ...prev, open: false }));
+    setCreate({
+      open: true,
+      selection: {
+        top: list.position.top,
+        bottom: list.position.top,
+        left: list.position.left,
+        selectedText: snippet,
+        startOffset: position.startOffset,
+        endOffset: position.endOffset,
+      },
+    });
+  };
+
+  /**
    * Re-injects highlight elements for every annotation position whenever the
    * annotations or content change.
    */
@@ -181,15 +208,13 @@ const AnnotationLayer = ({
       clearSelection();
       return;
     }
+    const existingRanges = positions.map((p) => ({
+      startOffset: p.startOffset,
+      endOffset: p.endOffset,
+    }));
     if (
-      overlapsExisting(
-        offsets.start,
-        offsets.end,
-        positions.map((p) => ({
-          startOffset: p.startOffset,
-          endOffset: p.endOffset,
-        })),
-      )
+      overlapsExisting(offsets.start, offsets.end, existingRanges) &&
+      !equalsExisting(offsets.start, offsets.end, existingRanges)
     ) {
       clearSelection();
       return;
@@ -257,6 +282,7 @@ const AnnotationLayer = ({
         list={list}
         annotations={listAnnotations}
         onOpenChange={(open) => setList((prev) => ({ ...prev, open }))}
+        onSuggestAnnotation={suggestOwnAnnotation}
       />
     </div>
   );

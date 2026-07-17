@@ -1,0 +1,15 @@
+mutation icarusRemoveVote($postId: ID!) {
+  icarusMutations {
+    removeVote(postId: $postId) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

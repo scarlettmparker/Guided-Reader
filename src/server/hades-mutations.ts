@@ -11,6 +11,9 @@ import {
   DeleteAnnotationDocument,
   type DeleteAnnotationMutation,
   type DeleteAnnotationMutationVariables,
+  AddCommentDocument,
+  type AddCommentMutation,
+  type AddCommentMutationVariables,
   HadesVoteDocument,
   type HadesVoteMutation,
   type HadesVoteMutationVariables,
@@ -84,6 +87,32 @@ defineMutation({
       invalidated: body.textId
         ? [makeCacheKey("texts/:id:annotations", { id: body.textId })]
         : [],
+    };
+  },
+});
+
+/**
+ * Adds a comment (or reply) to an annotation; invalidates that annotation's
+ * comments.
+ */
+defineMutation({
+  path: "hades/addComment",
+  async handler(body: AddCommentMutationVariables, context) {
+    const result = await executeDocument<
+      AddCommentMutation,
+      AddCommentMutationVariables
+    >(AddCommentDocument, body, tokenFrom(context));
+    const data = result.data?.hadesMutations.addComment;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to add comment.",
+      }),
+      invalidated: [
+        makeCacheKey("annotations/:annotationId:comments", {
+          annotationId: body.input.annotationId,
+        }),
+      ],
     };
   },
 });

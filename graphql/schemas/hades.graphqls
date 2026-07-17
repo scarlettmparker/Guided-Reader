@@ -34,7 +34,8 @@ type ReaderAnnotation {
   downvotes: Int!
   netScore: Int!
   remoteObject: [String!]
-  author: ReaderAccount
+  author: RemoteUser
+  authorProfile: ReaderAccount
   myVote: VoteValue
   createdAt: Date
   updatedAt: Date
@@ -49,6 +50,9 @@ type ReaderComment {
   upvotes: Int!
   downvotes: Int!
   netScore: Int!
+  author: RemoteUser
+  authorProfile: ReaderAccount
+  myVote: VoteValue
   createdAt: Date
   updatedAt: Date
 }
@@ -154,6 +158,7 @@ type HadesQueries {
     pagination: PaginationInput
   ): PagedReaderComments!
   readerAccount: ReaderAccount
+  readerAccounts(remoteUsers: [RemoteUserInput!]!): [ReaderAccount!]!
   myVote(targetType: ReaderVoteTarget!, targetId: ID!): VoteValue
   locateRemoteObjects(ids: [String!]!): [ReaderObjectReference!]!
 }

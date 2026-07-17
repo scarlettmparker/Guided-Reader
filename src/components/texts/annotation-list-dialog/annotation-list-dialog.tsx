@@ -3,8 +3,10 @@ import { useTranslation } from "react-i18next";
 import { EllipsisVerticalIcon } from "lucide-react";
 import {
   Badge,
+  Button,
   Dialog,
   DialogBody,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DropdownMenu,
@@ -16,6 +18,7 @@ import {
 import { usePageData } from "@sun/ssr/react";
 import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
+import AnnotationDiscussion from "../annotation-discussion";
 import AnnotationConfirmDeleteDialog from "../annotation-confirm-delete-dialog";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import {
@@ -64,6 +67,10 @@ type AnnotationListDialogProps = {
    * Called when the open state changes.
    */
   onOpenChange: (open: boolean) => void;
+  /**
+   * Called when the user asks to add their own annotation at this position.
+   */
+  onSuggestAnnotation?: () => void;
 };
 
 /**
@@ -73,6 +80,7 @@ const AnnotationListDialog = ({
   list,
   annotations,
   onOpenChange,
+  onSuggestAnnotation,
 }: AnnotationListDialogProps) => {
   const { t } = useTranslation("texts");
   const { data: colours } = usePageData<LevelColours | null>(
@@ -122,33 +130,33 @@ const AnnotationListDialog = ({
         ) : (
           <ul className={styles.list}>
             {items.map((annotation) => {
-              const author = annotation.author;
-              const colour = author?.cefrLevel
-                ? colours?.[CEFR_TO_KEY[author.cefrLevel]]
+              const profile = annotation.authorProfile;
+              const colour = profile?.cefrLevel
+                ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
                 : undefined;
               const isOwner =
-                !!author?.id &&
+                !!profile?.id &&
                 !!currentUser?.id &&
-                author.id === currentUser.id;
+                profile.id === currentUser.id;
               return (
                 <li key={annotation.id} className={styles.annotation}>
                   <div className={styles.header}>
                     <DiscordAvatar
-                      discordId={author?.discordId ?? ""}
-                      avatar={author?.avatar}
+                      discordId={profile?.discordId ?? ""}
+                      avatar={profile?.avatar}
                       size={28}
-                      alt={author?.globalName ?? author?.discordUsername ?? ""}
+                      alt={profile?.globalName ?? profile?.discordUsername ?? ""}
                     />
                     <span className={styles.author}>
-                      {author?.globalName ?? author?.discordUsername}
+                      {profile?.globalName ?? profile?.discordUsername}
                     </span>
-                    {author?.cefrLevel && (
+                    {profile?.cefrLevel && (
                       <Badge
                         variant="secondary"
                         className={styles.level}
                         style={colour ? { backgroundColor: colour } : undefined}
                       >
-                        {author.cefrLevel}
+                        {profile.cefrLevel}
                       </Badge>
                     )}
                     {isOwner && (
@@ -181,12 +189,26 @@ const AnnotationListDialog = ({
                     annotation={annotation}
                     onVoted={(netScore) => handleVoted(annotation.id, netScore)}
                   />
+                  <AnnotationDiscussion annotationId={annotation.id} />
                 </li>
               );
             })}
           </ul>
         )}
       </DialogBody>
+      {onSuggestAnnotation && (
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              onSuggestAnnotation();
+            }}
+          >
+            {t("suggest-own-annotation")}
+          </Button>
+        </DialogFooter>
+      )}
 
       <AnnotationConfirmDeleteDialog
         target={deleteTarget}

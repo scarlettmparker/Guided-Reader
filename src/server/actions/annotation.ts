@@ -1,6 +1,7 @@
 import { executeMutation, type MutationResult } from "@sun/ssr";
 import type {
   AnnotationInput,
+  CommentInput,
   ReaderVoteTarget,
   VoteValue,
 } from "~/generated/graphql";
@@ -12,6 +13,15 @@ export async function createAnnotation(
   input: AnnotationInput,
 ): Promise<MutationResult> {
   return executeMutation("hades/createAnnotation", { input });
+}
+
+/**
+ * Adds a comment (or reply) to an annotation.
+ */
+export async function addComment(
+  input: CommentInput,
+): Promise<MutationResult> {
+  return executeMutation("hades/addComment", { input });
 }
 
 /**

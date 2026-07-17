@@ -9,7 +9,8 @@ import {
 
 /**
  * Server-side loader for annotations on a text. Forwards the caller's JWT so
- * the backend can resolve each annotation's `myVote`.
+ * the backend can resolve each annotation's `myVote`. Author profiles are
+ * resolved in the GraphQL layer (gateway `authorProfile` field), not here.
  */
 defineLoader({
   pattern: "texts/:id",
