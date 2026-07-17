@@ -27,25 +27,26 @@ type AnnotationDiscussionProps = {
    */
   textId: string;
   /**
-   * Whether the accordion is open.
+   * Whether the reply composer is open.
    */
-  open: boolean;
+  composerOpen: boolean;
   /**
-   * Called when the open state changes.
+   * Called when the composer open state changes.
    */
-  onOpenChange: (open: boolean) => void;
+  onComposerOpenChange: (open: boolean) => void;
 };
 
 /**
- * Reply accordion for a single annotation. The composer sits at the top of the
- * accordion content and replies load below it; both appear only while open.
+ * Reply composer and reply list for a single annotation. The composer opens
+ * only from the reply action and is closed by its cancel button; replies load
+ * lazily behind their own accordion.
  */
 const AnnotationDiscussion = ({
   annotationId,
   replyCount,
   textId,
-  open,
-  onOpenChange,
+  composerOpen,
+  onComposerOpenChange,
 }: AnnotationDiscussionProps) => {
   const { t } = useTranslation("texts");
   const [body, setBody] = useState("");
@@ -54,15 +55,15 @@ const AnnotationDiscussion = ({
   const composerRef = useRef<HTMLDivElement>(null);
 
   /**
-   * Focuses the editor when the accordion opens.
+   * Focuses the editor when the composer opens.
    */
   useEffect(() => {
-    if (open) {
+    if (composerOpen) {
       composerRef.current
         ?.querySelector<HTMLElement>('[role="textbox"]')
         ?.focus();
     }
-  }, [open]);
+  }, [composerOpen]);
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -76,21 +77,17 @@ const AnnotationDiscussion = ({
       if (result.__typename !== "QuerySuccess") return;
       setBody("");
       setResetKey((key) => key + 1);
+      onComposerOpenChange(false);
     });
   };
 
-  if (replyCount === 0 && !open) {
+  if (replyCount === 0 && !composerOpen) {
     return null;
   }
 
   return (
-    <Accordion open={open} onOpenChange={onOpenChange}>
-      <AccordionTrigger>
-        {replyCount > 0
-          ? t("replies", { count: replyCount })
-          : t("reply-action")}
-      </AccordionTrigger>
-      <AccordionContent>
+    <div className={styles.discussion}>
+      {composerOpen && (
         <Form onSubmit={submit} className={styles.composer}>
           <div ref={composerRef}>
             <MarkdownEditor
@@ -104,18 +101,32 @@ const AnnotationDiscussion = ({
             />
           </div>
           <div className={styles.actions}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => onComposerOpenChange(false)}
+            >
+              {t("cancel")}
+            </Button>
             <Button type="submit" disabled={pending || !body.trim()}>
               {t("comment-action")}
             </Button>
           </div>
         </Form>
-        {replyCount > 0 && (
-          <Suspense fallback={<RepliesSkeleton count={replyCount} />}>
-            <AnnotationReplies annotationId={annotationId} textId={textId} />
-          </Suspense>
-        )}
-      </AccordionContent>
-    </Accordion>
+      )}
+      {replyCount > 0 && (
+        <Accordion defaultOpen={false}>
+          <AccordionTrigger>
+            {t("replies", { count: replyCount })}
+          </AccordionTrigger>
+          <AccordionContent>
+            <Suspense fallback={<RepliesSkeleton count={replyCount} />}>
+              <AnnotationReplies annotationId={annotationId} textId={textId} />
+            </Suspense>
+          </AccordionContent>
+        </Accordion>
+      )}
+    </div>
   );
 };
 

@@ -98,6 +98,7 @@ const AnnotationLayer = ({
     open: false,
     selection: null,
   });
+  const [createFromList, setCreateFromList] = useState(false);
   const [list, setList] = useState<AnnotationListState>({
     open: false,
     position: { top: 0, left: 0 },
@@ -139,6 +140,7 @@ const AnnotationLayer = ({
         position.endOffset,
       ) ?? "";
     setList((prev) => ({ ...prev, open: false }));
+    setCreateFromList(true);
     setCreate({
       open: true,
       selection: {
@@ -243,8 +245,17 @@ const AnnotationLayer = ({
    */
   const handleStartAnnotation = () => {
     if (!selection) return;
+    setCreateFromList(false);
     setCreate({ open: true, selection });
     clearSelection();
+  };
+
+  /**
+   * Returns from the create dialog to the annotation list it was opened from.
+   */
+  const handleCreateCancel = () => {
+    setCreate((prev) => ({ ...prev, open: false }));
+    setList((prev) => ({ ...prev, open: true }));
   };
 
   const viewer = useMemo(
@@ -279,6 +290,7 @@ const AnnotationLayer = ({
       <AnnotationCreateDialog
         create={create}
         onOpenChange={(open) => setCreate((prev) => ({ ...prev, open }))}
+        onCancel={createFromList ? handleCreateCancel : undefined}
         textId={textId}
       />
 

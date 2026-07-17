@@ -73,6 +73,12 @@ type AnnotationCreateDialogProps = {
    * Called when the open state changes.
    */
   onOpenChange: (open: boolean) => void;
+  /**
+   * Called when the reader cancels. When set (e.g. the dialog was opened from
+   * the annotation list), the caller can return to that list instead of just
+   * closing.
+   */
+  onCancel?: () => void;
 };
 
 /**
@@ -82,6 +88,7 @@ const AnnotationCreateDialog = ({
   textId,
   create,
   onOpenChange,
+  onCancel,
 }: AnnotationCreateDialogProps) => {
   const { t } = useTranslation("texts");
   const [body, setBody] = useState("");
@@ -145,7 +152,7 @@ const AnnotationCreateDialog = ({
           <Button
             type="button"
             variant="secondary"
-            onClick={() => onOpenChange(false)}
+            onClick={() => (onCancel ? onCancel() : onOpenChange(false))}
           >
             {t("cancel")}
           </Button>

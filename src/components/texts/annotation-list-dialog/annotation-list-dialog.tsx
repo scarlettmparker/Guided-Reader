@@ -211,8 +211,8 @@ const AnnotationListDialog = ({
                     annotationId={annotation.id}
                     replyCount={annotation.replyCount}
                     textId={textId}
-                    open={replyOpenId === annotation.id}
-                    onOpenChange={(open) =>
+                    composerOpen={replyOpenId === annotation.id}
+                    onComposerOpenChange={(open) =>
                       setReplyOpenId(open ? annotation.id : null)
                     }
                   />
