@@ -1,7 +1,3 @@
-.card {
-  margin-top: var(--lg);
-}
-
 .composer {
   display: flex;
   flex-direction: column;
