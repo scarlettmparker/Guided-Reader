@@ -104,6 +104,7 @@ const AnnotationLayer = ({
     position: { top: 0, left: 0 },
     textId,
     positionId: "",
+    snippet: "",
   });
 
   /**
@@ -179,6 +180,11 @@ const AnnotationLayer = ({
       for (const mark of marks) {
         mark.addEventListener("click", () => {
           const rect = mark.getBoundingClientRect();
+          const snippet =
+            containerRef.current?.textContent?.slice(
+              startOffset,
+              endOffset,
+            ) ?? "";
           setList({
             open: true,
             position: centeredDialogPosition(
@@ -187,6 +193,7 @@ const AnnotationLayer = ({
             ),
             textId,
             positionId,
+            snippet,
           });
         });
       }

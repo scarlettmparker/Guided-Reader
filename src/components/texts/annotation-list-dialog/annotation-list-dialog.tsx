@@ -35,6 +35,8 @@ type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"][number];
 
 type LevelColours = Record<string, string>;
 
+const TITLE_SNIPPET_LIMIT = 60;
+
 /**
  * List-dialog state owned by the annotation layer.
  */
@@ -55,6 +57,10 @@ export type AnnotationListState = {
    * The position whose annotations are shown.
    */
   positionId: string;
+  /**
+   * The annotated text snippet, shown in the dialog title.
+   */
+  snippet: string;
 };
 
 type AnnotationListDialogProps = {
@@ -94,10 +100,15 @@ const AnnotationListDialog = ({
     "currentUser",
     "currentUser",
   );
-  const { open, position, textId } = list;
+  const { open, position, textId, snippet } = list;
   const [items, setItems] = useState<Annotation[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Annotation | null>(null);
   const [replyOpenId, setReplyOpenId] = useState<string | null>(null);
+
+  const titleSnippet =
+    snippet.length > TITLE_SNIPPET_LIMIT
+      ? `${snippet.slice(0, TITLE_SNIPPET_LIMIT)}…`
+      : snippet;
 
   /**
    * Keeps the local list in sync when a different position is opened.
@@ -125,7 +136,7 @@ const AnnotationListDialog = ({
       position={position}
     >
       <DialogHeader>
-        <DialogTitle>{t("annotations")}</DialogTitle>
+        <DialogTitle>{t("annotations-for", { snippet: titleSnippet })}</DialogTitle>
       </DialogHeader>
       <DialogBody>
         {items.length === 0 ? (

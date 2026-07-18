@@ -54,6 +54,7 @@
     "annotate": "Click to annotate",
     "cancel": "Cancel",
     "annotations": "Annotations",
+    "annotations-for": "Annotations for \"{{snippet}}\"",
     "no-annotations": "No annotations yet",
     "sign-in-to-annotate": "Sign in to annotate",
     "vote-up": "Vote up",
