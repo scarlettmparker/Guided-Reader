@@ -5,7 +5,9 @@
  */
 
 import { print, type DocumentNode } from "graphql";
+import { getRequestCookie } from "@sun/ssr";
 import { PropertySetDocument } from "~/generated/graphql";
+import { AUTH_COOKIE, getCookieValue } from "~/utils/auth";
 
 export type ApiResponse<T> = {
   success: boolean;
@@ -13,6 +15,17 @@ export type ApiResponse<T> = {
   error?: string;
   statusCode?: number;
 };
+
+/**
+ * Resolves the caller's JWT.
+ */
+function resolveAuthToken(authToken?: string): string | undefined {
+  if (authToken) {
+    return authToken;
+  }
+  const cookie = getRequestCookie();
+  return cookie ? getCookieValue(cookie, AUTH_COOKIE) : undefined;
+}
 
 /**
  * Executes a typed GraphQL document against the backend.
@@ -27,8 +40,9 @@ export async function executeDocument<T, V = Record<string, unknown>>(
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (authToken) {
-    headers["Authorization"] = `Bearer ${authToken}`;
+  const token = resolveAuthToken(authToken);
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   try {
