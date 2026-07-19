@@ -78,20 +78,7 @@ export const OAUTH_STATE_COOKIE = "oauth_state";
 /**
  * Reads a named cookie value from a raw Cookie header.
  */
-export function getCookieValue(
-  cookieHeader: string | undefined,
-  name: string,
-): string | undefined {
-  if (!cookieHeader) return undefined;
-  for (const part of cookieHeader.split(/;\s*/)) {
-    const index = part.indexOf("=");
-    if (index < 0) continue;
-    if (part.slice(0, index).trim() === name) {
-      return decodeURIComponent(part.slice(index + 1));
-    }
-  }
-  return undefined;
-}
+export { getCookieValue } from "@sun/api";
 
 /**
  * Builds the Set-Cookie value that stores the JWT.
