@@ -11,7 +11,11 @@ import {
 } from "@sun/ssr/server";
 import { createI18nInstance } from "./utils/i18n";
 import { fetchPropertySet } from "./utils/api";
+import { configureApi } from "@sun/api";
+import { AUTH_COOKIE } from "./utils/auth";
 import "./utils/configure-framework";
+
+configureApi({ authCookie: AUTH_COOKIE });
 
 // Colocated loaders and mutation handlers self-register at boot.
 autoDiscoverRegistrations(import.meta.glob("./**/*-data.ts", { eager: true }));
