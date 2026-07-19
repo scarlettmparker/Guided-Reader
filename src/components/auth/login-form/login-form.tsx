@@ -9,6 +9,7 @@ import {
   Input,
   Button,
 } from "@sun/components";
+import { CsrfField } from "@sun/ssr/react";
 import styles from "./login-form.module.css";
 
 /** Username/password form. Native POST to /__login (PRG) so the cookie sticks. */
@@ -19,6 +20,7 @@ const LoginForm = () => {
 
   return (
     <Form action="/__login" method="post">
+      <CsrfField />
       <FormField name="username">
         <FormLabel>{t("username")}</FormLabel>
         <FormItem>

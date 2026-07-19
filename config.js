@@ -21,6 +21,12 @@ export const backendHost = process.env.BACKEND_HOST || "0.0.0.0";
 
 export const backendPort = parseInt(process.env.BACKEND_PORT || "443", 10);
 
+/**
+ * Per-app credentials forwarded to the gateway as X-Client-Id / X-Client-Secret.
+ */
+export const clientId = process.env.CLIENT_ID || "guided-reader";
+export const clientSecret = process.env.CLIENT_SECRET || "";
+
 export const manifestPath = "./dist/client/.vite/manifest.json";
 
 /**

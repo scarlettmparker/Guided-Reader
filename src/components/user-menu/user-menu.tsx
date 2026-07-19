@@ -15,6 +15,7 @@ import {
 } from "@sun/components";
 import DiscordAvatar from "~/components/discord-avatar";
 import ReaderRoleItem from "~/components/reader-role-item";
+import { CsrfField } from "@sun/ssr/react";
 import type { ReaderAccount } from "~/generated/graphql";
 import styles from "./user-menu.module.css";
 
@@ -86,6 +87,7 @@ const UserMenu = () => {
               <Button>{t("manage-profile")}</Button>
             </a>
             <Form action="/__logout" method="post">
+              <CsrfField />
               <Button
                 type="submit"
                 variant="secondary"

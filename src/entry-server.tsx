@@ -13,9 +13,10 @@ import { createI18nInstance } from "./utils/i18n";
 import { fetchPropertySet } from "./utils/api";
 import { configureApi } from "@sun/api";
 import { AUTH_COOKIE } from "./utils/auth";
+import { clientId, clientSecret } from "../config.js";
 import "./utils/configure-framework";
 
-configureApi({ authCookie: AUTH_COOKIE });
+configureApi({ authCookie: AUTH_COOKIE, clientId, clientSecret });
 
 // Colocated loaders and mutation handlers self-register at boot.
 autoDiscoverRegistrations(import.meta.glob("./**/*-data.ts", { eager: true }));
