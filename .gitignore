@@ -17,5 +17,8 @@ build/
 .idea
 stats.html
 
+.opencode/
+opencode.json
+
 # Local crap only 
 scripts/
