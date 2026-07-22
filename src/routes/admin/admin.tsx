@@ -1,7 +1,6 @@
 import { Suspense, useTransition } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useOutlet, useSearchParams } from "react-router-dom";
 import AdminUserList from "~/components/admin/user-list";
-import AdminUserDetail from "~/components/admin/user-detail";
 import AdminDetailPlaceholder from "~/components/admin/admin-detail-placeholder";
 import { AdminDetailSkeleton } from "~/components/admin/skeletons";
 import styles from "./admin.module.css";
@@ -9,9 +8,9 @@ import styles from "./admin.module.css";
 const Admin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [, startTransition] = useTransition();
+  const outlet = useOutlet();
   const search = searchParams.get("search") ?? "";
   const page = Number(searchParams.get("page") ?? "0");
-  const selectedId = searchParams.get("selected") ?? null;
 
   const updateParams = (key: string, value: string | null) => {
     const next = new URLSearchParams(searchParams);
@@ -32,10 +31,6 @@ const Admin = () => {
     });
   };
 
-  const handleSelect = (id: string) => {
-    setSearchParams(updateParams("selected", id));
-  };
-
   return (
     <div className={styles.items_layout}>
       <div className={styles.items_list_panel}>
@@ -44,16 +39,11 @@ const Admin = () => {
           page={page}
           onSearch={handleSearch}
           onPageChange={handlePageChange}
-          onSelect={handleSelect}
         />
       </div>
       <div className={styles.items_detail_panel}>
         <Suspense fallback={<AdminDetailSkeleton />}>
-          {selectedId ? (
-            <AdminUserDetail accountId={selectedId} />
-          ) : (
-            <AdminDetailPlaceholder />
-          )}
+          {outlet ?? <AdminDetailPlaceholder />}
         </Suspense>
       </div>
     </div>

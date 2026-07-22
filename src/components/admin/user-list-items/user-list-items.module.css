@@ -4,6 +4,13 @@
   gap: var(--lg);
 }
 
+.item_link {
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+
 .list_button {
   display: flex;
   align-items: center;

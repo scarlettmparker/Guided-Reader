@@ -20,7 +20,7 @@ type AdminUserListFooterProps = {
 const AdminUserListFooter = ({ search, page }: AdminUserListFooterProps) => {
   const { t } = useTranslation("admin");
   const { data } = usePageData<PagedAccounts>("accounts", "accounts", {
-    page,
+    page: String(page),
     search: search || undefined,
   });
   const count = data?.items?.length ?? 0;

@@ -26,7 +26,10 @@ defineMutation({
         __typename: "StandardError" as const,
         message: result.error || "Failed to suspend account.",
       }),
-      invalidated: [makeCacheKey("accounts:accounts", { page: "*" })],
+      invalidated: [
+        makeCacheKey("accounts:accounts", { page: "*" }),
+        makeCacheKey("admin/:id:account", { id: body.id }),
+      ],
     };
   },
 });
@@ -47,7 +50,10 @@ defineMutation({
         __typename: "StandardError" as const,
         message: result.error || "Failed to unsuspend account.",
       }),
-      invalidated: [makeCacheKey("accounts:accounts", { page: "*" })],
+      invalidated: [
+        makeCacheKey("accounts:accounts", { page: "*" }),
+        makeCacheKey("admin/:id:account", { id: body.id }),
+      ],
     };
   },
 });

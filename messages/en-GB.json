@@ -92,6 +92,12 @@
     "created": "Created",
     "updated": "Updated",
     "none": "None",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "suspend-title": "Suspend {{username}}?",
+    "suspend-body": "Are you sure you wish to suspend this user?",
+    "unsuspend-title": "Unsuspend {{username}}?",
+    "unsuspend-body": "Are you sure you wish to unsuspend this user?",
+    "cancel-label": "Cancel",
+    "confirm-label": "Confirm"
   }
 }

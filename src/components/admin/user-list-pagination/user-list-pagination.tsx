@@ -23,7 +23,7 @@ type AdminUserListPaginationProps = {
  */
 const AdminUserListPagination = ({ page, search, onPageChange }: AdminUserListPaginationProps) => {
   const { data } = usePageData<PagedAccounts>("accounts", "accounts", {
-    page,
+    page: String(page),
     search: search || undefined,
   });
 

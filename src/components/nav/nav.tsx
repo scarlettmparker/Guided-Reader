@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@sun/components";
@@ -44,13 +45,19 @@ const Nav = () => {
           </Link>
         );
       })}
-      <RoleCheck roles={["Admin"]}>
-        <Link to="/admin" className={styles.link}>
-          <Button variant="secondary" className={styles.admin_button} title={t("admin")}>
-            <Cog6ToothIcon width={20} height={20} />
-          </Button>
-        </Link>
-      </RoleCheck>
+      <Suspense fallback={null}>
+        <RoleCheck roles={["Admin"]}>
+          <Link to="/admin" className={styles.link}>
+            <Button
+              variant="secondary"
+              className={styles.admin_button}
+              title={t("admin")}
+            >
+              <Cog6ToothIcon width={20} height={20} />
+            </Button>
+          </Link>
+        </RoleCheck>
+      </Suspense>
       <UserMenu />
     </nav>
   );

@@ -23,16 +23,12 @@ type AdminUserListProps = {
    * Called when the user navigates to a new page.
    */
   onPageChange: (page: number) => void;
-  /**
-   * Called when an account is clicked.
-   */
-  onSelect: (id: string) => void;
 };
 
 /**
  * Searchable, paginated list of accounts.
  */
-const AdminUserList = ({ search, page, onSearch, onPageChange, onSelect }: AdminUserListProps) => {
+const AdminUserList = ({ search, page, onSearch, onPageChange }: AdminUserListProps) => {
   const { t } = useTranslation("admin");
   const [searchInput, setSearchInput] = useState(search);
 
@@ -58,11 +54,7 @@ const AdminUserList = ({ search, page, onSearch, onPageChange, onSelect }: Admin
               </div>
             }
           >
-            <AdminUserListItems
-              search={search}
-              page={page}
-              onSelect={onSelect}
-            />
+            <AdminUserListItems search={search} page={page} />
           </Suspense>
         </CardBody>
         <Suspense fallback={null}>

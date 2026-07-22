@@ -6,6 +6,7 @@ const Library = lazy(() => import("./routes/library"));
 const TextsPage = lazy(() => import("./routes/texts"));
 const TextDetailsPage = lazy(() => import("./routes/texts/[id]"));
 const Admin = lazy(() => import("./routes/admin"));
+const AccountDetailPage = lazy(() => import("./routes/admin/account-detail-page"));
 const Login = lazy(() => import("./routes/login"));
 const NotFound = lazy(() => import("./routes/not-found"));
 
@@ -42,6 +43,12 @@ export const routes: RouteObject[] = [
         <Admin />
       </Suspense>
     ),
+    children: [
+      {
+        path: ":id",
+        element: <AccountDetailPage />,
+      },
+    ],
   },
   {
     path: "/login",
