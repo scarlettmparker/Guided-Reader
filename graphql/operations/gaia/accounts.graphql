@@ -1,4 +1,4 @@
-query Accounts($pagination: PaginationInput) {
+query accounts($pagination: PaginationInput) {
   gaiaQueries {
     accounts(pagination: $pagination) {
       items {

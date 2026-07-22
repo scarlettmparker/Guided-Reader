@@ -1,4 +1,4 @@
-mutation SuspendAccount($id: ID!) {
+mutation suspendAccount($id: ID!) {
   gaiaMutations {
     suspendAccount(id: $id) {
       ... on QuerySuccess {

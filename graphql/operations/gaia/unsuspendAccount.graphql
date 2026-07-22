@@ -1,4 +1,4 @@
-mutation UnsuspendAccount($id: ID!) {
+mutation unsuspendAccount($id: ID!) {
   gaiaMutations {
     unsuspendAccount(id: $id) {
       ... on QuerySuccess {

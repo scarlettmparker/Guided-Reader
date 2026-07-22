@@ -1,4 +1,4 @@
-query Account($id: ID!) {
+query account($id: ID!) {
   gaiaQueries {
     account(id: $id) {
       id
