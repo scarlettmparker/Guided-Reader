@@ -19,7 +19,6 @@
 .score {
   min-width: 1.5em;
   text-align: center;
-  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 

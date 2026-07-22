@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { MarkdownViewer } from "@sun/components";
+import { MarkdownViewer, ScrollArea } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
 import {
   equalsExisting,
@@ -181,10 +181,8 @@ const AnnotationLayer = ({
         mark.addEventListener("click", () => {
           const rect = mark.getBoundingClientRect();
           const snippet =
-            containerRef.current?.textContent?.slice(
-              startOffset,
-              endOffset,
-            ) ?? "";
+            containerRef.current?.textContent?.slice(startOffset, endOffset) ??
+            "";
           setList({
             open: true,
             position: centeredDialogPosition(
@@ -266,7 +264,12 @@ const AnnotationLayer = ({
   };
 
   const viewer = useMemo(
-    () => <MarkdownViewer>{content}</MarkdownViewer>,
+    () => (
+      // Just what looks good.
+      <ScrollArea maxHeight="22rem">
+        <MarkdownViewer>{content}</MarkdownViewer>
+      </ScrollArea>
+    ),
     [content],
   );
 

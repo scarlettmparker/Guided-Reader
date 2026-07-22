@@ -14,7 +14,7 @@ import {
   LockClosedIcon,
   LockOpenIcon,
 } from "@heroicons/react/24/outline";
-import { executeMutation, invalidatePageData } from "@sun/ssr";
+import { executeMutation } from "@sun/ssr";
 import ConfirmSuspendAccountDialog from "~/components/admin/confirm-suspend-account-dialog";
 import ConfirmUnsuspendAccountDialog from "~/components/admin/confirm-unsuspend-account-dialog";
 import type { PagedAccounts } from "~/generated/graphql";
