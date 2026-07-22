@@ -1,6 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@sun/components";
+import { RoleCheck } from "@sun/ssr/react";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import UserMenu from "~/components/user-menu";
 import styles from "./nav.module.css";
 
@@ -42,6 +44,13 @@ const Nav = () => {
           </Link>
         );
       })}
+      <RoleCheck roles={["Admin"]}>
+        <Link to="/admin" className={styles.link}>
+          <Button variant="secondary" className={styles.admin_button} title={t("admin")}>
+            <Cog6ToothIcon width={20} height={20} />
+          </Button>
+        </Link>
+      </RoleCheck>
       <UserMenu />
     </nav>
   );

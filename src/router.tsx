@@ -5,6 +5,7 @@ import type { RouteMeta } from "@sun/ssr/server";
 const Library = lazy(() => import("./routes/library"));
 const TextsPage = lazy(() => import("./routes/texts"));
 const TextDetailsPage = lazy(() => import("./routes/texts/[id]"));
+const Admin = lazy(() => import("./routes/admin"));
 const Login = lazy(() => import("./routes/login"));
 const NotFound = lazy(() => import("./routes/not-found"));
 
@@ -33,6 +34,14 @@ export const routes: RouteObject[] = [
         element: <TextDetailsPage />,
       },
     ],
+  },
+  {
+    path: "admin",
+    element: (
+      <Suspense fallback={null}>
+        <Admin />
+      </Suspense>
+    ),
   },
   {
     path: "/login",

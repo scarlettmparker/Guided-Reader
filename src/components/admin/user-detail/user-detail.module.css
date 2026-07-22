@@ -1,0 +1,12 @@
+.detail_body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--lg);
+  align-items: baseline;
+}
+
+.detail_value {
+  text-align: right;
+  word-break: break-all;
+  margin: 0;
+}

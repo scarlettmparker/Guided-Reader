@@ -1,0 +1,15 @@
+mutation SuspendAccount($id: ID!) {
+  gaiaMutations {
+    suspendAccount(id: $id) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

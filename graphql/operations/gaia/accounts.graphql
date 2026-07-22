@@ -1,0 +1,27 @@
+query Accounts($pagination: PaginationInput) {
+  gaiaQueries {
+    accounts(pagination: $pagination) {
+      items {
+        id
+        username
+        personId
+        status
+        provider
+        remoteUsers {
+          type
+          id
+        }
+        createdAt
+        updatedAt
+      }
+      pageInfo {
+        page
+        size
+        totalPages
+        totalCount
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

@@ -19,6 +19,7 @@
     "home": "Home",
     "texts": "Texts",
     "profile": "Profile",
+    "admin": "Admin",
     "account": "Account",
     "logout": "Sign out",
     "manage-profile": "Manage profile",
@@ -73,5 +74,24 @@
     "replies_one": "{{count}} reply",
     "replies_other": "{{count}} replies",
     "text-discussion": "Text discussion"
+  },
+  "admin": {
+    "title": "Accounts",
+    "search-placeholder": "Search accounts...",
+    "select-user": "Select an account",
+    "user-not-found": "Account not found",
+    "no-items-found": "No accounts found",
+    "status-active": "Active",
+    "status-suspended": "Suspended",
+    "remote-accounts": "Remote accounts",
+    "suspend-account": "Suspend",
+    "unsuspend-account": "Unsuspend",
+    "items-count": "{{count}} accounts",
+    "status": "Status",
+    "provider": "Provider",
+    "created": "Created",
+    "updated": "Updated",
+    "none": "None",
+    "unknown": "Unknown"
   }
 }

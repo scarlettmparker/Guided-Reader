@@ -1,0 +1,22 @@
+.items_layout {
+  display: flex;
+  gap: var(--lg);
+  padding: var(--xl);
+  padding-top: calc(var(--xl) * 4);
+  justify-content: center;
+  z-index: 10;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.items_list_panel {
+  min-width: 350px;
+  max-width: 28rem;
+  flex-grow: 1;
+}
+
+.items_detail_panel {
+  min-width: 350px;
+  max-width: 44rem;
+  flex-grow: 1;
+}
