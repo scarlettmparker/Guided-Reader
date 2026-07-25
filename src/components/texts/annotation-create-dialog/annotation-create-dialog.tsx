@@ -132,13 +132,13 @@ const AnnotationCreateDialog = ({
       )}
       className={styles.dialog}
     >
-      <Form onSubmit={handleSubmit}>
-        <DialogHeader>
-          <DialogTitle>
-            {t("annotate-prefix")} &ldquo;{snippet}&rdquo;
-          </DialogTitle>
-        </DialogHeader>
-        <DialogBody>
+      <DialogHeader>
+        <DialogTitle>
+          {t("annotate-prefix")} &ldquo;{snippet}&rdquo;
+        </DialogTitle>
+      </DialogHeader>
+      <DialogBody>
+        <Form id="create-annotation-form" onSubmit={handleSubmit}>
           <MarkdownEditor
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setBody(e.target.value)
@@ -147,20 +147,20 @@ const AnnotationCreateDialog = ({
             aria-label={t("annotation-placeholder")}
             rows={5}
           />
-        </DialogBody>
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => (onCancel ? onCancel() : onOpenChange(false))}
-          >
-            {t("cancel")}
-          </Button>
-          <Button type="submit" disabled={pending || !body.trim()}>
-            {t("annotate")}
-          </Button>
-        </DialogFooter>
-      </Form>
+        </Form>
+      </DialogBody>
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => (onCancel ? onCancel() : onOpenChange(false))}
+        >
+          {t("cancel")}
+        </Button>
+        <Button type="submit" form="create-annotation-form" disabled={pending || !body.trim()}>
+          {t("annotate")}
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 };
