@@ -35,15 +35,23 @@ defineMutation({
       CreateAnnotationMutation,
       CreateAnnotationMutationVariables
     >(CreateAnnotationDocument, body, tokenFrom(context));
+    const invalidated = [
+      makeCacheKey("texts/:id:annotations", { id: body.input.textId }),
+    ];
+    if (result.statusCode === 429) {
+      return {
+        __typename: "StandardError" as const,
+        message: "rate_limited",
+        invalidated,
+      };
+    }
     const data = result.data?.hadesMutations.createAnnotation;
     return {
       ...(data ?? {
         __typename: "StandardError" as const,
         message: result.error || "Failed to create annotation.",
       }),
-      invalidated: [
-        makeCacheKey("texts/:id:annotations", { id: body.input.textId }),
-      ],
+      invalidated,
     };
   },
 });

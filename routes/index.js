@@ -21,7 +21,7 @@ import {
 import { seedPageData } from "../src/utils/seed-page-data.ts";
 
 /** Pages that do not require an authenticated session. */
-const PUBLIC_PAGES = new Set(["/login", "/register"]);
+const PUBLIC_PAGES = new Set(["/login", "/register", "/reactivate"]);
 
 /** Strips a trailing slash (except for the root). */
 function normalizePath(pathname) {
@@ -79,10 +79,17 @@ export function setupRoutes(app, vite) {
     if (!code || !state || !expected || state !== expected) {
       return reply.redirect("/login?error=discord");
     }
-    const token = await discordLoginViaCode(code, state);
-    if (!token) return reply.redirect("/login?error=discord");
+    const result = await discordLoginViaCode(code, state);
+    if (!result) return reply.redirect("/login?error=discord");
 
-    reply.header("Set-Cookie", buildAuthCookie(token));
+    if (result.status === "deactivated") {
+      const emailParam = result.email
+        ? `?email=${encodeURIComponent(result.email)}`
+        : "";
+      return reply.redirect(`/reactivate${emailParam}`);
+    }
+
+    reply.header("Set-Cookie", buildAuthCookie(result.token));
     return reply.redirect("/");
   });
 

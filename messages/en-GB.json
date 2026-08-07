@@ -73,7 +73,36 @@
     "delete-comment-body": "Delete this comment? This action can't be undone.",
     "replies_one": "{{count}} reply",
     "replies_other": "{{count}} replies",
-    "text-discussion": "Text discussion"
+    "text-discussion": "Text discussion",
+    "rate-limit-message": "You're creating annotations too often. Try again in a moment.",
+    "annotation-error": "Couldn't create the annotation. Try again."
+  },
+  "profile": {
+    "no-roles": "No roles",
+    "danger-zone-title": "Danger zone",
+    "danger-zone-body": "Deactivating revokes your session and hides you from the app until you reactivate via email.",
+    "deactivate-account": "Deactivate account",
+    "deactivate-title": "Deactivate {{username}}?",
+    "deactivate-body": "Your account will be deactivated and you'll be signed out. You can reactivate at any time using a link we email you.",
+    "cancel-label": "Cancel",
+    "confirm-label": "Deactivate"
+  },
+  "reactivate": {
+    "title": "Reactivate your account",
+    "subtitle": "Your account is deactivated. Confirm your email to get back in.",
+    "email-placeholder": "Enter your email",
+    "send-link": "Send reactivation link",
+    "sent": "Reactivation link sent. Check your email.",
+    "confirmed": "Account reactivated. You can sign in again.",
+    "confirming": "Reactivating your account…",
+    "confirm-error": "That reactivation link is invalid or has expired.",
+    "back-to-login": "Back to sign in"
+  },
+  "cookies": {
+    "title": "Cookies",
+    "description": "This site uses cookies to keep you signed in and secure. No tracking cookies are used.",
+    "accept": "Accept",
+    "decline": "Decline"
   },
   "admin": {
     "title": "Accounts",

@@ -1,11 +1,12 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { BreadcrumbProvider } from "@sun/components";
+import { BreadcrumbProvider, CookieBanner } from "@sun/components";
 import { getBackgroundHex } from "@sun/utils";
 import {
   ThemeSwitcher,
   THEME_APPLIED_EVENT,
   type ThemeOption,
 } from "@sun/themes";
+import CookieBannerPanel from "./cookie-banner-panel";
 import Nav from "./nav";
 import styles from "./layout.module.css";
 
@@ -49,6 +50,9 @@ const Layout = ({ children }: LayoutProps) => {
       <div className={styles.switcher}>
         <ThemeSwitcher themes={themes} />
       </div>
+      <CookieBanner>
+        <CookieBannerPanel />
+      </CookieBanner>
     </main>
   );
 };

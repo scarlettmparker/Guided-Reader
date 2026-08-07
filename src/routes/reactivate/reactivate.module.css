@@ -1,0 +1,27 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--xl);
+  height: calc(100vh - var(--xl) * 2);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.status {
+  margin: 0;
+}
+
+.form_footer {
+  margin-top: var(--md);
+}
+
+.footer {
+  display: flex;
+  justify-content: end;
+  margin-top: var(--xl);
+  gap: var(--md);
+}

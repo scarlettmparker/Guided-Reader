@@ -4,10 +4,19 @@ import { tokenFrom } from "./context";
 import {
   SuspendAccountDocument,
   UnsuspendAccountDocument,
+  DeactivateAccountDocument,
+  RequestAccountReactivationDocument,
+  ConfirmAccountReactivationDocument,
   type SuspendAccountMutation,
   type SuspendAccountMutationVariables,
   type UnsuspendAccountMutation,
   type UnsuspendAccountMutationVariables,
+  type DeactivateAccountMutation,
+  type DeactivateAccountMutationVariables,
+  type RequestAccountReactivationMutation,
+  type RequestAccountReactivationMutationVariables,
+  type ConfirmAccountReactivationMutation,
+  type ConfirmAccountReactivationMutationVariables,
 } from "~/generated/graphql";
 
 /**
@@ -55,5 +64,64 @@ defineMutation({
         makeCacheKey("admin/:id:account", { id: body.id }),
       ],
     };
+  },
+});
+
+/**
+ * Deactivates the calling account, revoking its sessions.
+ */
+defineMutation({
+  path: "gaia/deactivateAccount",
+  async handler(body: DeactivateAccountMutationVariables, context) {
+    const result = await executeDocument<
+      DeactivateAccountMutation,
+      DeactivateAccountMutationVariables
+    >(DeactivateAccountDocument, body, tokenFrom(context));
+    const data = result.data?.gaiaMutations?.deactivateAccount;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to deactivate account.",
+      }),
+      invalidated: [makeCacheKey("currentUser:currentUser", {})],
+    };
+  },
+});
+
+/**
+ * Emails a reactivation link to the given address.
+ */
+defineMutation({
+  path: "gaia/requestAccountReactivation",
+  async handler(body: RequestAccountReactivationMutationVariables, _context) {
+    const result = await executeDocument<
+      RequestAccountReactivationMutation,
+      RequestAccountReactivationMutationVariables
+    >(RequestAccountReactivationDocument, body);
+    return (
+      result.data?.gaiaMutations?.requestAccountReactivation ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to request reactivation.",
+      }
+    );
+  },
+});
+
+/**
+ * Reactivates an account using a confirmation token.
+ */
+defineMutation({
+  path: "gaia/confirmAccountReactivation",
+  async handler(body: ConfirmAccountReactivationMutationVariables, _context) {
+    const result = await executeDocument<
+      ConfirmAccountReactivationMutation,
+      ConfirmAccountReactivationMutationVariables
+    >(ConfirmAccountReactivationDocument, body);
+    return (
+      result.data?.gaiaMutations?.confirmAccountReactivation ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to confirm reactivation.",
+      }
+    );
   },
 });

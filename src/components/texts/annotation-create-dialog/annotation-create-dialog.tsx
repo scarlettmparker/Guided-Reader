@@ -92,6 +92,7 @@ const AnnotationCreateDialog = ({
 }: AnnotationCreateDialogProps) => {
   const { t } = useTranslation("texts");
   const [body, setBody] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const { selection } = create;
@@ -108,6 +109,7 @@ const AnnotationCreateDialog = ({
     if (!trimmed) return;
     const { startOffset, endOffset } = selection;
     startTransition(async () => {
+      setError(null);
       const result = await createAnnotation({
         textId,
         startOffset,
@@ -117,6 +119,13 @@ const AnnotationCreateDialog = ({
       if (result.__typename === "QuerySuccess") {
         setBody("");
         onOpenChange(false);
+      } else if (
+        result.__typename === "StandardError" &&
+        result.message === "rate_limited"
+      ) {
+        setError(t("rate-limit-message"));
+      } else {
+        setError(t("annotation-error"));
       }
     });
   };
@@ -148,6 +157,7 @@ const AnnotationCreateDialog = ({
             rows={5}
           />
         </Form>
+        {error && <p className={styles.error}>{error}</p>}
       </DialogBody>
       <DialogFooter>
         <Button

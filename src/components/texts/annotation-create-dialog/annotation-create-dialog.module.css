@@ -2,3 +2,9 @@
   min-width: 24rem;
   max-width: 24rem;
 }
+
+.error {
+  color: var(--destructive);
+  margin-block: var(--sm);
+}
+

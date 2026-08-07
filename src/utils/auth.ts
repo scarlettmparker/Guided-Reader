@@ -10,6 +10,7 @@ import {
   LoginDocument,
   ReaderAccountDocument,
   DiscordLoginDocument,
+  type DiscordLoginMutation,
 } from "~/generated/graphql";
 
 const TOKEN_KEY = "hades_auth_token";
@@ -160,17 +161,44 @@ export async function getCurrentUser(
 }
 
 /**
+ * Result of a Discord code exchange.
+ */
+export type DiscordLoginResult =
+  | {
+      /**
+       * Login succeeded; the JWT to store.
+       */
+      status: "ok";
+      token: string;
+    }
+  | {
+      /**
+       * The account exists but is deactivated; a reactivation email is needed.
+       */
+      status: "deactivated";
+      /**
+       * The member's email, when Discord exposes one, to prefill the request.
+       */
+      email: string | null;
+    };
+
+/**
  * Exchanges a Discord code for a JWT, or null on failure.
  */
 export async function discordLoginViaCode(
   code: string,
   state: string,
-): Promise<string | null> {
-  const res = await executeDocument<{
-    hadesMutations: { discordLogin: { token: string } | null };
-  }>(DiscordLoginDocument, { code, state });
+): Promise<DiscordLoginResult | null> {
+  const res = await executeDocument<DiscordLoginMutation>(DiscordLoginDocument, { code, state });
   if (!res.success || !res.data) {
     return null;
   }
-  return res.data.hadesMutations.discordLogin?.token ?? null;
+  const login = res.data.hadesMutations.discordLogin;
+  if (!login) {
+    return null;
+  }
+  if (login.requiresReactivation) {
+    return { status: "deactivated", email: null };
+  }
+  return { status: "ok", token: login.token };
 }

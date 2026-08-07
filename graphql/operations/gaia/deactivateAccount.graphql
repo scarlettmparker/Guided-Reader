@@ -1,0 +1,15 @@
+mutation deactivateAccount {
+  gaiaMutations {
+    deactivateAccount {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

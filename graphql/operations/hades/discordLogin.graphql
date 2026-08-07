@@ -4,6 +4,7 @@ mutation discordLogin($code: String!, $state: String!) {
       token
       accountId
       readerAccountId
+      requiresReactivation
     }
   }
 }

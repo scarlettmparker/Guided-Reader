@@ -8,6 +8,8 @@ const TextDetailsPage = lazy(() => import("./routes/texts/[id]"));
 const Admin = lazy(() => import("./routes/admin"));
 const AccountDetailPage = lazy(() => import("./routes/admin/account-detail-page"));
 const Login = lazy(() => import("./routes/login"));
+const Profile = lazy(() => import("./routes/profile"));
+const Reactivate = lazy(() => import("./routes/reactivate"));
 const NotFound = lazy(() => import("./routes/not-found"));
 
 /**
@@ -59,6 +61,22 @@ export const routes: RouteObject[] = [
     ),
   },
   {
+    path: "/profile",
+    element: (
+      <Suspense fallback={null}>
+        <Profile />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/reactivate",
+    element: (
+      <Suspense fallback={null}>
+        <Reactivate />
+      </Suspense>
+    ),
+  },
+  {
     path: "*",
     element: (
       <Suspense fallback={null}>
@@ -83,6 +101,14 @@ export const routeMeta: Record<string, RouteMeta> = {
   "texts/:id": {
     title: "Text | Guided Reader",
     description: "Read and annotate a text.",
+  },
+  profile: {
+    title: "Profile | Guided Reader",
+    description: "Manage your reader account.",
+  },
+  reactivate: {
+    title: "Reactivate | Guided Reader",
+    description: "Reactivate your reader account.",
   },
 };
 

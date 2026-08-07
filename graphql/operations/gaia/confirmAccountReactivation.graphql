@@ -1,0 +1,15 @@
+mutation confirmAccountReactivation($token: String!) {
+  gaiaMutations {
+    confirmAccountReactivation(token: $token) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}
