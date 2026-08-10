@@ -1,6 +1,6 @@
-mutation requestAccountReactivation($email: String!) {
+mutation requestAccountReactivation($email: String!, $provider: String!) {
   gaiaMutations {
-    requestAccountReactivation(email: $email) {
+    requestAccountReactivation(email: $email, provider: $provider) {
       ... on QuerySuccess {
         __typename
         message

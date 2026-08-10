@@ -6,7 +6,6 @@ import {
   Card,
   CardBody,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
   Form,
@@ -31,9 +30,9 @@ const Reactivate = () => {
   const { t } = useTranslation("reactivate");
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  const emailParam = searchParams.get("email") ?? "";
-  const [email, setEmail] = useState(emailParam);
+  const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmState>("idle");
   const [pending, setPending] = useState(false);
 
@@ -55,9 +54,14 @@ const Reactivate = () => {
     e.preventDefault();
     if (!email.trim()) return;
     setPending(true);
-    requestAccountReactivation(email.trim()).then(() => {
+    setError(false);
+    requestAccountReactivation(email.trim()).then((result) => {
       setPending(false);
-      setSent(true);
+      if (result.__typename === "QuerySuccess") {
+        setSent(true);
+      } else {
+        setError(true);
+      }
     });
   };
 
@@ -93,7 +97,13 @@ const Reactivate = () => {
                   />
                 </FormItem>
               </FormField>
+              {error && <p className={styles.error}>{t("send-error")}</p>}
               <FormFooter className={styles.form_footer}>
+                <Link to="/login">
+                  <Button type="button" variant="secondary">
+                    {t("back-to-login")}
+                  </Button>
+                </Link>
                 <Button type="submit" disabled={pending || !email.trim()}>
                   {t("send-link")}
                 </Button>
@@ -101,11 +111,6 @@ const Reactivate = () => {
             </Form>
           )}
         </CardBody>
-        <CardFooter className={styles.footer}>
-          <Link to="/login">
-            <Button variant="secondary">{t("back-to-login")}</Button>
-          </Link>
-        </CardFooter>
       </Card>
     </div>
   );

@@ -83,7 +83,7 @@
     "danger-zone-body": "Deactivating revokes your session and hides you from the app until you reactivate via email.",
     "deactivate-account": "Deactivate account",
     "deactivate-title": "Deactivate {{username}}?",
-    "deactivate-body": "Your account will be deactivated and you'll be signed out. You can reactivate at any time using a link we email you.",
+    "deactivate-body": "Your account will be deactivated and you'll be signed out. You can reactivate at any time using a link emailed to you.",
     "cancel-label": "Cancel",
     "confirm-label": "Deactivate"
   },
@@ -93,6 +93,7 @@
     "email-placeholder": "Enter your email",
     "send-link": "Send reactivation link",
     "sent": "Reactivation link sent. Check your email.",
+    "send-error": "Couldn't send the reactivation email. Try again.",
     "confirmed": "Account reactivated. You can sign in again.",
     "confirming": "Reactivating your account…",
     "confirm-error": "That reactivation link is invalid or has expired.",

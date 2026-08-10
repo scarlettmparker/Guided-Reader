@@ -15,6 +15,11 @@
   margin: 0;
 }
 
+.error {
+  color: var(--destructive);
+  margin-block: var(--sm);
+}
+
 .form_footer {
   margin-top: var(--md);
 }

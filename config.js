@@ -44,4 +44,4 @@ export const discordRedirectUri =
 
 /** OAuth scopes requested on authorization. Non-secret. */
 export const discordScopes =
-  process.env.DISCORD_SCOPES || "identify guilds guilds.members.read";
+  process.env.DISCORD_SCOPES || "identify email guilds guilds.members.read";

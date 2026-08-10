@@ -8,12 +8,15 @@ export async function deactivateAccount(): Promise<MutationResult> {
 }
 
 /**
- * Emails a reactivation link to the given address.
+ * Emails a reactivation link to the given address for a deactivated account.
  */
 export async function requestAccountReactivation(
   email: string,
 ): Promise<MutationResult> {
-  return executeMutation("gaia/requestAccountReactivation", { email });
+  return executeMutation("gaia/requestAccountReactivation", {
+    email,
+    provider: "discord",
+  });
 }
 
 /**

@@ -83,12 +83,9 @@ export function setupRoutes(app, vite) {
     if (!result) return reply.redirect("/login?error=discord");
 
     if (result.status === "deactivated") {
-      const emailParam = result.email
-        ? `?email=${encodeURIComponent(result.email)}`
-        : "";
-      return reply.redirect(`/reactivate${emailParam}`);
+      reply.header("Set-Cookie", clearAuthCookie());
+      return reply.redirect("/reactivate");
     }
-
     reply.header("Set-Cookie", buildAuthCookie(result.token));
     return reply.redirect("/");
   });
@@ -107,6 +104,12 @@ export function setupRoutes(app, vite) {
     const token = getCookieValue(request.headers.cookie, AUTH_COOKIE);
     const user = await getCurrentUser(token);
     const isPublic = PUBLIC_PAGES.has(pathname);
+
+    // A token that no longer resolves to a user is a dead session (expired,
+    // deactivated, revoked). Drop the cookie so protected calls stop firing.
+    if (!user && token) {
+      reply.header("Set-Cookie", clearAuthCookie());
+    }
 
     if (!user && !isPublic) return reply.redirect("/login");
     if (user && isPublic) return reply.redirect("/");

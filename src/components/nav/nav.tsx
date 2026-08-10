@@ -16,7 +16,7 @@ const NAV_ITEMS = [
 /**
  * Pages with no logged-in user, where the profile menu is not rendered.
  */
-const PUBLIC_PATHS = ["/login", "/register"];
+const PUBLIC_PATHS = ["/login", "/register", "/reactivate"];
 
 /**
  * Top navigation: page links on the left, current user's avatar on the right.

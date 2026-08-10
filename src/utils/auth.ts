@@ -52,7 +52,7 @@ export function discordAuthUrl(state: string): string {
     client_id: discordClientId,
     redirect_uri: discordRedirectUri,
     response_type: "code",
-    scope: "identify guilds guilds.members.read",
+    scope: discordScopes,
     state,
   });
   return `https://discord.com/api/oauth2/authorize?${params.toString()}`;
@@ -176,10 +176,6 @@ export type DiscordLoginResult =
        * The account exists but is deactivated; a reactivation email is needed.
        */
       status: "deactivated";
-      /**
-       * The member's email, when Discord exposes one, to prefill the request.
-       */
-      email: string | null;
     };
 
 /**
@@ -198,7 +194,7 @@ export async function discordLoginViaCode(
     return null;
   }
   if (login.requiresReactivation) {
-    return { status: "deactivated", email: null };
+    return { status: "deactivated" };
   }
   return { status: "ok", token: login.token };
 }
