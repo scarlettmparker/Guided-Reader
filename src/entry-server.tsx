@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { StaticRouter } from "react-router-dom/server";
-import { matchRoutes } from "react-router-dom";
+import { matchRoutes } from "react-router";
 import { Router, routes, routeMeta } from "./router";
 import Layout from "./components/layout";
 import NotFound from "./routes/not-found";

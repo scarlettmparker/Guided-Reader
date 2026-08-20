@@ -50,9 +50,6 @@ export default defineConfig(() => {
             if (id.includes("@sun/components")) {
               return "vendor-components";
             }
-            if (id.includes("posthog")) {
-              return "vendor-posthog";
-            }
             if (
               id.includes("/react-dom/") ||
               id.includes("\\react-dom\\") ||
