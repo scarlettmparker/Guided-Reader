@@ -13,6 +13,14 @@ query privateNotes($textId: ID!, $pagination: PaginationInput) {
           type
           id
         }
+        authorProfile {
+          id
+          discordId
+          discordUsername
+          globalName
+          avatar
+          cefrLevel
+        }
         createdAt
         updatedAt
       }

@@ -124,6 +124,44 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
   }, [searchParams, annotations, textId]);
 
   /**
+   * Opens the private note list for the ?note query param on initial load or
+   * after a successful create.
+   */
+  useEffect(() => {
+    const targetId = searchParams.get("note");
+    if (!targetId || !privateNotes.length) {
+      return;
+    }
+    const target = privateNotes.find((n) => n.id === targetId);
+    if (!target) {
+      return;
+    }
+    const raf = requestAnimationFrame(() => {
+      const key = `${target.startOffset}-${target.endOffset}`;
+      const mark = containerRef.current?.querySelector<HTMLElement>(
+        `[${PRIVATE_HIGHLIGHT_ATTR}="${key}"]`,
+      );
+      const rect = mark?.getBoundingClientRect();
+      const snippet =
+        containerRef.current?.textContent?.slice(
+          target.startOffset,
+          target.endOffset,
+        ) ?? "";
+      const top = rect ? rect.bottom + 8 : 0;
+      const left = rect ? rect.left + rect.width / 2 : 0;
+      setPrivateList({
+        open: true,
+        position: centeredDialogPosition({ top, left }, 20),
+        textId,
+        startOffset: target.startOffset,
+        endOffset: target.endOffset,
+        snippet,
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [searchParams, privateNotes, textId]);
+
+  /**
    * Unique positions and the annotations grouped under each.
    */
   const { positions, byPosition } = useMemo(() => {
@@ -149,6 +187,27 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     return { positions: [...posMap.values()], byPosition: groupMap };
   }, [annotations]);
 
+  /**
+   * Unique private note positions and the notes grouped under each.
+   */
+  const { privatePositions, byPrivatePosition } = useMemo(() => {
+    const posMap = new Map<string, { startOffset: number; endOffset: number }>();
+    const groupMap = new Map<string, PrivateNote[]>();
+    for (const note of privateNotes) {
+      const key = `${note.startOffset}-${note.endOffset}`;
+      if (!posMap.has(key)) {
+        posMap.set(key, {
+          startOffset: note.startOffset,
+          endOffset: note.endOffset,
+        });
+      }
+      const group = groupMap.get(key) ?? [];
+      group.push(note);
+      groupMap.set(key, group);
+    }
+    return { privatePositions: [...posMap.values()], byPrivatePosition: groupMap };
+  }, [privateNotes]);
+
   const [selection, setSelection] = useState<AnnotationSelection | null>(null);
   const [create, setCreate] = useState<AnnotationCreateState>({
     open: false,
@@ -159,6 +218,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     selection: null,
   });
   const [createFromList, setCreateFromList] = useState(false);
+  const [privateCreateFromList, setPrivateCreateFromList] = useState(false);
   const [list, setList] = useState<AnnotationListState>({
     open: false,
     position: { top: 0, left: 0 },
@@ -170,7 +230,8 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     open: false,
     position: { top: 0, left: 0 },
     textId,
-    noteId: "",
+    startOffset: 0,
+    endOffset: 0,
     snippet: "",
   });
 
@@ -182,9 +243,9 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     ? (byPosition.get(list.positionId) ?? NO_ANNOTATIONS)
     : NO_ANNOTATIONS;
 
-  const privateNote = privateList.open
-    ? privateNotes.find((n) => n.id === privateList.noteId)
-    : undefined;
+  const privateNotesForPosition = privateList.open
+    ? (byPrivatePosition.get(`${privateList.startOffset}-${privateList.endOffset}`) ?? [])
+    : [];
 
   /**
    * Closes the list dialog when its position has no annotations left.
@@ -196,13 +257,13 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
   }, [list.open, listAnnotations]);
 
   /**
-   * Closes the private note dialog when the note is deleted.
+   * Closes the private note dialog when its position has no notes left.
    */
   useEffect(() => {
-    if (privateList.open && !privateNote) {
+    if (privateList.open && privateNotesForPosition.length === 0) {
       setPrivateList((prev) => ({ ...prev, open: false }));
     }
-  }, [privateList.open, privateNote]);
+  }, [privateList.open, privateNotesForPosition]);
 
   /**
    * Re-opens the create dialog anchored to the position's highlight, so a
@@ -233,6 +294,63 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
         endOffset: position.endOffset,
       },
     });
+  };
+
+  /**
+   * Re-opens the private note create dialog at the position's highlight.
+   */
+  const suggestPrivateNote = () => {
+    const snippet =
+      containerRef.current?.textContent?.slice(
+        privateList.startOffset,
+        privateList.endOffset,
+      ) ?? privateList.snippet;
+    const key = `${privateList.startOffset}-${privateList.endOffset}`;
+    const mark = containerRef.current?.querySelector<HTMLElement>(
+      `[${PRIVATE_HIGHLIGHT_ATTR}="${key}"]`,
+    );
+    const rect = mark?.getBoundingClientRect();
+    setPrivateList((prev) => ({ ...prev, open: false }));
+    setPrivateCreateFromList(true);
+    setPrivateCreate({
+      open: true,
+      selection: {
+        top: rect ? rect.top + rect.height / 2 : privateList.position.top,
+        bottom: rect ? rect.bottom : privateList.position.top,
+        left: rect ? rect.left + rect.width / 2 : privateList.position.left,
+        selectedText: snippet,
+        startOffset: privateList.startOffset,
+        endOffset: privateList.endOffset,
+      },
+    });
+  };
+
+  const handlePrivateOpenChange = (open: boolean) => {
+    setPrivateList((prev) => ({ ...prev, open }));
+    if (!open) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("note");
+      setSearchParams(next, { replace: true });
+    }
+  };
+
+  /**
+   * Returns from the private note create dialog to the note list it was opened from.
+   */
+  const handlePrivateCreateCancel = () => {
+    setPrivateCreate((prev) => ({ ...prev, open: false }));
+    setPrivateList((prev) => ({ ...prev, open: true }));
+  };
+
+  const handlePrivateCreated = (noteId: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (noteId) {
+      next.set("note", noteId);
+    } else if (privateNotes.length) {
+      const last = privateNotes[privateNotes.length - 1];
+      if (last) next.set("note", last.id);
+    }
+    setSearchParams(next, { replace: true });
   };
 
   /**
@@ -290,15 +408,16 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
 
     unwrapCharacterRange(container, PRIVATE_HIGHLIGHT_ATTR);
 
-    for (const note of privateNotes) {
+    for (const { startOffset, endOffset } of privatePositions) {
+      const key = `${startOffset}-${endOffset}`;
       const marks = wrapCharacterRange(
         container,
-        note.startOffset,
-        note.endOffset,
+        startOffset,
+        endOffset,
         () => {
           const mark = document.createElement("mark");
           mark.className = styles.private_highlight;
-          mark.setAttribute(PRIVATE_HIGHLIGHT_ATTR, note.id);
+          mark.setAttribute(PRIVATE_HIGHLIGHT_ATTR, key);
           mark.setAttribute("title", t("view-note"));
           return mark;
         },
@@ -307,7 +426,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
         mark.addEventListener("click", () => {
           const rect = mark.getBoundingClientRect();
           const snippet =
-            containerRef.current?.textContent?.slice(note.startOffset, note.endOffset) ?? "";
+            containerRef.current?.textContent?.slice(startOffset, endOffset) ?? "";
           setPrivateList({
             open: true,
             position: centeredDialogPosition(
@@ -315,13 +434,20 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
               20,
             ),
             textId,
-            noteId: note.id,
+            startOffset,
+            endOffset,
             snippet,
           });
+          const firstId = byPrivatePosition.get(key)?.[0]?.id;
+          if (firstId) {
+            const next = new URLSearchParams(window.location.search);
+            next.set("note", firstId);
+            setSearchParamsRef.current(next, { replace: true });
+          }
         });
       }
     }
-  }, [privateNotes, content, t, textId]);
+  }, [privatePositions, byPrivatePosition, content, t, textId]);
 
   /**
    * Clears the selection toolbar when the selection collapses or overlaps.
@@ -387,6 +513,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
    */
   const handleStartPrivateNote = () => {
     if (!selection) return;
+    setPrivateCreateFromList(false);
     setPrivateCreate({ open: true, selection });
     clearSelection();
   };
@@ -472,8 +599,9 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
         onOpenChange={(open) =>
           setPrivateCreate((prev: PrivateNoteCreateState) => ({ ...prev, open }))
         }
+        onCancel={privateCreateFromList ? handlePrivateCreateCancel : undefined}
         textId={textId}
-        onCreated={() => setPrivateCreate({ open: false, selection: null })}
+        onCreated={handlePrivateCreated}
       />
 
       {list.open && (
@@ -488,10 +616,11 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
 
       {privateList.open && (
         <PrivateNoteListDialog
-          key={privateList.noteId}
+          key={`${privateList.startOffset}-${privateList.endOffset}`}
           list={privateList}
-          note={privateNote}
-          onOpenChange={(open) => setPrivateList((prev) => ({ ...prev, open }))}
+          notes={privateNotesForPosition}
+          onOpenChange={handlePrivateOpenChange}
+          onSuggestNote={suggestPrivateNote}
         />
       )}
     </div>

@@ -32,16 +32,22 @@ type PrivateNoteCreateDialogProps = {
    */
   onOpenChange: (open: boolean) => void;
   /**
-   * Called after a successful create.
+   * Called when the reader cancels. When set (e.g. the dialog was opened from
+   * the note list), the caller can return to that list instead of just
+   * closing.
    */
-  onCreated?: () => void;
+  onCancel?: () => void;
+  /**
+   * Called with the new note ID after a successful create.
+   */
+  onCreated?: (noteId: string) => void;
 };
 
 /**
  * Draggable dialog for creating a private note on a selected text range.
  */
 const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
-  const { textId, create, onOpenChange, onCreated } = props;
+  const { textId, create, onOpenChange, onCancel, onCreated } = props;
   const { t } = useTranslation("texts");
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +77,11 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
       if (result.__typename === "QuerySuccess") {
         setBody("");
         onOpenChange(false);
-        onCreated?.();
+        if (result.id) {
+          onCreated?.(result.id);
+        } else {
+          onCreated?.("");
+        }
       } else {
         setError(t("private-note-error"));
       }
@@ -101,7 +111,12 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
         {error && <p className={styles.error}>{error}</p>}
       </DialogBody>
       <DialogFooter>
-        <Button variant="secondary" onClick={() => onOpenChange(false)} title={t("cancel")} aria-label={t("cancel")}>
+        <Button
+          variant="secondary"
+          onClick={() => (onCancel ? onCancel() : onOpenChange(false))}
+          title={t("cancel")}
+          aria-label={t("cancel")}
+        >
           {t("cancel")}
         </Button>
         <Button type="submit" form="create-private-note-form" disabled={pending || !body.trim()} title={t("private-note-create")} aria-label={t("private-note-create")}>

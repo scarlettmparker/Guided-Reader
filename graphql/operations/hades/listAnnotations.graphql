@@ -29,6 +29,7 @@ query listAnnotations($textId: ID!, $includeHidden: Boolean) {
           cefrLevel
         }
         myVote
+        createdAt
       }
       pageInfo {
         totalPages

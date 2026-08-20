@@ -1,26 +1,37 @@
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
+import { EllipsisVerticalIcon } from "lucide-react";
 import {
+  Badge,
   Button,
   Dialog,
   DialogBody,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   MarkdownViewer,
 } from "@sun/components";
+import { usePageData } from "@sun/ssr/react";
+import DiscordAvatar from "~/components/discord-avatar";
+import { CEFR_TO_KEY } from "~/utils/cefr";
 import { deletePrivateNote } from "~/server/actions/private-note";
+import type { PrivateNotesQuery, ReaderAccount } from "~/generated/graphql";
 import styles from "./private-note-list-dialog.module.css";
-
-import type { PrivateNotesQuery } from "~/generated/graphql";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 type PrivateNote =
   PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 
+type LevelColours = Record<string, string>;
+
 const TITLE_SNIPPET_LIMIT = 60;
 
 /**
- * Dialog state for a single private note.
+ * List-dialog state owned by the annotation layer for private notes.
  */
 export type PrivateNoteListState = {
   /**
@@ -32,45 +43,65 @@ export type PrivateNoteListState = {
    */
   position: { top: number; left: number };
   /**
-   * The text the note belongs to.
+   * The text the notes belong to.
    */
   textId: string;
   /**
-   * The note being viewed.
+   * The start offset of the position being viewed.
    */
-  noteId: string;
+  startOffset: number;
   /**
-   * The annotated text snippet.
+   * The end offset of the position being viewed.
+   */
+  endOffset: number;
+  /**
+   * The annotated text snippet, shown in the dialog title.
    */
   snippet: string;
 };
 
 type PrivateNoteListDialogProps = {
   /**
-   * Dialog open state and the note being viewed.
+   * Dialog open state, screen position, and the position being viewed.
    */
   list: PrivateNoteListState;
   /**
-   * The live note for the position.
+   * The live notes for the position.
    */
-  note?: PrivateNote;
+  notes: PrivateNote[];
   /**
    * Called when the open state changes.
    */
   onOpenChange: (open: boolean) => void;
+  /**
+   * Called when the reader wants to add another note at this position.
+   */
+  onSuggestNote?: () => void;
 };
 
 /**
- * Draggable dialog showing a single private note.
+ * Draggable dialog listing the private notes for a single position, identical
+ * layout to the annotation list dialog for future shared ownership and cascade
+ * sharing.
  */
 const PrivateNoteListDialog = ({
   list,
-  note,
+  notes,
   onOpenChange,
+  onSuggestNote,
 }: PrivateNoteListDialogProps) => {
   const { t } = useTranslation("texts");
-  const { open, position, snippet, noteId, textId } = list;
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const { data: colours } = usePageData<LevelColours | null>(
+    "levelColours",
+    "levelColours",
+  );
+  const { data: currentUser } = usePageData<ReaderAccount | null>(
+    "currentUser",
+    "currentUser",
+  );
+  const { open, position, textId, snippet } = list;
+  const [items, setItems] = useState<PrivateNote[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<PrivateNote | null>(null);
   const [pending, startTransition] = useTransition();
 
   const titleSnippet =
@@ -78,31 +109,28 @@ const PrivateNoteListDialog = ({
       ? `${snippet.slice(0, TITLE_SNIPPET_LIMIT)}…`
       : snippet;
 
-  if (!note) {
-    return (
-      <Dialog
-        open={open}
-        onOpenChange={onOpenChange}
-        draggable
-        position={position}
-      >
-        <DialogHeader>
-          <DialogTitle>
-            {t("private-note-title", { snippet: titleSnippet })}
-          </DialogTitle>
-        </DialogHeader>
-        <DialogBody>
-          <p>{t("not-found")}</p>
-        </DialogBody>
-      </Dialog>
+  /**
+   * Keeps the local list in sync when a different position is opened.
+   */
+  useEffect(() => {
+    setItems(
+      [...notes].sort((a, b) => {
+        const aTime = a.createdAt
+          ? new Date(a.createdAt as string).getTime()
+          : 0;
+        const bTime = b.createdAt
+          ? new Date(b.createdAt as string).getTime()
+          : 0;
+        return bTime - aTime;
+      }),
     );
-  }
+  }, [notes]);
 
   const handleDelete = () => {
+    if (!deleteTarget) return;
     startTransition(async () => {
-      await deletePrivateNote(noteId, textId);
-      setConfirmOpen(false);
-      onOpenChange(false);
+      await deletePrivateNote(deleteTarget.id, textId);
+      setDeleteTarget(null);
     });
   };
 
@@ -115,26 +143,101 @@ const PrivateNoteListDialog = ({
         position={position}
       >
         <DialogHeader>
-          <DialogTitle>
-            {t("private-note-title", { snippet: titleSnippet })}
-          </DialogTitle>
+          <DialogTitle>{t("notes-for", { snippet: titleSnippet })}</DialogTitle>
         </DialogHeader>
         <DialogBody>
-          <MarkdownViewer className={styles.body}>{note.body}</MarkdownViewer>
+          {items.length === 0 ? (
+            <p className={styles.empty}>{t("no-notes")}</p>
+          ) : (
+            <ul className={styles.list}>
+              {items.map((note) => {
+                const profile = note.authorProfile;
+                const colour = profile?.cefrLevel
+                  ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
+                  : undefined;
+                const isOwner =
+                  !!profile?.id &&
+                  !!currentUser?.id &&
+                  profile.id === currentUser.id;
+                return (
+                  <li key={note.id} className={styles.annotation}>
+                    <div
+                      className={styles.header}
+                      title={
+                        note.createdAt
+                          ? new Date(note.createdAt as string).toLocaleString()
+                          : undefined
+                      }
+                    >
+                      <DiscordAvatar
+                        discordId={profile?.discordId ?? note.author?.id ?? ""}
+                        avatar={profile?.avatar}
+                        size={28}
+                        alt={
+                          profile?.globalName ?? profile?.discordUsername ?? ""
+                        }
+                      />
+                      <span className={styles.author}>
+                        {profile?.globalName ??
+                          profile?.discordUsername ??
+                          t("unknown")}
+                      </span>
+                      {profile?.cefrLevel && (
+                        <Badge
+                          variant="secondary"
+                          className={styles.level}
+                          style={
+                            colour ? { backgroundColor: colour } : undefined
+                          }
+                        >
+                          {profile.cefrLevel}
+                        </Badge>
+                      )}
+                      {isOwner && (
+                        <DropdownMenu className={styles.menu_trigger}>
+                          <DropdownMenuTrigger asChild>
+                            <EllipsisVerticalIcon
+                              width={16}
+                              height={16}
+                              aria-label={t("private-note-actions")}
+                            />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setDeleteTarget(note)}
+                              asChild
+                            >
+                              <span className={styles.delete_action}>
+                                <TrashIcon width={16} height={16} />
+                                {t("delete")}
+                              </span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                    <MarkdownViewer className={styles.body}>
+                      {note.body}
+                    </MarkdownViewer>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </DialogBody>
-        <DialogFooter>
-          <Button
-            variant="secondary"
-            onClick={() => setConfirmOpen(true)}
-            title={t("delete")}
-            aria-label={t("delete")}
-          >
-            {t("delete")}
-          </Button>
-        </DialogFooter>
+        {onSuggestNote && (
+          <DialogFooter className={styles.footer}>
+            <Button type="button" variant="secondary" onClick={onSuggestNote}>
+              {t("add-another-note")}
+            </Button>
+          </DialogFooter>
+        )}
       </Dialog>
 
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(o: boolean) => !o && setDeleteTarget(null)}
+      >
         <DialogHeader>
           <DialogTitle>{t("delete-private-note-title")}</DialogTitle>
         </DialogHeader>
@@ -144,7 +247,7 @@ const PrivateNoteListDialog = ({
         <DialogFooter>
           <Button
             variant="secondary"
-            onClick={() => setConfirmOpen(false)}
+            onClick={() => setDeleteTarget(null)}
             title={t("cancel")}
             aria-label={t("cancel")}
           >

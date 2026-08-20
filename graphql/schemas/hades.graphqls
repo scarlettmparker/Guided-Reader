@@ -141,6 +141,7 @@ type PrivateNote {
   visibility: PrivateNoteVisibility!
   remoteObject: [String!]
   author: RemoteUser
+  authorProfile: ReaderAccount
   createdAt: Date
   updatedAt: Date
 }

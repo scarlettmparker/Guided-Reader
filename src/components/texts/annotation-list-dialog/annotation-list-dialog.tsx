@@ -162,7 +162,14 @@ const AnnotationListDialog = ({
                 );
               return (
                 <li key={annotation.id} className={styles.annotation}>
-                  <div className={styles.header}>
+                  <div
+                    className={styles.header}
+                    title={
+                      annotation.createdAt
+                        ? new Date(annotation.createdAt as string).toLocaleString()
+                        : undefined
+                    }
+                  >
                     <DiscordAvatar
                       discordId={profile?.discordId ?? ""}
                       avatar={profile?.avatar}

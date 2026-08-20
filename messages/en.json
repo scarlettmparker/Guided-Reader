@@ -98,6 +98,10 @@
     "private-note-error": "Couldn't create private note.",
     "delete-private-note-title": "Delete private note",
     "delete-private-note-body": "Delete your private note? This action can't be undone.",
+    "notes-for": "Notes for \"{{snippet}}\"",
+    "no-notes": "No notes yet",
+    "add-another-note": "Add another note",
+    "private-note-actions": "Note actions",
     "view-annotation": "View annotation",
     "view-note": "View note"
   },
