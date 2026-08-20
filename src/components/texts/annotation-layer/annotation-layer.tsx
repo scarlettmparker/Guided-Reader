@@ -365,12 +365,15 @@ const AnnotationLayer = ({
         onCreated={handleCreated}
       />
 
-      <AnnotationListDialog
-        list={list}
-        annotations={listAnnotations}
-        onOpenChange={handleOpenDialog}
-        onSuggestAnnotation={suggestOwnAnnotation}
-      />
+      {list.open && (
+        <AnnotationListDialog
+          key={list.positionId}
+          list={list}
+          annotations={listAnnotations}
+          onOpenChange={handleOpenDialog}
+          onSuggestAnnotation={suggestOwnAnnotation}
+        />
+      )}
     </div>
   );
 };
