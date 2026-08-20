@@ -89,7 +89,17 @@
       "open-title": "Open dictionary",
       "no-result": "No definition found.",
       "source": "Source: WordReference"
-    }
+    },
+    "private-note": "Private Note",
+    "show-private-notes": "Show private notes",
+    "private-note-title": "Note for \"{{snippet}}\"",
+    "private-note-placeholder": "Write your private note…",
+    "private-note-create": "Create private note",
+    "private-note-error": "Couldn't create private note.",
+    "delete-private-note-title": "Delete private note",
+    "delete-private-note-body": "Delete your private note? This action can't be undone.",
+    "view-annotation": "View annotation",
+    "view-note": "View note"
   },
   "profile": {
     "no-roles": "No roles",

@@ -1,0 +1,7 @@
+.dialog {
+  width: 24rem;
+}
+
+.error {
+  margin: var(--md) 0 0;
+}

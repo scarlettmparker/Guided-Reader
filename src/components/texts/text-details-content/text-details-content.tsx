@@ -7,11 +7,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "@sun/components";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import AnnotationLayer from "~/components/texts/annotation-layer";
 import DefinitionToolbar from "~/components/texts/definition-toolbar";
 import DefinitionDialog from "~/components/texts/definition-dialog";
-import type { LocateTextQuery } from "~/generated/graphql";
+import type { LocateTextQuery, PrivateNotesQuery } from "~/generated/graphql";
+import styles from "./text-details-content.module.css";
 
 type ReaderText = LocateTextQuery["hadesQueries"]["text"];
 
@@ -33,6 +38,10 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
     id: textId,
   });
   const [definitionOpen, setDefinitionOpen] = useState(false);
+  const { data: privateNotes } = usePageData<
+    PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"]
+  >("privateNotes", "privateNotes/:textId", { textId });
+  const privateNotesCount = privateNotes?.length ?? 0;
 
   if (!text) {
     return (
@@ -48,17 +57,40 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>{text.title}</CardTitle>
+          <CardTitle>
+            {text.title}
+            {privateNotesCount > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className={styles.count_icon}>
+                    <DocumentTextIcon width={20} height={20} />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {privateNotesCount}{" "}
+                  {privateNotesCount === 1 ? "note" : "notes"}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </CardTitle>
           <CardDescription>
             {text.level} · {text.language}
           </CardDescription>
         </CardHeader>
         <CardBody>
-          <AnnotationLayer textId={textId} content={text.content} className={className} />
+          <AnnotationLayer
+            textId={textId}
+            content={text.content}
+            privateNotes={privateNotes ?? []}
+            className={className}
+          />
         </CardBody>
         <DefinitionToolbar onDefine={() => setDefinitionOpen(true)} />
       </Card>
-      <DefinitionDialog open={definitionOpen} onOpenChange={setDefinitionOpen} />
+      <DefinitionDialog
+        open={definitionOpen}
+        onOpenChange={setDefinitionOpen}
+      />
     </>
   );
 };

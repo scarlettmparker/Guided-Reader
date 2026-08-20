@@ -23,6 +23,12 @@ import {
   RemoveVoteDocument,
   type RemoveVoteMutation,
   type RemoveVoteMutationVariables,
+  CreatePrivateNoteDocument,
+  type CreatePrivateNoteMutation,
+  type CreatePrivateNoteMutationVariables,
+  DeletePrivateNoteDocument,
+  type DeletePrivateNoteMutation,
+  type DeletePrivateNoteMutationVariables,
 } from "~/generated/graphql";
 
 /**
@@ -209,5 +215,49 @@ defineMutation({
         message: result.error || "Failed to remove vote.",
       }
     );
+  },
+});
+
+/**
+ * Creates a private note on a text range.
+ */
+defineMutation({
+  path: "hades/createPrivateNote",
+  async handler(body: CreatePrivateNoteMutationVariables, context) {
+    const result = await executeDocument<
+      CreatePrivateNoteMutation,
+      CreatePrivateNoteMutationVariables
+    >(CreatePrivateNoteDocument, body, tokenFrom(context));
+    const data = result.data?.hadesMutations.createPrivateNote;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to create private note.",
+      }),
+      invalidated: [makeCacheKey("privateNotes/:textId:privateNotes", { textId: body.input.textId })],
+    };
+  },
+});
+
+/**
+ * Deletes a private note.
+ */
+defineMutation({
+  path: "hades/deletePrivateNote",
+  async handler(body: DeletePrivateNoteMutationVariables & { textId?: string }, context) {
+    const result = await executeDocument<
+      DeletePrivateNoteMutation,
+      DeletePrivateNoteMutationVariables
+    >(DeletePrivateNoteDocument, { id: body.id }, tokenFrom(context));
+    const data = result.data?.hadesMutations.deletePrivateNote;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to delete private note.",
+      }),
+      invalidated: body.textId
+        ? [makeCacheKey("privateNotes/:textId:privateNotes", { textId: body.textId })]
+        : [],
+    };
   },
 });

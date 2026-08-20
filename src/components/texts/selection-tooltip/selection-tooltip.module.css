@@ -1,5 +1,7 @@
 .anchor {
   position: fixed;
+  top: var(--top);
+  left: var(--left);
   width: 4px;
   height: 4px;
   transform: translate(-50%, -100%);

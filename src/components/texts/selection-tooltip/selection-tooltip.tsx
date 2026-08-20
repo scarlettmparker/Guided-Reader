@@ -40,7 +40,7 @@ const SelectionTooltip = ({
       <TooltipTrigger asChild>
         <div
           className={styles.anchor}
-          style={{ top: `${top}px`, left: `${left}px` }}
+          style={{ ["--top" as string]: `${top}px`, ["--left" as string]: `${left}px` } as React.CSSProperties}
         />
       </TooltipTrigger>
       <TooltipContent side="top" onMouseUp={stop} onMouseDown={stop}>

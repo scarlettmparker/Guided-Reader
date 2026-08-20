@@ -1,0 +1,27 @@
+query privateNotes($textId: ID!, $pagination: PaginationInput) {
+  hadesQueries {
+    privateNotes(textId: $textId, pagination: $pagination) {
+      items {
+        id
+        textId
+        startOffset
+        endOffset
+        body
+        visibility
+        remoteObject
+        author {
+          type
+          id
+        }
+        createdAt
+        updatedAt
+      }
+      pageInfo {
+        totalPages
+        page
+        size
+        totalCount
+      }
+    }
+  }
+}

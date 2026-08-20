@@ -1,0 +1,14 @@
+mutation deletePrivateNote($id: ID!) {
+  hadesMutations {
+    deletePrivateNote(id: $id) {
+      __typename
+      ... on QuerySuccess {
+        message
+        id
+      }
+      ... on StandardError {
+        message
+      }
+    }
+  }
+}

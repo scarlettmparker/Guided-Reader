@@ -10,7 +10,11 @@ import {
 } from "~/utils/selection-to-offset";
 import { unwrapCharacterRange, wrapCharacterRange } from "~/utils/wrap-range";
 import { centeredDialogPosition } from "~/utils/dialog-position";
-import type { ListAnnotationsQuery, ReaderAccount } from "~/generated/graphql";
+import type {
+  ListAnnotationsQuery,
+  PrivateNotesQuery,
+  ReaderAccount,
+} from "~/generated/graphql";
 import AnnotationCreateDialog, {
   type AnnotationCreateState,
   type AnnotationSelection,
@@ -18,11 +22,20 @@ import AnnotationCreateDialog, {
 import AnnotationListDialog, {
   type AnnotationListState,
 } from "../annotation-list-dialog";
+import PrivateNoteCreateDialog, {
+  type PrivateNoteCreateState,
+} from "../private-note-create-dialog";
+import PrivateNoteListDialog, {
+  type PrivateNoteListState,
+} from "../private-note-list-dialog";
 import SelectionTooltip from "../selection-tooltip";
 import styles from "./annotation-layer.module.css";
 
 type Annotation =
   ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+
+type PrivateNote =
+  PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 
 type AnnotationLayerProps = {
   /**
@@ -33,25 +46,29 @@ type AnnotationLayerProps = {
    * The markdown body to render and annotate.
    */
   content: string;
+  /**
+   * Private notes for the text, supplied by the parent loader to avoid double fetch.
+   */
+  privateNotes: PrivateNote[];
 } & React.HTMLAttributes<HTMLDivElement>;
 
 /**
  * Attribute used to tag injected highlight elements.
  */
 const HIGHLIGHT_ATTR = "data-annotation-pos";
+const PRIVATE_HIGHLIGHT_ATTR = "data-private-note-pos";
 
 /**
- * Stable empty fallback so the annotations reference doesn't change between
- * renders while loading.
+ * Stable empty fallback so the annotations reference doesn't change between renders while loading.
  */
 const NO_ANNOTATIONS: Annotation[] = [];
 
 /**
- * Renders the text body as markdown, overlays highlights for existing
- * annotations, and drives the create/list dialogs from text selections.
+ * Renders the text body as markdown, overlays highlights for existing annotations and
+ * private notes, and drives the create/list dialogs from text selections.
  */
 const AnnotationLayer = (props: AnnotationLayerProps) => {
-  const { textId, content, className } = props;
+  const { textId, content, privateNotes, className } = props;
   const { t } = useTranslation("texts");
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -137,12 +154,23 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     open: false,
     selection: null,
   });
+  const [privateCreate, setPrivateCreate] = useState<PrivateNoteCreateState>({
+    open: false,
+    selection: null,
+  });
   const [createFromList, setCreateFromList] = useState(false);
   const [list, setList] = useState<AnnotationListState>({
     open: false,
     position: { top: 0, left: 0 },
     textId,
     positionId: "",
+    snippet: "",
+  });
+  const [privateList, setPrivateList] = useState<PrivateNoteListState>({
+    open: false,
+    position: { top: 0, left: 0 },
+    textId,
+    noteId: "",
     snippet: "",
   });
 
@@ -154,6 +182,10 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     ? (byPosition.get(list.positionId) ?? NO_ANNOTATIONS)
     : NO_ANNOTATIONS;
 
+  const privateNote = privateList.open
+    ? privateNotes.find((n) => n.id === privateList.noteId)
+    : undefined;
+
   /**
    * Closes the list dialog when its position has no annotations left.
    */
@@ -162,6 +194,15 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
       setList((prev) => ({ ...prev, open: false }));
     }
   }, [list.open, listAnnotations]);
+
+  /**
+   * Closes the private note dialog when the note is deleted.
+   */
+  useEffect(() => {
+    if (privateList.open && !privateNote) {
+      setPrivateList((prev) => ({ ...prev, open: false }));
+    }
+  }, [privateList.open, privateNote]);
 
   /**
    * Re-opens the create dialog anchored to the position's highlight, so a
@@ -213,6 +254,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
           const mark = document.createElement("mark");
           mark.className = styles.highlight;
           mark.setAttribute(HIGHLIGHT_ATTR, positionId);
+          mark.setAttribute("title", t("view-annotation"));
           return mark;
         },
       );
@@ -220,8 +262,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
         mark.addEventListener("click", () => {
           const rect = mark.getBoundingClientRect();
           const snippet =
-            containerRef.current?.textContent?.slice(startOffset, endOffset) ??
-            "";
+            containerRef.current?.textContent?.slice(startOffset, endOffset) ?? "";
           setList({
             open: true,
             position: centeredDialogPosition(
@@ -238,12 +279,56 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
         });
       }
     }
-  }, [positions, byPosition, content]);
+  }, [positions, byPosition, content, t, textId]);
+
+  /**
+   * Re-injects private note highlights.
+   */
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    unwrapCharacterRange(container, PRIVATE_HIGHLIGHT_ATTR);
+
+    for (const note of privateNotes) {
+      const marks = wrapCharacterRange(
+        container,
+        note.startOffset,
+        note.endOffset,
+        () => {
+          const mark = document.createElement("mark");
+          mark.className = styles.private_highlight;
+          mark.setAttribute(PRIVATE_HIGHLIGHT_ATTR, note.id);
+          mark.setAttribute("title", t("view-note"));
+          return mark;
+        },
+      );
+      for (const mark of marks) {
+        mark.addEventListener("click", () => {
+          const rect = mark.getBoundingClientRect();
+          const snippet =
+            containerRef.current?.textContent?.slice(note.startOffset, note.endOffset) ?? "";
+          setPrivateList({
+            open: true,
+            position: centeredDialogPosition(
+              { top: rect.bottom + 8, left: rect.left + rect.width / 2 },
+              20,
+            ),
+            textId,
+            noteId: note.id,
+            snippet,
+          });
+        });
+      }
+    }
+  }, [privateNotes, content, t, textId]);
 
   /**
    * Clears the selection toolbar when the selection collapses or overlaps.
    */
-  const clearSelection = () => setSelection(null);
+  const clearSelection = () => {
+    setSelection(null);
+  };
 
   /**
    * Handles a mouse-up inside the text: shows the toolbar for valid ranges.
@@ -297,6 +382,15 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     clearSelection();
   };
 
+  /**
+   * Opens the private note create dialog at the selection.
+   */
+  const handleStartPrivateNote = () => {
+    if (!selection) return;
+    setPrivateCreate({ open: true, selection });
+    clearSelection();
+  };
+
   const handleOpenDialog = (open: boolean) => {
     setList((prev) => ({ ...prev, open }));
     if (!open) {
@@ -322,7 +416,6 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
 
   const viewer = useMemo(
     () => (
-      // Just what looks good.
       <ScrollArea maxHeight="22rem">
         <MarkdownViewer>{content}</MarkdownViewer>
       </ScrollArea>
@@ -337,15 +430,27 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
       {selection && (
         <SelectionTooltip open top={selection.top} left={selection.left}>
           {currentUser ? (
-            <span
-              className={styles.action}
-              onClick={(e) => {
-                e.preventDefault();
-                handleStartAnnotation();
-              }}
-            >
-              {t("annotate")}
-            </span>
+            <>
+              <span
+                className={styles.action}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleStartAnnotation();
+                }}
+              >
+                {t("annotate")}
+              </span>
+              <span className={styles.divider} />
+              <span
+                className={styles.action}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleStartPrivateNote();
+                }}
+              >
+                {t("private-note")}
+              </span>
+            </>
           ) : (
             <Link className={styles.action} to="/login">
               {t("sign-in-to-annotate")}
@@ -362,6 +467,15 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
         onCreated={handleCreated}
       />
 
+      <PrivateNoteCreateDialog
+        create={privateCreate}
+        onOpenChange={(open) =>
+          setPrivateCreate((prev: PrivateNoteCreateState) => ({ ...prev, open }))
+        }
+        textId={textId}
+        onCreated={() => setPrivateCreate({ open: false, selection: null })}
+      />
+
       {list.open && (
         <AnnotationListDialog
           key={list.positionId}
@@ -369,6 +483,15 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
           annotations={listAnnotations}
           onOpenChange={handleOpenDialog}
           onSuggestAnnotation={suggestOwnAnnotation}
+        />
+      )}
+
+      {privateList.open && (
+        <PrivateNoteListDialog
+          key={privateList.noteId}
+          list={privateList}
+          note={privateNote}
+          onOpenChange={(open) => setPrivateList((prev) => ({ ...prev, open }))}
         />
       )}
     </div>

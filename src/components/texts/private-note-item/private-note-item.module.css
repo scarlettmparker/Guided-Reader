@@ -1,0 +1,10 @@
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md);
+}
+
+.body {
+  margin: 0;
+  word-break: break-word;
+}

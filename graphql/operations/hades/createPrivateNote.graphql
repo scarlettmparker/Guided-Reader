@@ -1,0 +1,14 @@
+mutation createPrivateNote($input: PrivateNoteInput!) {
+  hadesMutations {
+    createPrivateNote(input: $input) {
+      __typename
+      ... on QuerySuccess {
+        message
+        id
+      }
+      ... on StandardError {
+        message
+      }
+    }
+  }
+}
