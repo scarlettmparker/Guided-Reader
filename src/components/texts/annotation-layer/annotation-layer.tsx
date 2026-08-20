@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { MarkdownViewer, ScrollArea } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
@@ -21,7 +21,8 @@ import AnnotationListDialog, {
 import SelectionTooltip from "../selection-tooltip";
 import styles from "./annotation-layer.module.css";
 
-type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+type Annotation =
+  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 type AnnotationLayerProps = {
   /**
@@ -56,6 +57,9 @@ const AnnotationLayer = ({
 }: AnnotationLayerProps) => {
   const { t } = useTranslation("texts");
   const containerRef = useRef<HTMLDivElement>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const setSearchParamsRef = useRef(setSearchParams);
+  setSearchParamsRef.current = setSearchParams;
 
   const { data } = usePageData<Annotation[]>("annotations", "texts/:id", {
     id: textId,
@@ -66,6 +70,44 @@ const AnnotationLayer = ({
   );
 
   const annotations = data ?? NO_ANNOTATIONS;
+
+  /**
+   * Opens the annotation list for the ?annotation query param on initial load
+   * or after a successful create.
+   */
+  useEffect(() => {
+    const targetId = searchParams.get("annotation");
+    if (!targetId || !annotations.length) {
+      return;
+    }
+    const target =
+      annotations.find((a) => a.id === targetId) ??
+      annotations.find((a) => a.positionId === targetId);
+    if (!target?.position) {
+      return;
+    }
+    const raf = requestAnimationFrame(() => {
+      const mark = containerRef.current?.querySelector<HTMLElement>(
+        `[${HIGHLIGHT_ATTR}="${target.positionId}"]`,
+      );
+      const rect = mark?.getBoundingClientRect();
+      const snippet =
+        containerRef.current?.textContent?.slice(
+          target.position?.startOffset,
+          target.position?.endOffset,
+        ) ?? "";
+      const top = rect ? rect.bottom + 8 : 0;
+      const left = rect ? rect.left + rect.width / 2 : 0;
+      setList({
+        open: true,
+        position: centeredDialogPosition({ top, left }, 20),
+        textId,
+        positionId: target.positionId,
+        snippet,
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [searchParams, annotations, textId]);
 
   /**
    * Unique positions and the annotations grouped under each.
@@ -193,6 +235,9 @@ const AnnotationLayer = ({
             positionId,
             snippet,
           });
+          const next = new URLSearchParams(window.location.search);
+          next.set("annotation", positionId);
+          setSearchParamsRef.current(next, { replace: true });
         });
       }
     }
@@ -255,12 +300,27 @@ const AnnotationLayer = ({
     clearSelection();
   };
 
+  const handleOpenDialog = (open: boolean) => {
+    setList((prev) => ({ ...prev, open }));
+    if (!open) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("annotation");
+      setSearchParams(next, { replace: true });
+    }
+  };
+
   /**
    * Returns from the create dialog to the annotation list it was opened from.
    */
   const handleCreateCancel = () => {
     setCreate((prev) => ({ ...prev, open: false }));
     setList((prev) => ({ ...prev, open: true }));
+  };
+
+  const handleCreated = (annotationId: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("annotation", annotationId);
+    setSearchParams(next, { replace: true });
   };
 
   const viewer = useMemo(
@@ -302,12 +362,13 @@ const AnnotationLayer = ({
         onOpenChange={(open) => setCreate((prev) => ({ ...prev, open }))}
         onCancel={createFromList ? handleCreateCancel : undefined}
         textId={textId}
+        onCreated={handleCreated}
       />
 
       <AnnotationListDialog
         list={list}
         annotations={listAnnotations}
-        onOpenChange={(open) => setList((prev) => ({ ...prev, open }))}
+        onOpenChange={handleOpenDialog}
         onSuggestAnnotation={suggestOwnAnnotation}
       />
     </div>

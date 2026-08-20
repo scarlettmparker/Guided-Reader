@@ -79,6 +79,10 @@ type AnnotationCreateDialogProps = {
    * closing.
    */
   onCancel?: () => void;
+  /**
+   * Called with the new annotation ID after a successful create.
+   */
+  onCreated?: (annotationId: string) => void;
 };
 
 /**
@@ -89,6 +93,7 @@ const AnnotationCreateDialog = ({
   create,
   onOpenChange,
   onCancel,
+  onCreated,
 }: AnnotationCreateDialogProps) => {
   const { t } = useTranslation("texts");
   const [body, setBody] = useState("");
@@ -119,6 +124,9 @@ const AnnotationCreateDialog = ({
       if (result.__typename === "QuerySuccess") {
         setBody("");
         onOpenChange(false);
+        if (result.id) {
+          onCreated?.(result.id);
+        }
       } else if (
         result.__typename === "StandardError" &&
         (result.message.includes("429") || result.message === "rate_limited")
@@ -167,7 +175,11 @@ const AnnotationCreateDialog = ({
         >
           {t("cancel")}
         </Button>
-        <Button type="submit" form="create-annotation-form" disabled={pending || !body.trim()}>
+        <Button
+          type="submit"
+          form="create-annotation-form"
+          disabled={pending || !body.trim()}
+        >
           {t("annotate")}
         </Button>
       </DialogFooter>
