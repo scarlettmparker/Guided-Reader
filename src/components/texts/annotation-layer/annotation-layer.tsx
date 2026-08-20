@@ -50,11 +50,8 @@ const NO_ANNOTATIONS: Annotation[] = [];
  * Renders the text body as markdown, overlays highlights for existing
  * annotations, and drives the create/list dialogs from text selections.
  */
-const AnnotationLayer = ({
-  textId,
-  content,
-  className,
-}: AnnotationLayerProps) => {
+const AnnotationLayer = (props: AnnotationLayerProps) => {
+  const { textId, content, className } = props;
   const { t } = useTranslation("texts");
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();

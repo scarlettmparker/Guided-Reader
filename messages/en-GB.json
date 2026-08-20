@@ -75,7 +75,21 @@
     "replies_other": "{{count}} replies",
     "text-discussion": "Text discussion",
     "rate-limit-message": "You're creating annotations too often. Try again in a moment.",
-    "annotation-error": "Couldn't create the annotation. Try again."
+    "annotation-error": "Couldn't create the annotation. Try again.",
+    "definition": {
+      "define": "Define",
+      "define-title": "Define “{{word}}”",
+      "close": "Close",
+      "close-title": "Close definition toolbar",
+      "dialog-title": "Definition for “{{word}}”",
+      "dialog-title-empty": "Search dictionary",
+      "placeholder": "Enter a word…",
+      "search": "Search",
+      "search-title": "Search for “{{word}}”",
+      "open-title": "Open dictionary",
+      "no-result": "No definition found.",
+      "source": "Source: WordReference"
+    }
   },
   "profile": {
     "no-roles": "No roles",

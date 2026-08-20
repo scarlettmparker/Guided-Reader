@@ -66,6 +66,14 @@ export type CommentInput = {
   parentId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type ComplexityFactor = {
+  __typename?: 'ComplexityFactor';
+  direction: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  value: Scalars['Float']['output'];
+  weight: Scalars['Float']['output'];
+};
+
 export type CreatePostInput = {
   body: Scalars['String']['input'];
   parentId?: InputMaybe<Scalars['ID']['input']>;
@@ -212,14 +220,17 @@ export type HadesMutations = {
   archiveText?: Maybe<QueryResult>;
   attachObject?: Maybe<QueryResult>;
   createAnnotation?: Maybe<QueryResult>;
+  createPrivateNote?: Maybe<QueryResult>;
   createSource?: Maybe<QueryResult>;
   createText?: Maybe<QueryResult>;
   deleteAnnotation?: Maybe<QueryResult>;
   deleteComment?: Maybe<QueryResult>;
+  deletePrivateNote?: Maybe<QueryResult>;
   discordLogin?: Maybe<DiscordLoginResult>;
   editAnnotation?: Maybe<QueryResult>;
   editComment?: Maybe<QueryResult>;
   removeVote?: Maybe<QueryResult>;
+  sharePrivateNote?: Maybe<QueryResult>;
   vote?: Maybe<QueryResult>;
 };
 
@@ -245,6 +256,11 @@ export type HadesMutationsCreateAnnotationArgs = {
 };
 
 
+export type HadesMutationsCreatePrivateNoteArgs = {
+  input: PrivateNoteInput;
+};
+
+
 export type HadesMutationsCreateSourceArgs = {
   name: Scalars['String']['input'];
   url: Scalars['String']['input'];
@@ -262,6 +278,11 @@ export type HadesMutationsDeleteAnnotationArgs = {
 
 
 export type HadesMutationsDeleteCommentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type HadesMutationsDeletePrivateNoteArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -290,6 +311,11 @@ export type HadesMutationsRemoveVoteArgs = {
 };
 
 
+export type HadesMutationsSharePrivateNoteArgs = {
+  input: ShareInput;
+};
+
+
 export type HadesMutationsVoteArgs = {
   input: VoteInput;
 };
@@ -298,9 +324,12 @@ export type HadesQueries = {
   __typename?: 'HadesQueries';
   annotation?: Maybe<ReaderAnnotation>;
   annotations: PagedReaderAnnotations;
+  classifyTextLevel?: Maybe<TextLevelAssessment>;
   comments: PagedReaderComments;
+  defineWord?: Maybe<Word>;
   locateRemoteObjects: Array<ReaderObjectReference>;
   myVote?: Maybe<VoteValue>;
+  privateNotes: PagedPrivateNotes;
   readerAccount?: Maybe<ReaderAccount>;
   readerAccounts: Array<ReaderAccount>;
   source?: Maybe<ReaderSource>;
@@ -322,10 +351,21 @@ export type HadesQueriesAnnotationsArgs = {
 };
 
 
+export type HadesQueriesClassifyTextLevelArgs = {
+  text: Scalars['String']['input'];
+};
+
+
 export type HadesQueriesCommentsArgs = {
   annotationId: Scalars['ID']['input'];
   includeHidden?: InputMaybe<Scalars['Boolean']['input']>;
   pagination?: InputMaybe<PaginationInput>;
+};
+
+
+export type HadesQueriesDefineWordArgs = {
+  scope?: InputMaybe<Array<WordScope>>;
+  word: Scalars['String']['input'];
 };
 
 
@@ -337,6 +377,12 @@ export type HadesQueriesLocateRemoteObjectsArgs = {
 export type HadesQueriesMyVoteArgs = {
   targetId: Scalars['ID']['input'];
   targetType: ReaderVoteTarget;
+};
+
+
+export type HadesQueriesPrivateNotesArgs = {
+  pagination?: InputMaybe<PaginationInput>;
+  textId: Scalars['ID']['input'];
 };
 
 
@@ -456,6 +502,12 @@ export type IcarusQueriesThreadsForArgs = {
   remoteObject: Scalars['String']['input'];
 };
 
+export type LevelProbability = {
+  __typename?: 'LevelProbability';
+  level: CefrLevel;
+  probability: Scalars['Float']['output'];
+};
+
 export type LoginInput = {
   password: Scalars['String']['input'];
   username: Scalars['String']['input'];
@@ -497,6 +549,12 @@ export type PagedForumThreads = {
   pageInfo: PageInfo;
 };
 
+export type PagedPrivateNotes = {
+  __typename?: 'PagedPrivateNotes';
+  items: Array<PrivateNote>;
+  pageInfo: PageInfo;
+};
+
 export type PagedReaderAnnotations = {
   __typename?: 'PagedReaderAnnotations';
   items: Array<ReaderAnnotation>;
@@ -528,6 +586,32 @@ export enum PostStatus {
   Active = 'ACTIVE',
   Deleted = 'DELETED',
   Hidden = 'HIDDEN'
+}
+
+export type PrivateNote = {
+  __typename?: 'PrivateNote';
+  author?: Maybe<RemoteUser>;
+  body: Scalars['String']['output'];
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  endOffset: Scalars['Int']['output'];
+  id: Scalars['String']['output'];
+  remoteObject?: Maybe<Array<Scalars['String']['output']>>;
+  startOffset: Scalars['Int']['output'];
+  textId: Scalars['ID']['output'];
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+  visibility: PrivateNoteVisibility;
+};
+
+export type PrivateNoteInput = {
+  body: Scalars['String']['input'];
+  endOffset: Scalars['Int']['input'];
+  startOffset: Scalars['Int']['input'];
+  textId: Scalars['ID']['input'];
+};
+
+export enum PrivateNoteVisibility {
+  Private = 'PRIVATE',
+  Shared = 'SHARED'
 }
 
 export type Query = {
@@ -676,6 +760,14 @@ export enum RemoteUserType {
   Discord = 'DISCORD'
 }
 
+export type ShareInput = {
+  objectId: Scalars['ID']['input'];
+  objectType: Scalars['String']['input'];
+  relation: Scalars['String']['input'];
+  subjectId: Scalars['ID']['input'];
+  subjectType: Scalars['String']['input'];
+};
+
 export enum SortDirection {
   Asc = 'ASC',
   Desc = 'DESC'
@@ -684,6 +776,14 @@ export enum SortDirection {
 export type StandardError = {
   __typename?: 'StandardError';
   message: Scalars['String']['output'];
+};
+
+export type TextLevelAssessment = {
+  __typename?: 'TextLevelAssessment';
+  confidence: Scalars['Float']['output'];
+  factors: Array<ComplexityFactor>;
+  level: CefrLevel;
+  probabilities: Array<LevelProbability>;
 };
 
 export enum ThreadStatus {
@@ -702,6 +802,42 @@ export enum VoteValue {
   Down = 'DOWN',
   Up = 'UP'
 }
+
+export type Word = {
+  __typename?: 'Word';
+  compounds: Array<WordEntry>;
+  entries: Array<WordEntry>;
+  id: Scalars['ID']['output'];
+  relatedWords: Array<Word>;
+  sourceUrl: Scalars['String']['output'];
+  term: Scalars['String']['output'];
+  wordType?: Maybe<Scalars['String']['output']>;
+};
+
+export type WordEntry = {
+  __typename?: 'WordEntry';
+  examples: Array<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  note?: Maybe<Scalars['String']['output']>;
+  sense?: Maybe<Scalars['String']['output']>;
+  term: Scalars['String']['output'];
+  translations: Array<WordTranslation>;
+  wordType: Scalars['String']['output'];
+};
+
+export enum WordScope {
+  AllTranslations = 'ALL_TRANSLATIONS',
+  Compounds = 'COMPOUNDS',
+  Examples = 'EXAMPLES',
+  RelatedWords = 'RELATED_WORDS'
+}
+
+export type WordTranslation = {
+  __typename?: 'WordTranslation';
+  term: Scalars['String']['output'];
+  usageNotes: Array<Scalars['String']['output']>;
+  wordType?: Maybe<Scalars['String']['output']>;
+};
 
 export type AccountQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -837,6 +973,14 @@ export type CreateTextMutation = { __typename?: 'Mutation', hadesMutations: { __
       | { __typename: 'QuerySuccess', message: string, id?: string | null }
       | { __typename: 'StandardError', message: string }
      | null } };
+
+export type DefineWordQueryVariables = Exact<{
+  word: Scalars['String']['input'];
+  scope?: InputMaybe<Array<WordScope> | WordScope>;
+}>;
+
+
+export type DefineWordQuery = { __typename?: 'Query', hadesQueries: { __typename?: 'HadesQueries', defineWord?: { __typename?: 'Word', id: string, term: string, wordType?: string | null, sourceUrl: string, entries: Array<{ __typename?: 'WordEntry', id: string, term: string, wordType: string, sense?: string | null, examples: Array<string>, note?: string | null, translations: Array<{ __typename?: 'WordTranslation', term: string, wordType?: string | null, usageNotes: Array<string> }> }>, compounds: Array<{ __typename?: 'WordEntry', id: string, term: string, wordType: string, sense?: string | null, examples: Array<string>, note?: string | null, translations: Array<{ __typename?: 'WordTranslation', term: string, wordType?: string | null, usageNotes: Array<string> }> }>, relatedWords: Array<{ __typename?: 'Word', id: string, term: string, sourceUrl: string }> } | null } };
 
 export type DeleteAnnotationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1050,6 +1194,7 @@ export const ArchiveTextDocument = {"kind":"Document","definitions":[{"kind":"Op
 export const CreateAnnotationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"createAnnotation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AnnotationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hadesMutations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createAnnotation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"QuerySuccess"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"StandardError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateAnnotationMutation, CreateAnnotationMutationVariables>;
 export const CreateSourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"createSource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"url"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hadesMutations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createSource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}},{"kind":"Argument","name":{"kind":"Name","value":"url"},"value":{"kind":"Variable","name":{"kind":"Name","value":"url"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"QuerySuccess"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"StandardError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateSourceMutation, CreateSourceMutationVariables>;
 export const CreateTextDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"createText"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ReaderTextInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hadesMutations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createText"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"QuerySuccess"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"StandardError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateTextMutation, CreateTextMutationVariables>;
+export const DefineWordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"defineWord"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"word"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"scope"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"WordScope"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hadesQueries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"defineWord"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"word"},"value":{"kind":"Variable","name":{"kind":"Name","value":"word"}}},{"kind":"Argument","name":{"kind":"Name","value":"scope"},"value":{"kind":"Variable","name":{"kind":"Name","value":"scope"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"term"}},{"kind":"Field","name":{"kind":"Name","value":"wordType"}},{"kind":"Field","name":{"kind":"Name","value":"sourceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"entries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"term"}},{"kind":"Field","name":{"kind":"Name","value":"wordType"}},{"kind":"Field","name":{"kind":"Name","value":"sense"}},{"kind":"Field","name":{"kind":"Name","value":"translations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"term"}},{"kind":"Field","name":{"kind":"Name","value":"wordType"}},{"kind":"Field","name":{"kind":"Name","value":"usageNotes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"examples"}},{"kind":"Field","name":{"kind":"Name","value":"note"}}]}},{"kind":"Field","name":{"kind":"Name","value":"compounds"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"term"}},{"kind":"Field","name":{"kind":"Name","value":"wordType"}},{"kind":"Field","name":{"kind":"Name","value":"sense"}},{"kind":"Field","name":{"kind":"Name","value":"translations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"term"}},{"kind":"Field","name":{"kind":"Name","value":"wordType"}},{"kind":"Field","name":{"kind":"Name","value":"usageNotes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"examples"}},{"kind":"Field","name":{"kind":"Name","value":"note"}}]}},{"kind":"Field","name":{"kind":"Name","value":"relatedWords"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"term"}},{"kind":"Field","name":{"kind":"Name","value":"sourceUrl"}}]}}]}}]}}]}}]} as unknown as DocumentNode<DefineWordQuery, DefineWordQueryVariables>;
 export const DeleteAnnotationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"deleteAnnotation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hadesMutations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteAnnotation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"QuerySuccess"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"StandardError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]}}]} as unknown as DocumentNode<DeleteAnnotationMutation, DeleteAnnotationMutationVariables>;
 export const DeleteCommentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"deleteComment"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hadesMutations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteComment"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"QuerySuccess"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"StandardError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]}}]} as unknown as DocumentNode<DeleteCommentMutation, DeleteCommentMutationVariables>;
 export const DiscordLoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"discordLogin"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"code"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"state"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hadesMutations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"discordLogin"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"code"},"value":{"kind":"Variable","name":{"kind":"Name","value":"code"}}},{"kind":"Argument","name":{"kind":"Name","value":"state"},"value":{"kind":"Variable","name":{"kind":"Name","value":"state"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"accountId"}},{"kind":"Field","name":{"kind":"Name","value":"readerAccountId"}},{"kind":"Field","name":{"kind":"Name","value":"requiresReactivation"}}]}}]}}]}}]} as unknown as DocumentNode<DiscordLoginMutation, DiscordLoginMutationVariables>;

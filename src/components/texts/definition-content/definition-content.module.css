@@ -1,0 +1,17 @@
+.entries {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+
+.entry {
+  margin-bottom: var(--xl);
+}
+
+.entry:last-child {
+  margin-bottom: 0;
+}
+
+.empty {
+  margin: 0;
+}

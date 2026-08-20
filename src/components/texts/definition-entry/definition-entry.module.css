@@ -1,0 +1,49 @@
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md);
+}
+
+.header {
+  display: flex;
+  gap: var(--md);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.term {
+  word-break: break-word;
+}
+
+.sense {
+  word-break: break-word;
+}
+
+.translations {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.examples {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.translation {
+  margin-bottom: var(--sm);
+}
+
+.translation:last-child {
+  margin-bottom: 0;
+}
+
+.example {
+  word-break: break-word;
+}
+
+.note {
+  margin: 0;
+  word-break: break-word;
+}

@@ -1,0 +1,18 @@
+.translation {
+  display: flex;
+  gap: var(--sm);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.term {
+  word-break: break-word;
+}
+
+.word_type {
+  word-break: break-word;
+}
+
+.usage {
+  word-break: break-word;
+}

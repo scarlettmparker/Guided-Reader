@@ -80,6 +80,96 @@ type ReaderRole {
   cefrLevel: CefrLevel
 }
 
+type LevelProbability {
+  level: CefrLevel!
+  probability: Float!
+}
+
+type ComplexityFactor {
+  name: String!
+  value: Float!
+  direction: String!
+  weight: Float!
+}
+
+type TextLevelAssessment {
+  level: CefrLevel!
+  confidence: Float!
+  probabilities: [LevelProbability!]!
+  factors: [ComplexityFactor!]!
+}
+
+enum WordScope {
+  ALL_TRANSLATIONS
+  EXAMPLES
+  COMPOUNDS
+  RELATED_WORDS
+}
+
+type Word {
+  id: ID!
+  term: String!
+  wordType: String
+  entries: [WordEntry!]!
+  compounds: [WordEntry!]!
+  relatedWords: [Word!]!
+  sourceUrl: String!
+}
+
+type WordEntry {
+  id: ID!
+  term: String!
+  wordType: String!
+  sense: String
+  translations: [WordTranslation!]!
+  examples: [String!]!
+  note: String
+}
+
+type WordTranslation {
+  term: String!
+  wordType: String
+  usageNotes: [String!]!
+}
+
+type PrivateNote {
+  id: String!
+  textId: ID!
+  startOffset: Int!
+  endOffset: Int!
+  body: String!
+  visibility: PrivateNoteVisibility!
+  remoteObject: [String!]
+  author: RemoteUser
+  createdAt: Date
+  updatedAt: Date
+}
+
+enum PrivateNoteVisibility {
+  PRIVATE
+  SHARED
+}
+
+type PagedPrivateNotes {
+  items: [PrivateNote!]!
+  pageInfo: PageInfo!
+}
+
+input PrivateNoteInput {
+  textId: ID!
+  startOffset: Int!
+  endOffset: Int!
+  body: String!
+}
+
+input ShareInput {
+  objectType: String!
+  objectId: ID!
+  subjectType: String!
+  subjectId: ID!
+  relation: String!
+}
+
 type PagedReaderTexts {
   items: [ReaderText!]!
   pageInfo: PageInfo!
@@ -157,6 +247,7 @@ type HadesQueries {
   source(id: ID!): ReaderSource
   sources: [ReaderSource!]
   texts(pagination: PaginationInput): PagedReaderTexts!
+  classifyTextLevel(text: String!): TextLevelAssessment
   annotations(
     textId: ID!
     includeHidden: Boolean
@@ -168,10 +259,12 @@ type HadesQueries {
     includeHidden: Boolean
     pagination: PaginationInput
   ): PagedReaderComments!
+  privateNotes(textId: ID!, pagination: PaginationInput): PagedPrivateNotes!
   readerAccount: ReaderAccount
   readerAccounts(remoteUsers: [RemoteUserInput!]!): [ReaderAccount!]!
   myVote(targetType: ReaderVoteTarget!, targetId: ID!): VoteValue
   locateRemoteObjects(ids: [String!]!): [ReaderObjectReference!]!
+  defineWord(word: String!, scope: [WordScope!]): Word
 }
 
 type HadesMutations {
@@ -186,6 +279,9 @@ type HadesMutations {
   deleteComment(id: ID!): QueryResult
   vote(input: VoteInput!): QueryResult
   removeVote(targetType: ReaderVoteTarget!, targetId: ID!): QueryResult
+  createPrivateNote(input: PrivateNoteInput!): QueryResult
+  deletePrivateNote(id: ID!): QueryResult
+  sharePrivateNote(input: ShareInput!): QueryResult
   attachObject(source: ID!, target: String!): QueryResult
   discordLogin(code: String!, state: String!): DiscordLoginResult
 }

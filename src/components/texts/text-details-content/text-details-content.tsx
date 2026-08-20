@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePageData } from "@sun/ssr/react";
 import {
@@ -8,6 +9,8 @@ import {
   CardTitle,
 } from "@sun/components";
 import AnnotationLayer from "~/components/texts/annotation-layer";
+import DefinitionToolbar from "~/components/texts/definition-toolbar";
+import DefinitionDialog from "~/components/texts/definition-dialog";
 import type { LocateTextQuery } from "~/generated/graphql";
 
 type ReaderText = LocateTextQuery["hadesQueries"]["text"];
@@ -23,11 +26,13 @@ type TextDetailsContentProps = {
  * Loads and renders a single text as an annotatable markdown layer. Suspends
  * while the text fetches.
  */
-const TextDetailsContent = ({ textId, className }: TextDetailsContentProps) => {
+const TextDetailsContent = (props: TextDetailsContentProps) => {
+  const { textId, className } = props;
   const { t } = useTranslation("texts");
   const { data: text } = usePageData<ReaderText>("text", "texts/:id", {
     id: textId,
   });
+  const [definitionOpen, setDefinitionOpen] = useState(false);
 
   if (!text) {
     return (
@@ -40,21 +45,21 @@ const TextDetailsContent = ({ textId, className }: TextDetailsContentProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{text.title}</CardTitle>
-        <CardDescription>
-          {text.level} · {text.language}
-        </CardDescription>
-      </CardHeader>
-      <CardBody>
-        <AnnotationLayer
-          textId={textId}
-          content={text.content}
-          className={className}
-        />
-      </CardBody>
-    </Card>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>{text.title}</CardTitle>
+          <CardDescription>
+            {text.level} · {text.language}
+          </CardDescription>
+        </CardHeader>
+        <CardBody>
+          <AnnotationLayer textId={textId} content={text.content} className={className} />
+        </CardBody>
+        <DefinitionToolbar onDefine={() => setDefinitionOpen(true)} />
+      </Card>
+      <DefinitionDialog open={definitionOpen} onOpenChange={setDefinitionOpen} />
+    </>
   );
 };
 
