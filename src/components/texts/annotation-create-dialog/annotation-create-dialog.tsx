@@ -121,7 +121,7 @@ const AnnotationCreateDialog = ({
         onOpenChange(false);
       } else if (
         result.__typename === "StandardError" &&
-        result.message === "rate_limited"
+        (result.message.includes("429") || result.message === "rate_limited")
       ) {
         setError(t("rate-limit-message"));
       } else {

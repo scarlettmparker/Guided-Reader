@@ -38,7 +38,7 @@ defineMutation({
     const invalidated = [
       makeCacheKey("texts/:id:annotations", { id: body.input.textId }),
     ];
-    if (result.statusCode === 429) {
+    if (result.statusCode === 429 || result.error?.includes("429")) {
       return {
         __typename: "StandardError" as const,
         message: "rate_limited",

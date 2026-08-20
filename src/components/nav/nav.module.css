@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--sm);
+  gap: var(--lg);
   padding: var(--md) var(--xl);
   width: calc(100% - var(--xl) * 2);
 }

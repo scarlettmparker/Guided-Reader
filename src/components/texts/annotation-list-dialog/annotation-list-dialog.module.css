@@ -12,7 +12,6 @@
   flex-direction: column;
   gap: var(--md);
   padding-bottom: var(--lg);
-  border-bottom: 1px solid var(--muted-foreground);
 }
 
 .annotation:last-child {
