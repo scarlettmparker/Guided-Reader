@@ -30,6 +30,7 @@ query listAnnotations($textId: ID!, $includeHidden: Boolean) {
         }
         myVote
         createdAt
+        updatedAt
       }
       pageInfo {
         totalPages

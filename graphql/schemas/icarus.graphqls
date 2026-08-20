@@ -3,8 +3,8 @@ type ForumThread {
   title: String!
   status: ThreadStatus!
   remoteObject: [String!]
-  createdAt: Date
-  updatedAt: Date
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type ForumPost {
@@ -19,8 +19,8 @@ type ForumPost {
   author: RemoteUser
   authorProfile: ReaderAccount
   myVote: VoteValue
-  createdAt: Date
-  updatedAt: Date
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type PagedForumThreads {

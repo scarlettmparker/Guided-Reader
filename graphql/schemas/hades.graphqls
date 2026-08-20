@@ -13,8 +13,8 @@ type ReaderText {
   ownerId: ID
   sourceId: ID
   status: ReaderTextStatus!
-  createdAt: Date
-  updatedAt: Date
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type ReaderPosition {
@@ -38,8 +38,8 @@ type ReaderAnnotation {
   author: RemoteUser
   authorProfile: ReaderAccount
   myVote: VoteValue
-  createdAt: Date
-  updatedAt: Date
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type PagedReaderAnnotations {
@@ -59,8 +59,8 @@ type ReaderComment {
   author: RemoteUser
   authorProfile: ReaderAccount
   myVote: VoteValue
-  createdAt: Date
-  updatedAt: Date
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type ReaderAccount {
@@ -142,8 +142,8 @@ type PrivateNote {
   remoteObject: [String!]
   author: RemoteUser
   authorProfile: ReaderAccount
-  createdAt: Date
-  updatedAt: Date
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 enum PrivateNoteVisibility {
