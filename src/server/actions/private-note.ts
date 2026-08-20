@@ -14,3 +14,10 @@ export async function createPrivateNote(input: PrivateNoteInput): Promise<Mutati
 export async function deletePrivateNote(id: string, textId: string): Promise<MutationResult> {
   return executeMutation("hades/deletePrivateNote", { id, textId });
 }
+
+/**
+ * Shares all private notes on a text.
+ */
+export async function shareNotes(input: { textId: string; subjectIds?: string[]; subjectEmails?: string[] }): Promise<MutationResult> {
+  return executeMutation("hades/shareNotes", { input });
+}

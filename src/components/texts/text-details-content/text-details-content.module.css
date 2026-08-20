@@ -1,5 +1,12 @@
 .count_icon {
   display: inline-flex;
+  align-items: center;
+  gap: var(--sm);
   margin-left: 0.5rem;
-  vertical-align: middle;
+}
+
+.share_button {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
 }

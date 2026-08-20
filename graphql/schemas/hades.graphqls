@@ -171,6 +171,12 @@ input ShareInput {
   relation: String!
 }
 
+input ShareNotesInput {
+  textId: ID!
+  subjectIds: [ID!]
+  subjectEmails: [String!]
+}
+
 type PagedReaderTexts {
   items: [ReaderText!]!
   pageInfo: PageInfo!
@@ -263,6 +269,7 @@ type HadesQueries {
   privateNotes(textId: ID!, pagination: PaginationInput): PagedPrivateNotes!
   readerAccount: ReaderAccount
   readerAccounts(remoteUsers: [RemoteUserInput!]!): [ReaderAccount!]!
+  searchReaderAccounts(query: String!, pagination: PaginationInput): [ReaderAccount!]!
   myVote(targetType: ReaderVoteTarget!, targetId: ID!): VoteValue
   locateRemoteObjects(ids: [String!]!): [ReaderObjectReference!]!
   defineWord(word: String!, scope: [WordScope!]): Word
@@ -282,7 +289,7 @@ type HadesMutations {
   removeVote(targetType: ReaderVoteTarget!, targetId: ID!): QueryResult
   createPrivateNote(input: PrivateNoteInput!): QueryResult
   deletePrivateNote(id: ID!): QueryResult
-  sharePrivateNote(input: ShareInput!): QueryResult
+  shareNotes(input: ShareNotesInput!): QueryResult
   attachObject(source: ID!, target: String!): QueryResult
   discordLogin(code: String!, state: String!): DiscordLoginResult
 }

@@ -104,8 +104,11 @@
     "private-note-actions": "Note actions",
     "view-annotation": "View annotation",
     "view-note": "View note",
-    "view-annotation": "View annotation",
-    "view-note": "View note"
+    "share-notes-title": "Share private notes",
+    "share-notes-placeholder": "Search users or add emails…",
+    "share": "Share",
+    "remove": "Remove",
+    "notes-authors-title": "Filter by author"
   },
   "profile": {
     "no-roles": "No roles",

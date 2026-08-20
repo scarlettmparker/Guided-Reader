@@ -29,6 +29,9 @@ import {
   DeletePrivateNoteDocument,
   type DeletePrivateNoteMutation,
   type DeletePrivateNoteMutationVariables,
+  ShareNotesDocument,
+  type ShareNotesMutation,
+  type ShareNotesMutationVariables,
 } from "~/generated/graphql";
 
 /**
@@ -258,6 +261,28 @@ defineMutation({
       invalidated: body.textId
         ? [makeCacheKey("privateNotes/:textId:privateNotes", { textId: body.textId })]
         : [],
+    };
+  },
+});
+
+/**
+ * Shares all private notes on a text.
+ */
+defineMutation({
+  path: "hades/shareNotes",
+  async handler(body: ShareNotesMutationVariables, context) {
+    const result = await executeDocument<ShareNotesMutation, ShareNotesMutationVariables>(
+      ShareNotesDocument,
+      body,
+      tokenFrom(context),
+    );
+    const data = result.data?.hadesMutations.shareNotes;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to share notes.",
+      }),
+      invalidated: [makeCacheKey("privateNotes/:textId:privateNotes", { textId: body.input.textId })],
     };
   },
 });

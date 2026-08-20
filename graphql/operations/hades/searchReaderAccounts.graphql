@@ -1,0 +1,13 @@
+query searchReaderAccounts($query: String!, $pagination: PaginationInput) {
+  hadesQueries {
+    searchReaderAccounts(query: $query, pagination: $pagination) {
+      id
+      gaiaAccountId
+      discordId
+      discordUsername
+      globalName
+      avatar
+      cefrLevel
+    }
+  }
+}

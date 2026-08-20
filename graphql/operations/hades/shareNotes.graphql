@@ -1,0 +1,14 @@
+mutation shareNotes($input: ShareNotesInput!) {
+  hadesMutations {
+    shareNotes(input: $input) {
+      __typename
+      ... on QuerySuccess {
+        message
+        id
+      }
+      ... on StandardError {
+        message
+      }
+    }
+  }
+}
