@@ -1,4 +1,4 @@
-import { useState, useTransition, useRef } from "react";
+import { Suspense, useEffect, useState, useTransition, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Badge,
@@ -11,9 +11,9 @@ import {
   TaggedInput,
 } from "@sun/components";
 import { X } from "lucide-react";
-import { usePageData } from "@sun/ssr/react";
 import { shareNotes } from "~/server/actions/private-note";
-import DiscordAvatar from "~/components/discord-avatar";
+import type { SearchReaderAccountsQuery } from "~/generated/graphql";
+import SearchSuggestions from "./search-suggestions";
 import styles from "./share-notes-dialog.module.css";
 
 type ShareTag = {
@@ -46,6 +46,8 @@ type ShareNotesDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+
+
 /**
  * Dialog to share all private notes on a text.
  */
@@ -53,39 +55,19 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
   const { textId, open, onOpenChange } = props;
   const { t } = useTranslation("texts");
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [tags, setTags] = useState<ShareTag[]>([]);
   const [pending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const trimmed = query.trim();
-  const { data: accounts } = usePageData<{
-    accounts: {
-      id: string;
-      discordId: string;
-      globalName: string | null;
-      discordUsername: string | null;
-      avatar: string | null;
-    }[];
-  }>(
-    "accounts",
-    "searchReaderAccounts/:query",
-    trimmed ? { query: trimmed } : { query: "" },
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 150);
+    return () => clearTimeout(timer);
+  }, [query]);
 
-  const suggestions = trimmed
-    ? (accounts ?? [])
-        .filter((a) => !tags.some((tag) => tag.id === a.id))
-        .slice(0, 5)
-    : [];
-
-  const handleAddSuggestion = (account: {
-    id: string;
-    discordId: string;
-    globalName: string | null;
-    discordUsername: string | null;
-  }) => {
-    const label = account.globalName || account.discordUsername || account.id;
-    setTags([...tags, { id: account.id, label, isEmail: false }]);
+  const handleAddSuggestion = (account: SearchReaderAccountsQuery["hadesQueries"]["searchReaderAccounts"][number]) => {
+    const label = account.globalName || account.discordUsername || account.gaiaAccountId;
+    setTags([...tags, { id: account.gaiaAccountId, label, isEmail: false }]);
     setQuery("");
   };
 
@@ -103,6 +85,7 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const trimmed = query.trim();
     if ((e.key === "Enter" || e.key === ",") && trimmed.includes("@")) {
       e.preventDefault();
       handleAddEmail(trimmed.replace(/,$/, ""));
@@ -138,7 +121,7 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
             placeholder={t("share-notes-placeholder")}
           >
             {tags.map((tag) => (
-              <Badge key={tag.id} variant="secondary" className={styles.tag}>
+              <Badge key={tag.id} variant="primary" className={styles.tag}>
                 <span className={styles.tag_label}>{tag.label}</span>
                 <Button
                   variant="secondary"
@@ -152,31 +135,9 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
               </Badge>
             ))}
           </TaggedInput>
-          {suggestions.length > 0 && (
-            <div className={styles.suggestions}>
-              {suggestions.map((account) => (
-                <Button
-                  key={account.id}
-                  variant="secondary"
-                  className={styles.suggestion}
-                  title={account.globalName || account.discordUsername || ""}
-                  aria-label={
-                    account.globalName || account.discordUsername || ""
-                  }
-                  onClick={() => handleAddSuggestion(account)}
-                >
-                  <DiscordAvatar
-                    discordId={account.discordId}
-                    avatar={account.avatar}
-                    size={24}
-                  />
-                  <span className={styles.suggestion_label}>
-                    {account.globalName || account.discordUsername}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          )}
+          <Suspense fallback={null}>
+            <SearchSuggestions query={debouncedQuery} tags={tags} onAdd={handleAddSuggestion} />
+          </Suspense>
         </div>
       </DialogBody>
       <DialogFooter>

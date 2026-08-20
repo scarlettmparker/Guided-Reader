@@ -41,11 +41,9 @@ type NotesAuthorToggleDialogProps = {
 const NotesAuthorToggleDialog = (props: NotesAuthorToggleDialogProps) => {
   const { textId, open, onOpenChange, hiddenAuthors, onToggle } = props;
   const { t } = useTranslation("texts");
-  const { data: notes } = usePageData<PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"]>(
-    "privateNotes",
-    "privateNotes/:textId",
-    { textId },
-  );
+  const { data: notes } = usePageData<
+    PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"]
+  >("privateNotes", "privateNotes/:textId", { textId });
 
   const map = new Map<
     string,
@@ -96,9 +94,7 @@ const NotesAuthorToggleDialog = (props: NotesAuthorToggleDialogProps) => {
                   />
                 )}
                 <span className={styles.name}>{label}</span>
-                <Badge variant="secondary" className={styles.count}>
-                  {group.count}
-                </Badge>
+                <Badge className={styles.count}>{group.count}</Badge>
               </label>
             );
           })}
