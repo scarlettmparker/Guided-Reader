@@ -21,7 +21,7 @@ import AnnotationListDialog, {
 import SelectionTooltip from "../selection-tooltip";
 import styles from "./annotation-layer.module.css";
 
-type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 type AnnotationLayerProps = {
   /**

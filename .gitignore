@@ -22,3 +22,5 @@ opencode.json
 
 # Local crap only 
 scripts/
+vm/
+deploy.sh

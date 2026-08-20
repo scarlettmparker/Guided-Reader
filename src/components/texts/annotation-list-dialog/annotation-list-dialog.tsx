@@ -31,7 +31,7 @@ import {
 import styles from "./annotation-list-dialog.module.css";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
-type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 type LevelColours = Record<string, string>;
 

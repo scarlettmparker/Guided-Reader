@@ -27,7 +27,7 @@ defineLoader({
         ListAnnotationsQueryVariables
       >(ListAnnotationsDocument, { textId: id, includeHidden: false }, token);
       const annotations = result.success
-        ? (result.data?.hadesQueries.annotations ?? [])
+        ? (result.data?.hadesQueries.annotations.items ?? [])
         : [];
       return { annotations };
     } catch (error) {

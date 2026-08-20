@@ -42,6 +42,11 @@ type ReaderAnnotation {
   updatedAt: Date
 }
 
+type PagedReaderAnnotations {
+  items: [ReaderAnnotation!]!
+  pageInfo: PageInfo!
+}
+
 type ReaderComment {
   id: String!
   annotationId: ID!
@@ -152,7 +157,11 @@ type HadesQueries {
   source(id: ID!): ReaderSource
   sources: [ReaderSource!]
   texts(pagination: PaginationInput): PagedReaderTexts!
-  annotations(textId: ID!, includeHidden: Boolean): [ReaderAnnotation!]!
+  annotations(
+    textId: ID!
+    includeHidden: Boolean
+    pagination: PaginationInput
+  ): PagedReaderAnnotations!
   annotation(id: ID!): ReaderAnnotation
   comments(
     annotationId: ID!

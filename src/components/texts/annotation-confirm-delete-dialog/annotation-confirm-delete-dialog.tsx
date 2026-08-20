@@ -11,7 +11,7 @@ import {
 import { deleteAnnotation } from "~/server/actions/annotation";
 import type { ListAnnotationsQuery } from "~/generated/graphql";
 
-type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 type AnnotationConfirmDeleteDialogProps = {
   /**
