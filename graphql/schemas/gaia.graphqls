@@ -42,6 +42,7 @@ type GaiaQueries {
   accountRoles(accountId: ID!): [String!]!
   accountPermissions(accountId: ID!): [String!]!
   rolePermissions(roleId: ID!): [String!]!
+  allPermissions: [String!]!
 }
 
 input LoginInput {

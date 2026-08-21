@@ -26,14 +26,24 @@
   word-break: break-all;
 }
 
+.transfer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--lg);
+  align-items: start;
+}
+
 .column {
   display: flex;
   flex-direction: column;
-  gap: var(--md);
+  gap: var(--lg);
   min-width: 0;
 }
 
 .column_title {
+  display: flex;
+  gap: var(--md);
+  align-items: center;
   word-break: break-all;
   margin: 0;
 }
@@ -41,12 +51,13 @@
 .list_wrap {
   display: flex;
   flex-direction: column;
+  min-height: 12rem;
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--md);
+  gap: var(--lg);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -54,9 +65,21 @@
 
 .row {
   display: flex;
-  gap: var(--md);
+  gap: var(--lg);
   align-items: center;
   word-break: break-all;
+  padding: var(--sm) var(--md);
+  border-radius: var(--sm);
+  user-select: none;
+  cursor: pointer;
+}
+
+.row:hover {
+  background-color: var(--secondary);
+}
+
+.row_selected {
+  background-color: var(--secondary);
 }
 
 .row_label_wrap {
@@ -64,6 +87,7 @@
   gap: var(--md);
   align-items: center;
   word-break: break-all;
+  pointer-events: none;
 }
 
 .row_dragging {
@@ -75,10 +99,25 @@
   margin: 0;
 }
 
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md);
+  align-items: center;
+  padding-top: var(--xl);
+}
+
 .remove_button {
   margin-left: auto;
+  flex-shrink: 0;
+}
+
+.remove_selected {
+  align-self: flex-start;
 }
 
 .empty {
   margin: 0;
+  padding: var(--lg);
+  text-align: center;
 }

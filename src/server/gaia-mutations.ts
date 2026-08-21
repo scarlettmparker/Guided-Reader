@@ -32,6 +32,7 @@ import {
   type SetAccountPermissionsMutationVariables,
   type SetRolePermissionsMutation,
   type SetRolePermissionsMutationVariables,
+  type Role,
 } from "~/generated/graphql";
 
 /**
@@ -144,10 +145,9 @@ defineMutation({
 /**
  * Creates a new role.
  */
-// @ts-expect-error createRole returns Role not QueryResult
-defineMutation({
+defineMutation<CreateRoleMutationVariables, Role>({
   path: "gaia/createRole",
-  async handler(body: CreateRoleMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<CreateRoleMutation, CreateRoleMutationVariables>(
       CreateRoleDocument,
       body,

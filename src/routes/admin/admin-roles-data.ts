@@ -4,12 +4,15 @@ import { AUTH_COOKIE, getCookieValue } from "~/utils/auth";
 import {
   AccountPermissionsDocument,
   AccountRolesDocument,
+  AllPermissionsDocument,
   RolePermissionsDocument,
   RolesDocument,
   type AccountPermissionsQuery,
   type AccountPermissionsQueryVariables,
   type AccountRolesQuery,
   type AccountRolesQueryVariables,
+  type AllPermissionsQuery,
+  type AllPermissionsQueryVariables,
   type RolePermissionsQuery,
   type RolePermissionsQueryVariables,
   type RolesQuery,
@@ -101,6 +104,27 @@ defineLoader({
       return { rolePermissions: result.data?.gaiaQueries?.rolePermissions ?? [] };
     } catch {
       return { rolePermissions: [] };
+    }
+  },
+});
+
+/**
+ * Lists all distinct permissions.
+ */
+defineLoader({
+  pattern: "admin/all-permissions",
+  async loader(_params, context) {
+    const token = getCookieValue(context?.cookie, AUTH_COOKIE);
+    if (!token) return { allPermissions: [] };
+    try {
+      const result = await executeDocument<AllPermissionsQuery, AllPermissionsQueryVariables>(
+        AllPermissionsDocument,
+        {},
+        token,
+      );
+      return { allPermissions: result.data?.gaiaQueries?.allPermissions ?? [] };
+    } catch {
+      return { allPermissions: [] };
     }
   },
 });

@@ -182,6 +182,10 @@
     "move-all-to-available": "Move all to available",
     "transfer-actions": "Transfer actions",
     "remove-permission": "Remove permission",
-    "remove-selected": "Remove selected"
+    "remove-selected": "Remove selected",
+    "search-roles": "Search roles...",
+    "search-permissions": "Search permissions...",
+    "no-roles-found": "No roles found",
+    "no-permissions-found": "No permissions found"
   }
 }

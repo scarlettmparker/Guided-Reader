@@ -8,11 +8,14 @@
 .column {
   display: flex;
   flex-direction: column;
-  gap: var(--md);
+  gap: var(--lg);
   min-width: 0;
 }
 
 .column_title {
+  display: flex;
+  gap: var(--md);
+  align-items: center;
   word-break: break-all;
   margin: 0;
 }
@@ -20,12 +23,13 @@
 .list_wrap {
   display: flex;
   flex-direction: column;
+  min-height: 12rem;
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--md);
+  gap: var(--lg);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -33,9 +37,21 @@
 
 .row {
   display: flex;
-  gap: var(--md);
+  gap: var(--lg);
   align-items: center;
   word-break: break-all;
+  padding: var(--sm) var(--md);
+  border-radius: var(--sm);
+  user-select: none;
+  cursor: pointer;
+}
+
+.row:hover {
+  background-color: var(--secondary);
+}
+
+.row_selected {
+  background-color: var(--secondary);
 }
 
 .row_label_wrap {
@@ -43,6 +59,7 @@
   gap: var(--md);
   align-items: center;
   word-break: break-all;
+  pointer-events: none;
 }
 
 .row_dragging {
@@ -64,4 +81,6 @@
 
 .empty {
   margin: 0;
+  padding: var(--lg);
+  text-align: center;
 }

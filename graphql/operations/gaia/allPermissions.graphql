@@ -1,0 +1,5 @@
+query allPermissions {
+  gaiaQueries {
+    allPermissions
+  }
+}
