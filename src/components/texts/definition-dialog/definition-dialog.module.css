@@ -19,6 +19,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--lg);
+  margin-top: var(--md);
+}
+
+.results:hover {
+  box-shadow: var(--shadow-soft);
 }
 
 .empty {

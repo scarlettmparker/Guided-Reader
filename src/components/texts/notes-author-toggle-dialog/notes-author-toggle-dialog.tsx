@@ -1,9 +1,11 @@
 import { useTranslation } from "react-i18next";
 import {
   Badge,
+  Button,
   Checkbox,
   Dialog,
   DialogBody,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@sun/components";
@@ -100,6 +102,15 @@ const NotesAuthorToggleDialog = (props: NotesAuthorToggleDialogProps) => {
           })}
         </div>
       </DialogBody>
+      <DialogFooter>
+        <Button
+          onClick={() => onOpenChange(false)}
+          title={t("close")}
+          aria-label={t("close")}
+        >
+          {t("close")}
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 };

@@ -108,7 +108,8 @@
     "share-notes-placeholder": "Search users or add emails…",
     "share": "Share",
     "remove": "Remove",
-    "notes-authors-title": "Filter by author"
+    "notes-authors-title": "Filter notes by author",
+    "close": "Close"
   },
   "profile": {
     "no-roles": "No roles",

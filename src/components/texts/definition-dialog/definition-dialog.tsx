@@ -1,9 +1,19 @@
 import { Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, Button, SearchBar } from "@sun/components";
+import {
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+  Button,
+  SearchBar,
+} from "@sun/components";
 import { centeredDialogPosition } from "~/utils/dialog-position";
 import DefinitionContent from "../definition-content";
 import styles from "./definition-dialog.module.css";
+import { CardBody } from "@sun/components";
+import { Card } from "@sun/components";
 
 type DefinitionDialogProps = {
   /**
@@ -43,7 +53,10 @@ const DefinitionDialog = (props: DefinitionDialogProps) => {
   const position =
     typeof window === "undefined"
       ? { top: 100, left: 100 }
-      : centeredDialogPosition({ top: window.innerHeight / 2, left: window.innerWidth / 2 }, 48);
+      : centeredDialogPosition(
+          { top: window.innerHeight / 2, left: window.innerWidth / 2 },
+          48,
+        );
 
   return (
     <Dialog
@@ -70,11 +83,13 @@ const DefinitionDialog = (props: DefinitionDialogProps) => {
           />
         </div>
         {searchWord && (
-          <div className={styles.results} data-no-drag>
-            <Suspense fallback={null}>
-              <DefinitionContent word={searchWord} />
-            </Suspense>
-          </div>
+          <Card className={styles.results} data-no-drag>
+            <CardBody>
+              <Suspense fallback={null}>
+                <DefinitionContent word={searchWord} />
+              </Suspense>
+            </CardBody>
+          </Card>
         )}
       </DialogBody>
       <DialogFooter>

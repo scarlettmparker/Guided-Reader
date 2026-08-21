@@ -1,12 +1,23 @@
-.count_icon {
-  display: inline-flex;
+.title {
+  display: flex;
   align-items: center;
-  gap: var(--sm);
-  margin-left: 0.5rem;
+  gap: var(--md);
 }
 
-.share_button {
+.title_actions {
+  display: flex;
+  align-items: center;
+  gap: var(--md);
+  margin-left: auto;
+}
+
+.icon_link {
   display: inline-flex;
   align-items: center;
-  margin-left: auto;
+  color: inherit;
+  text-decoration: none;
+}
+
+.icon_link:hover {
+  color: var(--muted-foreground);
 }

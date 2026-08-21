@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePageData } from "@sun/ssr/react";
 import {
-  Button,
   Card,
   CardBody,
   CardDescription,
@@ -64,7 +63,10 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
   }, [textId]);
 
   useEffect(() => {
-    localStorage.setItem(`guided-reader:notes-hidden:${textId}`, JSON.stringify(Array.from(hiddenAuthors)));
+    localStorage.setItem(
+      `guided-reader:notes-hidden:${textId}`,
+      JSON.stringify(Array.from(hiddenAuthors)),
+    );
   }, [textId, hiddenAuthors]);
 
   const handleToggle = (authorId: string, checked: boolean) => {
@@ -98,36 +100,43 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>
+          <CardTitle className={styles.title}>
             {text.title}
-            {privateNotesCount > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    className={styles.count_icon}
-                    title={t("notes-authors-title")}
-                    aria-label={t("notes-authors-title")}
-                    onClick={() => setToggleOpen(true)}
-                  >
-                    <DocumentTextIcon width={20} height={20} />
-                    <span>{privateNotesCount}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {privateNotesCount} {privateNotesCount === 1 ? "note" : "notes"}
-                </TooltipContent>
-              </Tooltip>
-            )}
-            <Button
-              variant="secondary"
-              className={styles.share_button}
-              title={t("share-notes-title")}
-              aria-label={t("share-notes-title")}
-              onClick={() => setShareOpen(true)}
-            >
-              <ShareIcon width={20} height={20} />
-            </Button>
+            <span className={styles.title_actions}>
+              {privateNotesCount > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      className={styles.icon_link}
+                      href="#"
+                      title={t("notes-authors-title")}
+                      aria-label={t("notes-authors-title")}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setToggleOpen(true);
+                      }}
+                    >
+                      <DocumentTextIcon width={20} height={20} />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {privateNotesCount} {privateNotesCount === 1 ? "note" : "notes"}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              <a
+                className={styles.icon_link}
+                href="#"
+                title={t("share-notes-title")}
+                aria-label={t("share-notes-title")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShareOpen(true);
+                }}
+              >
+                <ShareIcon width={20} height={20} />
+              </a>
+            </span>
           </CardTitle>
           <CardDescription>
             {text.level} · {text.language}
@@ -143,8 +152,15 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
         </CardBody>
         <DefinitionToolbar onDefine={() => setDefinitionOpen(true)} />
       </Card>
-      <DefinitionDialog open={definitionOpen} onOpenChange={setDefinitionOpen} />
-      <ShareNotesDialog textId={textId} open={shareOpen} onOpenChange={setShareOpen} />
+      <DefinitionDialog
+        open={definitionOpen}
+        onOpenChange={setDefinitionOpen}
+      />
+      <ShareNotesDialog
+        textId={textId}
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+      />
       <NotesAuthorToggleDialog
         textId={textId}
         open={toggleOpen}

@@ -21,6 +21,7 @@ const DefinitionToolbar = (props: DefinitionToolbarProps) => {
     <CardFooter className={cn(styles.toolbar, className)} {...rest}>
       <Button
         onClick={onDefine}
+        variant="secondary"
         title={t("definition.open-title")}
         aria-label={t("definition.open-title")}
       >
