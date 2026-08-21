@@ -14,6 +14,8 @@ import DefinitionContent from "../definition-content";
 import styles from "./definition-dialog.module.css";
 import { CardBody } from "@sun/components";
 import { Card } from "@sun/components";
+import { ScrollArea } from "@sun/components";
+import { Skeleton } from "@sun/components";
 
 type DefinitionDialogProps = {
   /**
@@ -85,8 +87,10 @@ const DefinitionDialog = (props: DefinitionDialogProps) => {
         {searchWord && (
           <Card className={styles.results} data-no-drag>
             <CardBody>
-              <Suspense fallback={null}>
-                <DefinitionContent word={searchWord} />
+              <Suspense fallback={<Skeleton className={styles.skeleton} />}>
+                <ScrollArea maxHeight="22rem">
+                  <DefinitionContent word={searchWord} />
+                </ScrollArea>
               </Suspense>
             </CardBody>
           </Card>
