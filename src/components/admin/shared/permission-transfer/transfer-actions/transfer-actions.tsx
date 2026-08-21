@@ -1,59 +1,34 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@sun/components";
 import { ChevronRightIcon, ChevronLeftIcon, ChevronDoubleRightIcon, ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
-import styles from "./account-role-transfer-list.module.css";
+import styles from "./transfer-actions.module.css";
 
 type TransferActionsProps = {
   /**
-   * Whether available has selected.
+   * Left side state and handlers.
    */
-  hasSelectedAvailable: boolean;
+  left: {
+    hasSelected: boolean;
+    hasItems: boolean;
+    onMoveSelected: () => void;
+    onMoveAll: () => void;
+  };
   /**
-   * Whether assigned has selected.
+   * Right side state and handlers.
    */
-  hasSelectedAssigned: boolean;
-  /**
-   * Whether filtered available has items.
-   */
-  hasFilteredAvailable: boolean;
-  /**
-   * Whether filtered assigned has items.
-   */
-  hasFilteredAssigned: boolean;
-  /**
-   * Move selected to assigned.
-   */
-  onMoveSelectedToAssigned: () => void;
-  /**
-   * Move selected to available.
-   */
-  onMoveSelectedToAvailable: () => void;
-  /**
-   * Move all to assigned.
-   */
-  onMoveAllToAssigned: () => void;
-  /**
-   * Move all to available.
-   */
-  onMoveAllToAvailable: () => void;
+  right: {
+    hasSelected: boolean;
+    hasItems: boolean;
+    onMoveSelected: () => void;
+    onMoveAll: () => void;
+  };
 } & React.HTMLAttributes<HTMLElement>;
 
 /**
  * Center actions for transfer.
  */
 const TransferActions = (props: TransferActionsProps) => {
-  const {
-    hasSelectedAvailable,
-    hasSelectedAssigned,
-    hasFilteredAvailable,
-    hasFilteredAssigned,
-    onMoveSelectedToAssigned,
-    onMoveSelectedToAvailable,
-    onMoveAllToAssigned,
-    onMoveAllToAvailable,
-    className,
-    ...rest
-  } = props;
+  const { left, right, className, ...rest } = props;
   const { t } = useTranslation("admin");
 
   return (
@@ -62,8 +37,8 @@ const TransferActions = (props: TransferActionsProps) => {
         variant="secondary"
         title={t("move-selected-to-assigned")}
         aria-label={t("move-selected-to-assigned")}
-        onClick={onMoveSelectedToAssigned}
-        disabled={!hasSelectedAvailable}
+        onClick={left.onMoveSelected}
+        disabled={!left.hasSelected}
       >
         <ChevronRightIcon width={16} height={16} />
       </Button>
@@ -71,8 +46,8 @@ const TransferActions = (props: TransferActionsProps) => {
         variant="secondary"
         title={t("move-selected-to-available")}
         aria-label={t("move-selected-to-available")}
-        onClick={onMoveSelectedToAvailable}
-        disabled={!hasSelectedAssigned}
+        onClick={right.onMoveSelected}
+        disabled={!right.hasSelected}
       >
         <ChevronLeftIcon width={16} height={16} />
       </Button>
@@ -80,8 +55,8 @@ const TransferActions = (props: TransferActionsProps) => {
         variant="secondary"
         title={t("move-all-to-assigned")}
         aria-label={t("move-all-to-assigned")}
-        onClick={onMoveAllToAssigned}
-        disabled={!hasFilteredAvailable}
+        onClick={left.onMoveAll}
+        disabled={!left.hasItems}
       >
         <ChevronDoubleRightIcon width={16} height={16} />
       </Button>
@@ -89,8 +64,8 @@ const TransferActions = (props: TransferActionsProps) => {
         variant="secondary"
         title={t("move-all-to-available")}
         aria-label={t("move-all-to-available")}
-        onClick={onMoveAllToAvailable}
-        disabled={!hasFilteredAssigned}
+        onClick={right.onMoveAll}
+        disabled={!right.hasItems}
       >
         <ChevronDoubleLeftIcon width={16} height={16} />
       </Button>

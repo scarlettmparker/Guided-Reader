@@ -228,6 +228,7 @@ defineMutation({
       }),
       invalidated: [
         makeCacheKey("admin/:id/permissions:accountPermissions", { id: body.accountId }),
+        makeCacheKey("admin/all-permissions:allPermissions", {}),
       ],
     };
   },
@@ -251,6 +252,7 @@ defineMutation({
       }),
       invalidated: [
         makeCacheKey("admin/roles/:id/permissions:rolePermissions", { id: body.roleId }),
+        makeCacheKey("admin/all-permissions:allPermissions", {}),
       ],
     };
   },

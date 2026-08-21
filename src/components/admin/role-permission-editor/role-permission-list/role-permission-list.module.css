@@ -17,7 +17,7 @@
 
 .input_row {
   display: flex;
-  gap: var(--md);
+  gap: var(--lg);
   align-items: center;
 }
 

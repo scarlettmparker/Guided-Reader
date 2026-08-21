@@ -14,10 +14,9 @@ export function usePaintSelection() {
   }, []);
 
   /**
-   * Handles mouse down on a row.
+   * Handles mouse down on an item.
    */
-  const onMouseDown = (value: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
+  const onMouseDown = (value: string) => (_event: React.MouseEvent) => {
     const target = !selected.has(value);
     setDrag({ active: true, target });
     setSelected((prev) => {
@@ -41,5 +40,5 @@ export function usePaintSelection() {
     });
   };
 
-  return { selected, setSelected, drag, onMouseDown, onMouseEnter };
+  return { selected, setSelected, drag, setDrag, onMouseDown, onMouseEnter };
 }

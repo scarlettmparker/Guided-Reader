@@ -1,9 +1,8 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@sun/components";
 import type { RolesQuery } from "~/generated/graphql";
-import { useRoleTransfer } from "./use-role-transfer";
-import RoleColumn from "./role-column";
-import TransferActions from "./transfer-actions";
+import { PermissionColumn, TransferActions, usePermissionTransfer } from "~/components/admin/shared/permission-transfer";
 import styles from "./account-role-transfer-list.module.css";
 
 type RolesData = RolesQuery["gaiaQueries"]["roles"];
@@ -29,72 +28,50 @@ type AccountRoleTransferListProps = {
 const AccountRoleTransferList = (props: AccountRoleTransferListProps) => {
   const { roles, assignedRoleNames, onChange, className, ...rest } = props;
   const { t } = useTranslation("admin");
+  const catalog = useMemo(() => (roles ?? []).map((role) => role.name).sort((a, b) => a.localeCompare(b)), [roles]);
+
   const {
-    filteredAvailable,
-    filteredAssigned,
-    availableQuery,
-    setAvailableQuery,
-    assignedQuery,
-    setAssignedQuery,
-    selectedAvailable,
-    selectedAssigned,
     available,
     assigned,
-    onAvailableMouseDown,
-    onAvailableMouseEnter,
-    onAssignedMouseDown,
-    onAssignedMouseEnter,
+    left,
+    right,
     moveSelectedToAssigned,
     moveSelectedToAvailable,
     moveAllToAssigned,
     moveAllToAvailable,
-    handleDragStartAvailable,
-    handleDragStartAssigned,
-    handleDropToAssigned,
-    handleDropToAvailable,
-  } = useRoleTransfer(roles, assignedRoleNames, onChange);
+  } = usePermissionTransfer(catalog, assignedRoleNames, onChange);
 
   return (
     <section className={cn(styles.transfer, className)} {...rest}>
-      <RoleColumn
+      <PermissionColumn
         title={t("available-roles")}
-        count={available.length}
+        items={available}
+        selected={left.selected}
+        paint={left}
         placeholder={t("search-roles")}
-        query={availableQuery}
-        onQueryChange={setAvailableQuery}
-        onSearch={setAvailableQuery}
-        items={filteredAvailable}
-        selected={selectedAvailable}
         emptyLabel={t("no-roles-found")}
-        onDragStart={handleDragStartAvailable}
-        onMouseDown={onAvailableMouseDown}
-        onMouseEnter={onAvailableMouseEnter}
-        onDrop={handleDropToAvailable}
       />
       <TransferActions
-        hasSelectedAvailable={selectedAvailable.size > 0}
-        hasSelectedAssigned={selectedAssigned.size > 0}
-        hasFilteredAvailable={filteredAvailable.length > 0}
-        hasFilteredAssigned={filteredAssigned.length > 0}
-        onMoveSelectedToAssigned={moveSelectedToAssigned}
-        onMoveSelectedToAvailable={moveSelectedToAvailable}
-        onMoveAllToAssigned={moveAllToAssigned}
-        onMoveAllToAvailable={moveAllToAvailable}
+        left={{
+          hasSelected: left.selected.size > 0,
+          hasItems: available.length > 0,
+          onMoveSelected: moveSelectedToAssigned,
+          onMoveAll: moveAllToAssigned,
+        }}
+        right={{
+          hasSelected: right.selected.size > 0,
+          hasItems: assigned.length > 0,
+          onMoveSelected: moveSelectedToAvailable,
+          onMoveAll: moveAllToAvailable,
+        }}
       />
-      <RoleColumn
+      <PermissionColumn
         title={t("assigned-roles")}
-        count={assigned.length}
+        items={assigned}
+        selected={right.selected}
+        paint={right}
         placeholder={t("search-roles")}
-        query={assignedQuery}
-        onQueryChange={setAssignedQuery}
-        onSearch={setAssignedQuery}
-        items={filteredAssigned}
-        selected={selectedAssigned}
         emptyLabel={t("no-roles-found")}
-        onDragStart={handleDragStartAssigned}
-        onMouseDown={onAssignedMouseDown}
-        onMouseEnter={onAssignedMouseEnter}
-        onDrop={handleDropToAssigned}
       />
     </section>
   );
