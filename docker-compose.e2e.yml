@@ -1,0 +1,115 @@
+# Isolated functional-test stack for the Guided-Reader app.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: sun_test
+      POSTGRES_USER: sun
+      POSTGRES_PASSWORD: sun
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sun -d sun_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    image: sun-graphql:dev
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      APOLLO_SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sun_test
+      APOLLO_SPRING_DATASOURCE_USERNAME: sun
+      APOLLO_SPRING_DATASOURCE_PASSWORD: sun
+      BRI_SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sun_test
+      BRI_SPRING_DATASOURCE_USERNAME: sun
+      BRI_SPRING_DATASOURCE_PASSWORD: sun
+      CERB_SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sun_test
+      CERB_SPRING_DATASOURCE_USERNAME: sun
+      CERB_SPRING_DATASOURCE_PASSWORD: sun
+      DION_SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sun_test
+      DION_SPRING_DATASOURCE_USERNAME: sun
+      DION_SPRING_DATASOURCE_PASSWORD: sun
+      ECHO_SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sun_test
+      ECHO_SPRING_DATASOURCE_USERNAME: sun
+      ECHO_SPRING_DATASOURCE_PASSWORD: sun
+      FATES_SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sun_test
+      FATES_SPRING_DATASOURCE_USERNAME: sun
+      FATES_SPRING_DATASOURCE_PASSWORD: sun
+      GAIA_SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sun_test
+      GAIA_SPRING_DATASOURCE_USERNAME: sun
+      GAIA_SPRING_DATASOURCE_PASSWORD: sun
+      JWT_SECRET: test-secret-key-for-functional-tests-only
+      EMAIL_CLIENT_ID: test
+      EMAIL_CLIENT_SECRET: test
+      EMAIL_REFRESH_TOKEN: test
+      EMAIL_ADDRESS: test@example.com
+      GARAGE_SECRET_KEY: test
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      S3_ENDPOINT: http://example.com
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        java -jar app.jar
+        --spring.jpa.show-sql=false
+        --logging.level.root=WARN
+        --logging.level.org.hibernate=WARN
+        --logging.level.org.hibernate.SQL=WARN
+        --logging.level.com.zaxxer.hikari=WARN
+        > /logs/backend.log 2>&1
+    volumes:
+      - ./cypress-results/logs:/logs
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'curl -fs -X POST -H ''content-type: application/json'' --data ''{"query":"{__typename}"}'' http://localhost:8083/graphql'
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    ports:
+      - "8083:8083"
+
+  app:
+    image: guided-reader-e2e-app:latest
+    build: .
+    environment:
+      NODE_ENV: production
+      SERVER_PORT: 3000
+      GRAPHQL_ENDPOINT: http://backend:8083/graphql
+      AUTH_DISABLED: "true"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "fetch(''http://localhost:''+process.env.SERVER_PORT+''/'').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    ports:
+      - "3000:3000"
+
+  cypress:
+    build:
+      context: .
+      dockerfile: cypress/Dockerfile
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      CYPRESS_baseUrl: http://app:3000
+      CYPRESS_CAPTURE_OUTPUTS: ${CYPRESS_CAPTURE_OUTPUTS:-false}
+      DATABASE_URL: postgres://sun:sun@db:5432/sun_test
+    working_dir: /e2e
+    volumes:
+      - ./cypress.config.ts:/e2e/cypress.config.ts:ro
+      - ./cypress:/e2e/cypress:ro
+      - ./cypress-results:/e2e/cypress-results

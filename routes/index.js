@@ -3,8 +3,19 @@
  * @module routes
  */
 import { renderApp } from "@sun/ssr/server";
+import { suspenseCache, pageDataRegistry } from "@sun/ssr";
 import { base, isProduction, manifestPath } from "../config.js";
 import { Buffer } from "buffer";
+
+/**
+ * Clears the in-memory page-data caches so the next SSR render fetches fresh.
+ */
+function clearAppCache() {
+  suspenseCache.clear();
+  for (const key of Object.keys(pageDataRegistry.pageDataCache)) {
+    delete pageDataRegistry.pageDataCache[key];
+  }
+}
 import {
   AUTH_COOKIE,
   OAUTH_STATE_COOKIE,
@@ -38,6 +49,11 @@ function normalizePath(pathname) {
  * @param {object} vite - The Vite dev server instance (optional, only in development).
  */
 export function setupRoutes(app, vite) {
+  app.post("/__reset-cache", async (_request, reply) => {
+    clearAppCache();
+    reply.send({ ok: true });
+  });
+
   /**
    * Login via PRG: validate against gaia, set the httpOnly cookie, redirect.
    */

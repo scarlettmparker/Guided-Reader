@@ -10,7 +10,12 @@
     "graphql:generate": "graphql-codegen --config codegen.ts",
     "lint": "npx eslint",
     "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
-    "preview": "cross-env NODE_ENV=production tsx --loader ./css-loader.mjs server.js"
+    "preview": "cross-env NODE_ENV=production tsx --loader ./css-loader.mjs server.js",
+    "cypress": "cypress",
+    "cypress:run": "cypress run --browser chrome",
+    "e2e:up": "docker compose -f docker-compose.e2e.yml up -d db backend app",
+    "e2e:down": "docker compose -f docker-compose.e2e.yml down -v",
+    "e2e": "./e2e.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
