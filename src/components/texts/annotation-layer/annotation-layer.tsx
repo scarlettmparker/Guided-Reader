@@ -191,7 +191,10 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
    * Unique private note positions and the notes grouped under each.
    */
   const { privatePositions, byPrivatePosition } = useMemo(() => {
-    const posMap = new Map<string, { startOffset: number; endOffset: number }>();
+    const posMap = new Map<
+      string,
+      { startOffset: number; endOffset: number }
+    >();
     const groupMap = new Map<string, PrivateNote[]>();
     for (const note of privateNotes) {
       const key = `${note.startOffset}-${note.endOffset}`;
@@ -205,7 +208,10 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
       group.push(note);
       groupMap.set(key, group);
     }
-    return { privatePositions: [...posMap.values()], byPrivatePosition: groupMap };
+    return {
+      privatePositions: [...posMap.values()],
+      byPrivatePosition: groupMap,
+    };
   }, [privateNotes]);
 
   const [selection, setSelection] = useState<AnnotationSelection | null>(null);
@@ -244,7 +250,9 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     : NO_ANNOTATIONS;
 
   const privateNotesForPosition = privateList.open
-    ? (byPrivatePosition.get(`${privateList.startOffset}-${privateList.endOffset}`) ?? [])
+    ? (byPrivatePosition.get(
+        `${privateList.startOffset}-${privateList.endOffset}`,
+      ) ?? [])
     : [];
 
   /**
@@ -380,7 +388,8 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
         mark.addEventListener("click", () => {
           const rect = mark.getBoundingClientRect();
           const snippet =
-            containerRef.current?.textContent?.slice(startOffset, endOffset) ?? "";
+            containerRef.current?.textContent?.slice(startOffset, endOffset) ??
+            "";
           setList({
             open: true,
             position: centeredDialogPosition(
@@ -426,7 +435,8 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
         mark.addEventListener("click", () => {
           const rect = mark.getBoundingClientRect();
           const snippet =
-            containerRef.current?.textContent?.slice(startOffset, endOffset) ?? "";
+            containerRef.current?.textContent?.slice(startOffset, endOffset) ??
+            "";
           setPrivateList({
             open: true,
             position: centeredDialogPosition(
@@ -555,7 +565,12 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
       {viewer}
 
       {selection && (
-        <SelectionTooltip open top={selection.top} left={selection.left}>
+        <SelectionTooltip
+          open
+          top={selection.top}
+          left={selection.left}
+          className={styles.selection_tooltip}
+        >
           {currentUser ? (
             <>
               <span
@@ -597,7 +612,10 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
       <PrivateNoteCreateDialog
         create={privateCreate}
         onOpenChange={(open) =>
-          setPrivateCreate((prev: PrivateNoteCreateState) => ({ ...prev, open }))
+          setPrivateCreate((prev: PrivateNoteCreateState) => ({
+            ...prev,
+            open,
+          }))
         }
         onCancel={privateCreateFromList ? handlePrivateCreateCancel : undefined}
         textId={textId}

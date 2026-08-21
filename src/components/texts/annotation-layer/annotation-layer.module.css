@@ -38,6 +38,12 @@
 .divider {
   width: 1px;
   height: 1rem;
-  background-color: var(--border);
+  background-color: var(--muted-foreground);
   margin: 0 var(--sm);
+}
+
+.selection_tooltip {
+  display: flex;
+  align-items: center;
+  gap: var(--sm);
 }

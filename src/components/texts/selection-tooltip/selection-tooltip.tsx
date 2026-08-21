@@ -15,7 +15,7 @@ type SelectionTooltipProps = {
    * Viewport X of the selection's horizontal centre.
    */
   left: number;
-} & React.PropsWithChildren;
+} & React.HTMLAttributes<HTMLDivElement>;
 
 /**
  * Tooltip anchored above a text selection.
@@ -25,6 +25,7 @@ const SelectionTooltip = ({
   top,
   left,
   children,
+  className,
 }: SelectionTooltipProps) => {
   if (typeof document === "undefined") return null;
 
@@ -40,10 +41,20 @@ const SelectionTooltip = ({
       <TooltipTrigger asChild>
         <div
           className={styles.anchor}
-          style={{ ["--top" as string]: `${top}px`, ["--left" as string]: `${left}px` } as React.CSSProperties}
+          style={
+            {
+              ["--top" as string]: `${top}px`,
+              ["--left" as string]: `${left}px`,
+            } as React.CSSProperties
+          }
         />
       </TooltipTrigger>
-      <TooltipContent side="top" onMouseUp={stop} onMouseDown={stop}>
+      <TooltipContent
+        side="top"
+        onMouseUp={stop}
+        onMouseDown={stop}
+        className={className}
+      >
         {children}
       </TooltipContent>
     </Tooltip>,
