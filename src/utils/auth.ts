@@ -8,6 +8,9 @@ import {
 import { executeDocument } from "./api";
 import {
   LoginDocument,
+  LogoutDocument,
+  MeDocument,
+  type MeQuery,
   ReaderAccountDocument,
   DiscordLoginDocument,
   type DiscordLoginMutation,
@@ -86,7 +89,7 @@ export { getCookieValue } from "@sun/api";
  */
 export function buildAuthCookie(
   token: string,
-  maxAgeSeconds = 60 * 60 * 12,
+  maxAgeSeconds = 60 * 60 * 24,
 ): string {
   return `${AUTH_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${maxAgeSeconds}`;
 }
@@ -95,7 +98,7 @@ export function buildAuthCookie(
  * Builds the Set-Cookie value that clears the JWT.
  */
 export function clearAuthCookie(): string {
-  return `${AUTH_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
+  return `${AUTH_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0`;
 }
 
 /**
@@ -144,6 +147,9 @@ export async function loginViaGaia(
 
 /**
  * Returns the logged-in reader account for a JWT, or null.
+ * Throws on transient backend errors so the caller can keep the cookie.
+ * For password-registered HUMAN accounts without a hades row, returns a
+ * synthetic ReaderAccount so the session stays alive with limited UI.
  */
 export async function getCurrentUser(
   token: string | undefined,
@@ -151,13 +157,53 @@ export async function getCurrentUser(
   if (!token) {
     return null;
   }
+  const meRes = await executeDocument<MeQuery>(MeDocument, {}, token);
+  if (!meRes.success) {
+    if (meRes.statusCode && meRes.statusCode >= 500) {
+      throw new Error(meRes.error || "Transient auth error");
+    }
+    return null;
+  }
+  const me = meRes.data?.gaiaQueries.me;
+  if (!me) {
+    return null;
+  }
   const res = await executeDocument<{
     hadesQueries: { readerAccount: ReaderAccount | null };
   }>(ReaderAccountDocument, {}, token);
-  if (!res.success || !res.data) {
+  if (!res.success) {
+    if (res.statusCode && res.statusCode >= 500) {
+      throw new Error(res.error || "Transient auth error");
+    }
     return null;
   }
-  return res.data.hadesQueries.readerAccount ?? null;
+  if (res.data?.hadesQueries.readerAccount) {
+    return res.data.hadesQueries.readerAccount;
+  }
+  return {
+    id: me.id,
+    gaiaAccountId: me.id,
+    discordId: "",
+    discordUsername: me.username,
+    globalName: me.username,
+    avatar: null,
+    cefrLevel: null,
+    guildRoles: [],
+    createdAt: me.createdAt ?? null,
+    updatedAt: me.updatedAt ?? null,
+  } as unknown as ReaderAccount;
+}
+
+/**
+ * Revokes the current JWT server-side (best-effort).
+ */
+export async function logoutViaBackend(token: string | undefined): Promise<void> {
+  if (!token) return;
+  try {
+    await executeDocument(LogoutDocument, {}, token);
+  } catch (_) {
+    // best-effort: cookie will be cleared anyway
+  }
 }
 
 /**

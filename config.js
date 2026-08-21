@@ -40,7 +40,7 @@ export const discordGuildId = process.env.DISCORD_GUILD_ID || "";
  */
 export const discordRedirectUri =
   process.env.DISCORD_REDIRECT_URI ||
-  "http://localhost:5178/auth/discord/callback";
+  "https://reader.int.scarlettparker.co.uk/auth/discord/callback";
 
 /** OAuth scopes requested on authorization. Non-secret. */
 export const discordScopes =

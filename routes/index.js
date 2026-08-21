@@ -12,6 +12,7 @@ import {
   getCurrentUser,
   loginViaGaia,
   discordLoginViaCode,
+  logoutViaBackend,
   buildAuthCookie,
   clearAuthCookie,
   buildStateCookie,
@@ -49,9 +50,11 @@ export function setupRoutes(app, vite) {
   });
 
   /**
-   * Logout via PRG: clear the cookie, redirect to /login.
+   * Logout via PRG: revoke server-side, clear the cookie, redirect to /login.
    */
-  app.post("/__logout", async (_request, reply) => {
+  app.post("/__logout", async (request, reply) => {
+    const token = getCookieValue(request.headers.cookie, AUTH_COOKIE);
+    await logoutViaBackend(token);
     reply.header("Set-Cookie", clearAuthCookie());
     return reply.redirect("/login");
   });
@@ -102,16 +105,26 @@ export function setupRoutes(app, vite) {
     }
 
     const token = getCookieValue(request.headers.cookie, AUTH_COOKIE);
-    const user = await getCurrentUser(token);
+    let user = null;
+    let isDeadSession = false;
+    let isTransient = false;
+    try {
+      user = await getCurrentUser(token);
+      isDeadSession = !user && !!token;
+    } catch (_) {
+      // Transient backend error, keep the cookie so a retry can succeed.
+      isTransient = !!token;
+      isDeadSession = false;
+    }
     const isPublic = PUBLIC_PAGES.has(pathname);
 
     // A token that no longer resolves to a user is a dead session (expired,
     // deactivated, revoked). Drop the cookie so protected calls stop firing.
-    if (!user && token) {
+    if (isDeadSession) {
       reply.header("Set-Cookie", clearAuthCookie());
     }
 
-    if (!user && !isPublic) return reply.redirect("/login");
+    if (!user && !isPublic && !isTransient) return reply.redirect("/login");
     if (user && isPublic) return reply.redirect("/");
 
     await seedPageData(user);

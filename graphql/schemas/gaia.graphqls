@@ -24,6 +24,7 @@ enum AccountStatus {
 }
 
 type GaiaQueries {
+  me: Account
   propertySet(ownerKey: String!, name: String!, entry: String): JSON
   myRoles: [String!]!
   account(id: ID!): Account
@@ -43,6 +44,7 @@ type AuthResult {
 
 type GaiaMutations {
   login(input: LoginInput!): AuthResult
+  logout: QueryResult
   suspendAccount(id: ID!): QueryResult
   unsuspendAccount(id: ID!): QueryResult
   deactivateAccount: QueryResult

@@ -19,6 +19,8 @@ type Documents = {
     "mutation confirmAccountReactivation($token: String!) {\n  gaiaMutations {\n    confirmAccountReactivation(token: $token) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.ConfirmAccountReactivationDocument,
     "mutation deactivateAccount {\n  gaiaMutations {\n    deactivateAccount {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.DeactivateAccountDocument,
     "mutation Login($input: LoginInput!) {\n  gaiaMutations {\n    login(input: $input) {\n      token\n    }\n  }\n}": typeof types.LoginDocument,
+    "mutation logout {\n  gaiaMutations {\n    logout {\n      __typename\n      ... on QuerySuccess {\n        message\n      }\n      ... on StandardError {\n        message\n      }\n    }\n  }\n}": typeof types.LogoutDocument,
+    "query me {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n}": typeof types.MeDocument,
     "query myRoles {\n  gaiaQueries {\n    myRoles\n  }\n}": typeof types.MyRolesDocument,
     "query propertySet($ownerKey: String!, $name: String!, $entry: String) {\n  gaiaQueries {\n    propertySet(ownerKey: $ownerKey, name: $name, entry: $entry)\n  }\n}": typeof types.PropertySetDocument,
     "mutation requestAccountReactivation($email: String!, $provider: String!) {\n  gaiaMutations {\n    requestAccountReactivation(email: $email, provider: $provider) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.RequestAccountReactivationDocument,
@@ -65,6 +67,8 @@ const documents: Documents = {
     "mutation confirmAccountReactivation($token: String!) {\n  gaiaMutations {\n    confirmAccountReactivation(token: $token) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.ConfirmAccountReactivationDocument,
     "mutation deactivateAccount {\n  gaiaMutations {\n    deactivateAccount {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.DeactivateAccountDocument,
     "mutation Login($input: LoginInput!) {\n  gaiaMutations {\n    login(input: $input) {\n      token\n    }\n  }\n}": types.LoginDocument,
+    "mutation logout {\n  gaiaMutations {\n    logout {\n      __typename\n      ... on QuerySuccess {\n        message\n      }\n      ... on StandardError {\n        message\n      }\n    }\n  }\n}": types.LogoutDocument,
+    "query me {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n}": types.MeDocument,
     "query myRoles {\n  gaiaQueries {\n    myRoles\n  }\n}": types.MyRolesDocument,
     "query propertySet($ownerKey: String!, $name: String!, $entry: String) {\n  gaiaQueries {\n    propertySet(ownerKey: $ownerKey, name: $name, entry: $entry)\n  }\n}": types.PropertySetDocument,
     "mutation requestAccountReactivation($email: String!, $provider: String!) {\n  gaiaMutations {\n    requestAccountReactivation(email: $email, provider: $provider) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.RequestAccountReactivationDocument,
@@ -140,6 +144,14 @@ export function graphql(source: "mutation deactivateAccount {\n  gaiaMutations {
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "mutation Login($input: LoginInput!) {\n  gaiaMutations {\n    login(input: $input) {\n      token\n    }\n  }\n}"): (typeof documents)["mutation Login($input: LoginInput!) {\n  gaiaMutations {\n    login(input: $input) {\n      token\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "mutation logout {\n  gaiaMutations {\n    logout {\n      __typename\n      ... on QuerySuccess {\n        message\n      }\n      ... on StandardError {\n        message\n      }\n    }\n  }\n}"): (typeof documents)["mutation logout {\n  gaiaMutations {\n    logout {\n      __typename\n      ... on QuerySuccess {\n        message\n      }\n      ... on StandardError {\n        message\n      }\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query me {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n}"): (typeof documents)["query me {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
