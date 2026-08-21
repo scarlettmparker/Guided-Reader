@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
  * Paint selection via mouse drag.
  */
 export function usePaintSelection() {
-  const [drag, setDrag] = useState<{ active: boolean; target: boolean } | null>(null);
+  const [drag, setDrag] = useState<{ active: boolean; target: boolean } | null>(
+    null,
+  );
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   useEffect(() => {

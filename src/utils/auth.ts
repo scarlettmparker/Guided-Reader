@@ -197,7 +197,9 @@ export async function getCurrentUser(
 /**
  * Revokes the current JWT server-side (best-effort).
  */
-export async function logoutViaBackend(token: string | undefined): Promise<void> {
+export async function logoutViaBackend(
+  token: string | undefined,
+): Promise<void> {
   if (!token) return;
   try {
     await executeDocument(LogoutDocument, {}, token);
@@ -231,7 +233,10 @@ export async function discordLoginViaCode(
   code: string,
   state: string,
 ): Promise<DiscordLoginResult | null> {
-  const res = await executeDocument<DiscordLoginMutation>(DiscordLoginDocument, { code, state });
+  const res = await executeDocument<DiscordLoginMutation>(
+    DiscordLoginDocument,
+    { code, state },
+  );
   if (!res.success || !res.data) {
     return null;
   }

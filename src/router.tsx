@@ -1,12 +1,18 @@
 import { RouteObject, useRoutes } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import type { RouteMeta } from "@sun/ssr/server";
+import AdminPageSkeleton from "./components/admin/admin-page-skeleton";
+import LibrarySkeleton from "./components/library-skeleton";
+import PageSkeleton from "./components/page-skeleton";
+import TextsPageSkeleton from "./components/texts/skeletons/texts-page-skeleton";
 
 const Library = lazy(() => import("./routes/library"));
 const TextsPage = lazy(() => import("./routes/texts"));
 const TextDetailsPage = lazy(() => import("./routes/texts/[id]"));
 const Admin = lazy(() => import("./routes/admin"));
-const AccountDetailPage = lazy(() => import("./routes/admin/account-detail-page"));
+const AccountDetailPage = lazy(
+  () => import("./routes/admin/account-detail-page"),
+);
 const Login = lazy(() => import("./routes/login"));
 const Profile = lazy(() => import("./routes/profile"));
 const Reactivate = lazy(() => import("./routes/reactivate"));
@@ -19,7 +25,7 @@ export const routes: RouteObject[] = [
   {
     path: "/",
     element: (
-      <Suspense fallback={null}>
+      <Suspense fallback={<LibrarySkeleton />}>
         <Library />
       </Suspense>
     ),
@@ -27,7 +33,7 @@ export const routes: RouteObject[] = [
   {
     path: "texts",
     element: (
-      <Suspense fallback={null}>
+      <Suspense fallback={<TextsPageSkeleton />}>
         <TextsPage />
       </Suspense>
     ),
@@ -41,7 +47,7 @@ export const routes: RouteObject[] = [
   {
     path: "admin",
     element: (
-      <Suspense fallback={null}>
+      <Suspense fallback={<AdminPageSkeleton />}>
         <Admin />
       </Suspense>
     ),
@@ -55,7 +61,7 @@ export const routes: RouteObject[] = [
   {
     path: "/login",
     element: (
-      <Suspense fallback={null}>
+      <Suspense fallback={<PageSkeleton />}>
         <Login />
       </Suspense>
     ),
@@ -63,7 +69,7 @@ export const routes: RouteObject[] = [
   {
     path: "/profile",
     element: (
-      <Suspense fallback={null}>
+      <Suspense fallback={<PageSkeleton />}>
         <Profile />
       </Suspense>
     ),
@@ -71,7 +77,7 @@ export const routes: RouteObject[] = [
   {
     path: "/reactivate",
     element: (
-      <Suspense fallback={null}>
+      <Suspense fallback={<PageSkeleton />}>
         <Reactivate />
       </Suspense>
     ),
@@ -79,7 +85,7 @@ export const routes: RouteObject[] = [
   {
     path: "*",
     element: (
-      <Suspense fallback={null}>
+      <Suspense fallback={<PageSkeleton />}>
         <NotFound />
       </Suspense>
     ),

@@ -8,7 +8,10 @@ import { executeMutation } from "@sun/ssr";
  * @return the mutation result
  */
 export async function createRole(name: string, description?: string) {
-  return executeMutation("gaia/createRole", { name, description: description ?? null });
+  return executeMutation("gaia/createRole", {
+    name,
+    description: description ?? null,
+  });
 }
 
 /**
@@ -39,8 +42,14 @@ export async function setAccountRoles(accountId: string, roleNames: string[]) {
  * @param permissions the desired permission strings
  * @return the mutation result
  */
-export async function setAccountPermissions(accountId: string, permissions: string[]) {
-  return executeMutation("gaia/setAccountPermissions", { accountId, permissions });
+export async function setAccountPermissions(
+  accountId: string,
+  permissions: string[],
+) {
+  return executeMutation("gaia/setAccountPermissions", {
+    accountId,
+    permissions,
+  });
 }
 
 /**
@@ -50,6 +59,9 @@ export async function setAccountPermissions(accountId: string, permissions: stri
  * @param permissions the desired permission strings
  * @return the mutation result
  */
-export async function setRolePermissions(roleId: string, permissions: string[]) {
+export async function setRolePermissions(
+  roleId: string,
+  permissions: string[],
+) {
   return executeMutation("gaia/setRolePermissions", { roleId, permissions });
 }

@@ -1,6 +1,13 @@
 import { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "@sun/components";
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@sun/components";
 import { deletePrivateNote } from "~/server/actions/private-note";
 import styles from "./private-note-item.module.css";
 
@@ -60,10 +67,20 @@ const PrivateNoteItem = (props: PrivateNoteItemProps) => {
           <p>{t("delete-private-note-body")}</p>
         </DialogBody>
         <DialogFooter>
-          <Button variant="secondary" onClick={() => setConfirmOpen(false)} title={t("cancel")} aria-label={t("cancel")}>
+          <Button
+            variant="secondary"
+            onClick={() => setConfirmOpen(false)}
+            title={t("cancel")}
+            aria-label={t("cancel")}
+          >
             {t("cancel")}
           </Button>
-          <Button onClick={handleDelete} disabled={pending} title={t("delete")} aria-label={t("delete")}>
+          <Button
+            onClick={handleDelete}
+            disabled={pending}
+            title={t("delete")}
+            aria-label={t("delete")}
+          >
             {t("delete")}
           </Button>
         </DialogFooter>

@@ -4,7 +4,7 @@ import { initReactI18next } from "react-i18next";
 import ReactDOM from "react-dom/client";
 import i18n from "i18next";
 import { Suspense } from "react";
-
+import ErrorBoundary from "./components/error-boundary";
 import Layout from "./components/layout";
 import { initClientBootstrap } from "@sun/ssr";
 import { loadPersistedTheme, applyTheme } from "@sun/themes";
@@ -27,9 +27,11 @@ initClientBootstrap({ i18n }).then(() => {
     document.getElementById("app") as HTMLElement,
     <BrowserRouter>
       <Layout>
-        <Suspense fallback={null}>
-          <Router />
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={null}>
+            <Router />
+          </Suspense>
+        </ErrorBoundary>
       </Layout>
     </BrowserRouter>,
   );

@@ -1,7 +1,14 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Card, CardBody, CardHeader, CardTitle, SearchBar, Skeleton } from "@sun/components";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  SearchBar,
+  Skeleton,
+} from "@sun/components";
 import AdminUserListItems from "~/components/admin/user-list-items";
 import AdminUserListFooter from "~/components/admin/user-list-footer";
 import AdminUserListPagination from "~/components/admin/user-list-pagination";

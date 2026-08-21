@@ -24,7 +24,16 @@ const configure = async (app) => {
 };
 
 await createServer({
-  config: { port, host, base, isProduction, backendHost, backendPort, clientId, clientSecret },
+  config: {
+    port,
+    host,
+    base,
+    isProduction,
+    backendHost,
+    backendPort,
+    clientId,
+    clientSecret,
+  },
   setupRoutes,
   configure,
 });

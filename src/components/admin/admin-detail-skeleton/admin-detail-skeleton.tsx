@@ -1,10 +1,15 @@
-import { Skeleton } from "@sun/components";
+import { Card, CardBody, Skeleton } from "@sun/components";
+import styles from "./admin-detail-skeleton.module.css";
 
 /**
  * Skeleton for the admin detail panel while data loads.
  */
 const AdminDetailSkeleton = () => (
-  <Skeleton style={{ width: "100%", height: "12rem" }} />
+  <Card>
+    <CardBody>
+      <Skeleton className={styles.skeleton_block} />
+    </CardBody>
+  </Card>
 );
 
 export default AdminDetailSkeleton;

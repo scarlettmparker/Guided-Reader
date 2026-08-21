@@ -79,22 +79,37 @@ const PermissionColumn = (props: PermissionColumnProps) => {
   } = props;
 
   return (
-    <fieldset className={cn(styles.column, className)} onDragOver={(e) => e.preventDefault()} onDrop={onDrop} {...rest}>
+    <fieldset
+      className={cn(styles.column, className)}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDrop}
+      {...rest}
+    >
       <legend className={styles.column_title}>
         {title} <Badge variant="secondary">{count}</Badge>
       </legend>
-      <SearchBar value={query} onChange={onQueryChange} onSearch={onSearch} placeholder={placeholder} />
+      <SearchBar
+        value={query}
+        onChange={onQueryChange}
+        onSearch={onSearch}
+        placeholder={placeholder}
+      />
       <ScrollArea maxHeight="22rem" className={styles.list_wrap}>
         <ul className={styles.list} role="listbox" aria-multiselectable="true">
           {items.length === 0 ? (
-            <li className={styles.empty} role="status">{emptyLabel}</li>
+            <li className={styles.empty} role="status">
+              {emptyLabel}
+            </li>
           ) : (
             items.map((value) => (
               <li
                 key={value}
                 role="option"
                 aria-selected={selected.has(value)}
-                className={cn(styles.row, selected.has(value) && styles.row_selected)}
+                className={cn(
+                  styles.row,
+                  selected.has(value) && styles.row_selected,
+                )}
                 draggable
                 onDragStart={onDragStart(value)}
                 onMouseDown={onMouseDown(value)}

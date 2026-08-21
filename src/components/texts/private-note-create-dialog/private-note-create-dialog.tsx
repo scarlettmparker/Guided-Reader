@@ -1,6 +1,15 @@
 import { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle, Form, MarkdownEditor } from "@sun/components";
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Form,
+  MarkdownEditor,
+} from "@sun/components";
 import { createPrivateNote } from "~/server/actions/private-note";
 import { centeredDialogPosition } from "~/utils/dialog-position";
 import styles from "./private-note-create-dialog.module.css";
@@ -93,7 +102,10 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
       open={create.open}
       onOpenChange={onOpenChange}
       draggable
-      position={centeredDialogPosition({ top: selection.bottom + 8, left: selection.left }, 24)}
+      position={centeredDialogPosition(
+        { top: selection.bottom + 8, left: selection.left },
+        24,
+      )}
       className={styles.dialog}
     >
       <DialogHeader>
@@ -102,7 +114,9 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
       <DialogBody>
         <Form id="create-private-note-form" onSubmit={handleSubmit}>
           <MarkdownEditor
-            onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setBody(event.target.value)}
+            onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setBody(event.target.value)
+            }
             placeholder={t("private-note-placeholder")}
             aria-label={t("private-note-placeholder")}
             rows={5}
@@ -119,7 +133,13 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
         >
           {t("cancel")}
         </Button>
-        <Button type="submit" form="create-private-note-form" disabled={pending || !body.trim()} title={t("private-note-create")} aria-label={t("private-note-create")}>
+        <Button
+          type="submit"
+          form="create-private-note-form"
+          disabled={pending || !body.trim()}
+          title={t("private-note-create")}
+          aria-label={t("private-note-create")}
+        >
           {t("private-note-create")}
         </Button>
       </DialogFooter>

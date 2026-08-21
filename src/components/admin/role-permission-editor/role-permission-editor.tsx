@@ -7,7 +7,8 @@ import { setRolePermissions } from "~/server/actions/roles";
 import RolePermissionList from "./role-permission-list";
 import styles from "./role-permission-editor.module.css";
 
-type RolePermissionsData = RolePermissionsQuery["gaiaQueries"]["rolePermissions"];
+type RolePermissionsData =
+  RolePermissionsQuery["gaiaQueries"]["rolePermissions"];
 
 type RolePermissionEditorProps = {
   /**
@@ -31,7 +32,9 @@ const RolePermissionEditor = (props: RolePermissionEditorProps) => {
     { id: roleId },
   );
 
-  const assigned = [...(rolePermissions ?? [])].sort((a, b) => a.localeCompare(b));
+  const assigned = [...(rolePermissions ?? [])].sort((a, b) =>
+    a.localeCompare(b),
+  );
   const [draft, setDraft] = useState<string[]>(assigned);
 
   useEffect(() => {
@@ -41,7 +44,10 @@ const RolePermissionEditor = (props: RolePermissionEditorProps) => {
   const handleSave = () => {
     setError(null);
     startTransition(async () => {
-      const result = await setRolePermissions(roleId, draft) as { __typename?: string; message?: string };
+      const result = (await setRolePermissions(roleId, draft)) as {
+        __typename?: string;
+        message?: string;
+      };
       if (result?.__typename === "StandardError") {
         setError(result.message ?? "Failed to save permissions.");
       }

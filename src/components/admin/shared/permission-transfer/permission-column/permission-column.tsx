@@ -58,7 +58,12 @@ const PermissionColumn = (props: PermissionColumnProps) => {
       <legend className={styles.column_title}>
         {title} <Badge variant="secondary">{items.length}</Badge>
       </legend>
-      <SearchBar value={query} onChange={setQuery} onSearch={setQuery} placeholder={placeholder} />
+      <SearchBar
+        value={query}
+        onChange={setQuery}
+        onSearch={setQuery}
+        placeholder={placeholder}
+      />
       <ScrollArea maxHeight="22rem" className={styles.list_wrap}>
         <ul className={styles.list} role="listbox" aria-multiselectable="true">
           {filtered.length === 0 ? (
@@ -71,7 +76,10 @@ const PermissionColumn = (props: PermissionColumnProps) => {
                 key={value}
                 role="option"
                 aria-selected={selected.has(value)}
-                className={cn(styles.row, selected.has(value) && styles.row_selected)}
+                className={cn(
+                  styles.row,
+                  selected.has(value) && styles.row_selected,
+                )}
                 onMouseDown={paint.onMouseDown(value)}
                 onMouseEnter={paint.onMouseEnter(value)}
               >

@@ -3,8 +3,7 @@ import type { ListCommentsQuery } from "~/generated/graphql";
 import CommentItem from "../comment-item";
 import styles from "./annotation-replies.module.css";
 
-type Comment =
-  ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
+type Comment = ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
 
 type AnnotationRepliesProps = {
   /**
@@ -21,7 +20,10 @@ type AnnotationRepliesProps = {
  * Reply list for an annotation. Reads page data on mount, so it is rendered
  * inside a Suspense boundary by its parent.
  */
-const AnnotationReplies = ({ annotationId, textId }: AnnotationRepliesProps) => {
+const AnnotationReplies = ({
+  annotationId,
+  textId,
+}: AnnotationRepliesProps) => {
   const { data: comments } = usePageData<Comment[]>(
     "comments",
     "annotations/:annotationId",

@@ -3,7 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Button, Input, cn } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
 import type { AllPermissionsQuery } from "~/generated/graphql";
-import { PermissionColumn, TransferActions, usePermissionTransfer } from "~/components/admin/shared/permission-transfer";
+import {
+  PermissionColumn,
+  TransferActions,
+  usePermissionTransfer,
+} from "~/components/admin/shared/permission-transfer";
 import styles from "./role-permission-list.module.css";
 
 type AllPermissionsData = AllPermissionsQuery["gaiaQueries"]["allPermissions"];
@@ -25,7 +29,11 @@ type RolePermissionListProps = {
 const RolePermissionList = (props: RolePermissionListProps) => {
   const { assignedPermissions, onChange, className, ...rest } = props;
   const { t } = useTranslation("admin");
-  const { data: allPermissions } = usePageData<AllPermissionsData>("allPermissions", "admin/all-permissions", {});
+  const { data: allPermissions } = usePageData<AllPermissionsData>(
+    "allPermissions",
+    "admin/all-permissions",
+    {},
+  );
   const catalog = (allPermissions ?? []) as string[];
   const [input, setInput] = useState("");
 
@@ -60,7 +68,9 @@ const RolePermissionList = (props: RolePermissionListProps) => {
         <div className={styles.input_row}>
           <Input
             value={input}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setInput(event.target.value)}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setInput(event.target.value)
+            }
             placeholder={t("permission-placeholder")}
             aria-label={t("permission-placeholder")}
           />

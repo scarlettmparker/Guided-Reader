@@ -17,9 +17,13 @@ const DefinitionTranslation = (props: DefinitionTranslationProps) => {
   return (
     <li className={styles.translation} {...rest}>
       <span className={styles.term}>{translation.term}</span>
-      {translation.wordType && <span className={styles.word_type}>{translation.wordType}</span>}
+      {translation.wordType && (
+        <span className={styles.word_type}>{translation.wordType}</span>
+      )}
       {translation.usageNotes.length > 0 && (
-        <span className={styles.usage}>({translation.usageNotes.join(", ")})</span>
+        <span className={styles.usage}>
+          ({translation.usageNotes.join(", ")})
+        </span>
       )}
     </li>
   );

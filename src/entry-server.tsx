@@ -16,7 +16,12 @@ import { AUTH_COOKIE } from "./utils/auth";
 import { clientId, clientSecret, base } from "../config.js";
 import "./utils/configure-framework";
 
-configureApi({ authCookie: AUTH_COOKIE, clientId, clientSecret, appBaseUrl: base });
+configureApi({
+  authCookie: AUTH_COOKIE,
+  clientId,
+  clientSecret,
+  appBaseUrl: base,
+});
 
 // Colocated loaders and mutation handlers self-register at boot.
 autoDiscoverRegistrations(import.meta.glob("./**/*-data.ts", { eager: true }));

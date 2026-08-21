@@ -22,7 +22,9 @@ export function usePermissionTransfer(
   );
 
   const available = useMemo(() => {
-    return catalog.filter((p) => !assigned.includes(p)).sort((a, b) => a.localeCompare(b));
+    return catalog
+      .filter((p) => !assigned.includes(p))
+      .sort((a, b) => a.localeCompare(b));
   }, [assigned, catalog]);
 
   /**
@@ -31,7 +33,9 @@ export function usePermissionTransfer(
   const moveSelectedToAssigned = () => {
     if (left.selected.size === 0) return;
     const toMove = [...left.selected].filter((v) => available.includes(v));
-    onChange([...new Set([...assigned, ...toMove])].sort((a, b) => a.localeCompare(b)));
+    onChange(
+      [...new Set([...assigned, ...toMove])].sort((a, b) => a.localeCompare(b)),
+    );
     left.setSelected(new Set());
   };
 
@@ -49,7 +53,11 @@ export function usePermissionTransfer(
    */
   const moveAllToAssigned = () => {
     if (available.length === 0) return;
-    onChange([...new Set([...assigned, ...available])].sort((a, b) => a.localeCompare(b)));
+    onChange(
+      [...new Set([...assigned, ...available])].sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    );
     left.setSelected(new Set());
   };
 

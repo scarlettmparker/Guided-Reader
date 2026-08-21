@@ -43,7 +43,10 @@ const AccountRoleEditor = (props: AccountRoleEditorProps) => {
   const handleSave = () => {
     setError(null);
     startTransition(async () => {
-      const result = await setAccountRoles(accountId, draft) as { __typename?: string; message?: string };
+      const result = (await setAccountRoles(accountId, draft)) as {
+        __typename?: string;
+        message?: string;
+      };
       if (result?.__typename === "StandardError") {
         setError(result.message ?? "Failed to save roles.");
       }
@@ -60,7 +63,11 @@ const AccountRoleEditor = (props: AccountRoleEditorProps) => {
       </CardHeader>
       <CardBody>
         <section className={styles.editor_body}>
-          <AccountRoleTransferList roles={roles ?? []} assignedRoleNames={draft} onChange={setDraft} />
+          <AccountRoleTransferList
+            roles={roles ?? []}
+            assignedRoleNames={draft}
+            onChange={setDraft}
+          />
           {error && <p className={styles.error}>{error}</p>}
           <section className={styles.footer}>
             <Button

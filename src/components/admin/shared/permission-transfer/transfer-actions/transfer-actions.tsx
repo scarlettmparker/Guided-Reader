@@ -1,6 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@sun/components";
-import { ChevronRightIcon, ChevronLeftIcon, ChevronDoubleRightIcon, ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronRightIcon,
+  ChevronLeftIcon,
+  ChevronDoubleRightIcon,
+  ChevronDoubleLeftIcon,
+} from "@heroicons/react/24/outline";
 import styles from "./transfer-actions.module.css";
 
 type TransferActionsProps = {
@@ -32,7 +37,11 @@ const TransferActions = (props: TransferActionsProps) => {
   const { t } = useTranslation("admin");
 
   return (
-    <section className={styles.actions} aria-label={t("transfer-actions")} {...rest}>
+    <section
+      className={styles.actions}
+      aria-label={t("transfer-actions")}
+      {...rest}
+    >
       <Button
         variant="secondary"
         title={t("move-selected-to-assigned")}

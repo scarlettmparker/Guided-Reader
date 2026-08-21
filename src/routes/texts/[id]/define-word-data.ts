@@ -26,11 +26,13 @@ defineLoader({
     };
     if (!word.trim()) return { word: empty };
     try {
-      const result = await executeDocument<DefineWordQuery, DefineWordQueryVariables>(
-        DefineWordDocument,
-        { word, scope: [WordScope.AllTranslations] },
-      );
-      const entry = result.success ? (result.data?.hadesQueries.defineWord ?? null) : null;
+      const result = await executeDocument<
+        DefineWordQuery,
+        DefineWordQueryVariables
+      >(DefineWordDocument, { word, scope: [WordScope.AllTranslations] });
+      const entry = result.success
+        ? (result.data?.hadesQueries.defineWord ?? null)
+        : null;
       return { word: entry ?? empty };
     } catch (error) {
       console.error("Failed to fetch word:", error);

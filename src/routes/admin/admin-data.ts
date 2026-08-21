@@ -39,9 +39,20 @@ defineLoader({
       : undefined;
 
     try {
-      const result = await executeDocument<AccountsQuery, AccountsQueryVariables>(
+      const result = await executeDocument<
+        AccountsQuery,
+        AccountsQueryVariables
+      >(
         AccountsDocument,
-        { pagination: { page, size: 20, sortBy: "username", sortDir: SortDirection.Asc, filters } },
+        {
+          pagination: {
+            page,
+            size: 20,
+            sortBy: "username",
+            sortDir: SortDirection.Asc,
+            filters,
+          },
+        },
         token,
       );
       const data = result.data?.gaiaQueries?.accounts;

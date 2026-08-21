@@ -60,10 +60,20 @@ const ConfirmDeactivateAccountDialog = ({
         <p>{t("deactivate-body")}</p>
       </DialogBody>
       <DialogFooter>
-        <Button type="button" variant="secondary" onClick={onClose} disabled={pending}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onClose}
+          disabled={pending}
+        >
           {t("cancel-label")}
         </Button>
-        <Button type="submit" variant="destructive" onClick={handleConfirm} disabled={pending}>
+        <Button
+          type="submit"
+          variant="destructive"
+          onClick={handleConfirm}
+          disabled={pending}
+        >
           {t("confirm-label")}
         </Button>
       </DialogFooter>

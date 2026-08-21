@@ -237,7 +237,11 @@ defineMutation({
         __typename: "StandardError" as const,
         message: result.error || "Failed to create private note.",
       }),
-      invalidated: [makeCacheKey("privateNotes/:textId:privateNotes", { textId: body.input.textId })],
+      invalidated: [
+        makeCacheKey("privateNotes/:textId:privateNotes", {
+          textId: body.input.textId,
+        }),
+      ],
     };
   },
 });
@@ -247,7 +251,10 @@ defineMutation({
  */
 defineMutation({
   path: "hades/deletePrivateNote",
-  async handler(body: DeletePrivateNoteMutationVariables & { textId?: string }, context) {
+  async handler(
+    body: DeletePrivateNoteMutationVariables & { textId?: string },
+    context,
+  ) {
     const result = await executeDocument<
       DeletePrivateNoteMutation,
       DeletePrivateNoteMutationVariables
@@ -259,7 +266,11 @@ defineMutation({
         message: result.error || "Failed to delete private note.",
       }),
       invalidated: body.textId
-        ? [makeCacheKey("privateNotes/:textId:privateNotes", { textId: body.textId })]
+        ? [
+            makeCacheKey("privateNotes/:textId:privateNotes", {
+              textId: body.textId,
+            }),
+          ]
         : [],
     };
   },
@@ -271,18 +282,21 @@ defineMutation({
 defineMutation({
   path: "hades/shareNotes",
   async handler(body: ShareNotesMutationVariables, context) {
-    const result = await executeDocument<ShareNotesMutation, ShareNotesMutationVariables>(
-      ShareNotesDocument,
-      body,
-      tokenFrom(context),
-    );
+    const result = await executeDocument<
+      ShareNotesMutation,
+      ShareNotesMutationVariables
+    >(ShareNotesDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.shareNotes;
     return {
       ...(data ?? {
         __typename: "StandardError" as const,
         message: result.error || "Failed to share notes.",
       }),
-      invalidated: [makeCacheKey("privateNotes/:textId:privateNotes", { textId: body.input.textId })],
+      invalidated: [
+        makeCacheKey("privateNotes/:textId:privateNotes", {
+          textId: body.input.textId,
+        }),
+      ],
     };
   },
 });

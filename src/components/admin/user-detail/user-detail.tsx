@@ -41,15 +41,21 @@ const AdminUserDetail = ({ accountId }: AdminUserDetailProps) => {
         <label>{t("provider")}</label>
         <p className={styles.detail_value}>{account.provider ?? t("none")}</p>
         <label>{t("created")}</label>
-        <p className={styles.detail_value}>{account.createdAt ?? t("unknown")}</p>
+        <p className={styles.detail_value}>
+          {account.createdAt ?? t("unknown")}
+        </p>
         <label>{t("updated")}</label>
-        <p className={styles.detail_value}>{account.updatedAt ?? t("unknown")}</p>
+        <p className={styles.detail_value}>
+          {account.updatedAt ?? t("unknown")}
+        </p>
         {account.remoteUsers && account.remoteUsers.length > 0 && (
           <>
             <label>{t("remote-accounts")}</label>
             <div className={styles.detail_value}>
               {account.remoteUsers.map((ru, i) => (
-                <p key={i}>{ru.type}: {ru.id}</p>
+                <p key={i}>
+                  {ru.type}: {ru.id}
+                </p>
               ))}
             </div>
           </>

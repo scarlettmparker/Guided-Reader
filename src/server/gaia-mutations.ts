@@ -148,11 +148,10 @@ defineMutation({
 defineMutation<CreateRoleMutationVariables, Role>({
   path: "gaia/createRole",
   async handler(body, context) {
-    const result = await executeDocument<CreateRoleMutation, CreateRoleMutationVariables>(
-      CreateRoleDocument,
-      body,
-      tokenFrom(context),
-    );
+    const result = await executeDocument<
+      CreateRoleMutation,
+      CreateRoleMutationVariables
+    >(CreateRoleDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.createRole;
     if (!data) {
       return {
@@ -173,11 +172,10 @@ defineMutation<CreateRoleMutationVariables, Role>({
 defineMutation({
   path: "gaia/deleteRole",
   async handler(body: DeleteRoleMutationVariables, context) {
-    const result = await executeDocument<DeleteRoleMutation, DeleteRoleMutationVariables>(
-      DeleteRoleDocument,
-      body,
-      tokenFrom(context),
-    );
+    const result = await executeDocument<
+      DeleteRoleMutation,
+      DeleteRoleMutationVariables
+    >(DeleteRoleDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.deleteRole;
     return {
       ...(data ?? {
@@ -205,7 +203,9 @@ defineMutation({
         __typename: "StandardError" as const,
         message: result.error || "Failed to set account roles.",
       }),
-      invalidated: [makeCacheKey("admin/:id/roles:accountRoles", { id: body.accountId })],
+      invalidated: [
+        makeCacheKey("admin/:id/roles:accountRoles", { id: body.accountId }),
+      ],
     };
   },
 });
@@ -227,7 +227,9 @@ defineMutation({
         message: result.error || "Failed to set account permissions.",
       }),
       invalidated: [
-        makeCacheKey("admin/:id/permissions:accountPermissions", { id: body.accountId }),
+        makeCacheKey("admin/:id/permissions:accountPermissions", {
+          id: body.accountId,
+        }),
         makeCacheKey("admin/all-permissions:allPermissions", {}),
       ],
     };
@@ -251,7 +253,9 @@ defineMutation({
         message: result.error || "Failed to set role permissions.",
       }),
       invalidated: [
-        makeCacheKey("admin/roles/:id/permissions:rolePermissions", { id: body.roleId }),
+        makeCacheKey("admin/roles/:id/permissions:rolePermissions", {
+          id: body.roleId,
+        }),
         makeCacheKey("admin/all-permissions:allPermissions", {}),
       ],
     };

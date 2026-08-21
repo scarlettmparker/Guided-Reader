@@ -74,12 +74,16 @@ const AdminUserListItems = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       {account.status === "SUSPENDED" ? (
-                        <DropdownMenuItem onClick={() => setUnsuspendId(account.id)}>
+                        <DropdownMenuItem
+                          onClick={() => setUnsuspendId(account.id)}
+                        >
                           <LockOpenIcon width={16} height={16} />
                           {t("unsuspend-account")}
                         </DropdownMenuItem>
                       ) : (
-                        <DropdownMenuItem onClick={() => setSuspendId(account.id)}>
+                        <DropdownMenuItem
+                          onClick={() => setSuspendId(account.id)}
+                        >
                           <LockClosedIcon width={16} height={16} />
                           {t("suspend-account")}
                         </DropdownMenuItem>
@@ -98,7 +102,9 @@ const AdminUserListItems = () => {
           onClose={() => setSuspendId(null)}
           onConfirm={async () => {
             setSuspendId(null);
-            await executeMutation("gaia/suspendAccount", { id: suspendAccount.id });
+            await executeMutation("gaia/suspendAccount", {
+              id: suspendAccount.id,
+            });
           }}
           username={suspendAccount.username}
         />
@@ -109,7 +115,9 @@ const AdminUserListItems = () => {
           onClose={() => setUnsuspendId(null)}
           onConfirm={async () => {
             setUnsuspendId(null);
-            await executeMutation("gaia/unsuspendAccount", { id: unsuspendAccount.id });
+            await executeMutation("gaia/unsuspendAccount", {
+              id: unsuspendAccount.id,
+            });
           }}
           username={unsuspendAccount.username}
         />

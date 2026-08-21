@@ -2,7 +2,11 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@sun/components";
 import type { RolesQuery } from "~/generated/graphql";
-import { PermissionColumn, TransferActions, usePermissionTransfer } from "~/components/admin/shared/permission-transfer";
+import {
+  PermissionColumn,
+  TransferActions,
+  usePermissionTransfer,
+} from "~/components/admin/shared/permission-transfer";
 import styles from "./account-role-transfer-list.module.css";
 
 type RolesData = RolesQuery["gaiaQueries"]["roles"];
@@ -28,7 +32,11 @@ type AccountRoleTransferListProps = {
 const AccountRoleTransferList = (props: AccountRoleTransferListProps) => {
   const { roles, assignedRoleNames, onChange, className, ...rest } = props;
   const { t } = useTranslation("admin");
-  const catalog = useMemo(() => (roles ?? []).map((role) => role.name).sort((a, b) => a.localeCompare(b)), [roles]);
+  const catalog = useMemo(
+    () =>
+      (roles ?? []).map((role) => role.name).sort((a, b) => a.localeCompare(b)),
+    [roles],
+  );
 
   const {
     available,
