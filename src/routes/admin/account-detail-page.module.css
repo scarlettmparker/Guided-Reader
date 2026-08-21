@@ -1,0 +1,5 @@
+.detail_stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lg);
+}

@@ -162,6 +162,26 @@
     "unsuspend-title": "Unsuspend {{username}}?",
     "unsuspend-body": "Are you sure you wish to unsuspend this user?",
     "cancel-label": "Cancel",
-    "confirm-label": "Confirm"
+    "confirm-label": "Confirm",
+    "roles-title": "Roles",
+    "permissions-title": "Permissions",
+    "role-permissions-title": "Role permissions",
+    "available-roles": "Available roles",
+    "assigned-roles": "Assigned roles",
+    "available-permissions": "Available permissions",
+    "assigned-permissions": "Assigned permissions",
+    "save-roles": "Save roles",
+    "save-permissions": "Save permissions",
+    "saving": "Saving...",
+    "add-permission": "Add",
+    "permission-placeholder": "e.g. graphql.gaia.roles",
+    "permission-hint": "Use * as wildcard, e.g. graphql.*",
+    "move-selected-to-assigned": "Move selected to assigned",
+    "move-selected-to-available": "Move selected to available",
+    "move-all-to-assigned": "Move all to assigned",
+    "move-all-to-available": "Move all to available",
+    "transfer-actions": "Transfer actions",
+    "remove-permission": "Remove permission",
+    "remove-selected": "Remove selected"
   }
 }
