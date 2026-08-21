@@ -1,0 +1,11 @@
+query roles {
+  gaiaQueries {
+    roles {
+      id
+      name
+      description
+      createdAt
+      updatedAt
+    }
+  }
+}

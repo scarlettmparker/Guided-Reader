@@ -1,0 +1,5 @@
+query rolePermissions($roleId: ID!) {
+  gaiaQueries {
+    rolePermissions(roleId: $roleId)
+  }
+}

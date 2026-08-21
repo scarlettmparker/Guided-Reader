@@ -1,0 +1,5 @@
+query accountPermissions($accountId: ID!) {
+  gaiaQueries {
+    accountPermissions(accountId: $accountId)
+  }
+}

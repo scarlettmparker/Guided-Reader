@@ -1,0 +1,15 @@
+mutation setAccountPermissions($accountId: ID!, $permissions: [String!]!) {
+  gaiaMutations {
+    setAccountPermissions(accountId: $accountId, permissions: $permissions) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

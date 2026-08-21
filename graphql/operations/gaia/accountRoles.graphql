@@ -1,0 +1,5 @@
+query accountRoles($accountId: ID!) {
+  gaiaQueries {
+    accountRoles(accountId: $accountId)
+  }
+}

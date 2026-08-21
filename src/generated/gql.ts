@@ -15,15 +15,25 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 type Documents = {
     "query account($id: ID!) {\n  gaiaQueries {\n    account(id: $id) {\n      id\n      username\n      personId\n      status\n      provider\n      remoteUsers {\n        type\n        id\n      }\n      createdAt\n      updatedAt\n    }\n  }\n}": typeof types.AccountDocument,
+    "query accountPermissions($accountId: ID!) {\n  gaiaQueries {\n    accountPermissions(accountId: $accountId)\n  }\n}": typeof types.AccountPermissionsDocument,
+    "query accountRoles($accountId: ID!) {\n  gaiaQueries {\n    accountRoles(accountId: $accountId)\n  }\n}": typeof types.AccountRolesDocument,
     "query accounts($pagination: PaginationInput) {\n  gaiaQueries {\n    accounts(pagination: $pagination) {\n      items {\n        id\n        username\n        personId\n        status\n        provider\n        remoteUsers {\n          type\n          id\n        }\n        createdAt\n        updatedAt\n      }\n      pageInfo {\n        page\n        size\n        totalPages\n        totalCount\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n}": typeof types.AccountsDocument,
     "mutation confirmAccountReactivation($token: String!) {\n  gaiaMutations {\n    confirmAccountReactivation(token: $token) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.ConfirmAccountReactivationDocument,
+    "mutation createRole($name: String!, $description: String) {\n  gaiaMutations {\n    createRole(name: $name, description: $description) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}": typeof types.CreateRoleDocument,
     "mutation deactivateAccount {\n  gaiaMutations {\n    deactivateAccount {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.DeactivateAccountDocument,
+    "mutation deleteRole($id: ID!) {\n  gaiaMutations {\n    deleteRole(id: $id) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.DeleteRoleDocument,
     "mutation Login($input: LoginInput!) {\n  gaiaMutations {\n    login(input: $input) {\n      token\n    }\n  }\n}": typeof types.LoginDocument,
     "mutation logout {\n  gaiaMutations {\n    logout {\n      __typename\n      ... on QuerySuccess {\n        message\n      }\n      ... on StandardError {\n        message\n      }\n    }\n  }\n}": typeof types.LogoutDocument,
     "query me {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n}": typeof types.MeDocument,
     "query myRoles {\n  gaiaQueries {\n    myRoles\n  }\n}": typeof types.MyRolesDocument,
     "query propertySet($ownerKey: String!, $name: String!, $entry: String) {\n  gaiaQueries {\n    propertySet(ownerKey: $ownerKey, name: $name, entry: $entry)\n  }\n}": typeof types.PropertySetDocument,
     "mutation requestAccountReactivation($email: String!, $provider: String!) {\n  gaiaMutations {\n    requestAccountReactivation(email: $email, provider: $provider) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.RequestAccountReactivationDocument,
+    "query role($id: ID!) {\n  gaiaQueries {\n    role(id: $id) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}": typeof types.RoleDocument,
+    "query rolePermissions($roleId: ID!) {\n  gaiaQueries {\n    rolePermissions(roleId: $roleId)\n  }\n}": typeof types.RolePermissionsDocument,
+    "query roles {\n  gaiaQueries {\n    roles {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}": typeof types.RolesDocument,
+    "mutation setAccountPermissions($accountId: ID!, $permissions: [String!]!) {\n  gaiaMutations {\n    setAccountPermissions(accountId: $accountId, permissions: $permissions) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.SetAccountPermissionsDocument,
+    "mutation setAccountRoles($accountId: ID!, $roleNames: [String!]!) {\n  gaiaMutations {\n    setAccountRoles(accountId: $accountId, roleNames: $roleNames) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.SetAccountRolesDocument,
+    "mutation setRolePermissions($roleId: ID!, $permissions: [String!]!) {\n  gaiaMutations {\n    setRolePermissions(roleId: $roleId, permissions: $permissions) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.SetRolePermissionsDocument,
     "mutation suspendAccount($id: ID!) {\n  gaiaMutations {\n    suspendAccount(id: $id) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.SuspendAccountDocument,
     "mutation unsuspendAccount($id: ID!) {\n  gaiaMutations {\n    unsuspendAccount(id: $id) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.UnsuspendAccountDocument,
     "mutation addComment($input: CommentInput!) {\n  hadesMutations {\n    addComment(input: $input) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.AddCommentDocument,
@@ -63,15 +73,25 @@ type Documents = {
 };
 const documents: Documents = {
     "query account($id: ID!) {\n  gaiaQueries {\n    account(id: $id) {\n      id\n      username\n      personId\n      status\n      provider\n      remoteUsers {\n        type\n        id\n      }\n      createdAt\n      updatedAt\n    }\n  }\n}": types.AccountDocument,
+    "query accountPermissions($accountId: ID!) {\n  gaiaQueries {\n    accountPermissions(accountId: $accountId)\n  }\n}": types.AccountPermissionsDocument,
+    "query accountRoles($accountId: ID!) {\n  gaiaQueries {\n    accountRoles(accountId: $accountId)\n  }\n}": types.AccountRolesDocument,
     "query accounts($pagination: PaginationInput) {\n  gaiaQueries {\n    accounts(pagination: $pagination) {\n      items {\n        id\n        username\n        personId\n        status\n        provider\n        remoteUsers {\n          type\n          id\n        }\n        createdAt\n        updatedAt\n      }\n      pageInfo {\n        page\n        size\n        totalPages\n        totalCount\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n}": types.AccountsDocument,
     "mutation confirmAccountReactivation($token: String!) {\n  gaiaMutations {\n    confirmAccountReactivation(token: $token) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.ConfirmAccountReactivationDocument,
+    "mutation createRole($name: String!, $description: String) {\n  gaiaMutations {\n    createRole(name: $name, description: $description) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}": types.CreateRoleDocument,
     "mutation deactivateAccount {\n  gaiaMutations {\n    deactivateAccount {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.DeactivateAccountDocument,
+    "mutation deleteRole($id: ID!) {\n  gaiaMutations {\n    deleteRole(id: $id) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.DeleteRoleDocument,
     "mutation Login($input: LoginInput!) {\n  gaiaMutations {\n    login(input: $input) {\n      token\n    }\n  }\n}": types.LoginDocument,
     "mutation logout {\n  gaiaMutations {\n    logout {\n      __typename\n      ... on QuerySuccess {\n        message\n      }\n      ... on StandardError {\n        message\n      }\n    }\n  }\n}": types.LogoutDocument,
     "query me {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n}": types.MeDocument,
     "query myRoles {\n  gaiaQueries {\n    myRoles\n  }\n}": types.MyRolesDocument,
     "query propertySet($ownerKey: String!, $name: String!, $entry: String) {\n  gaiaQueries {\n    propertySet(ownerKey: $ownerKey, name: $name, entry: $entry)\n  }\n}": types.PropertySetDocument,
     "mutation requestAccountReactivation($email: String!, $provider: String!) {\n  gaiaMutations {\n    requestAccountReactivation(email: $email, provider: $provider) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.RequestAccountReactivationDocument,
+    "query role($id: ID!) {\n  gaiaQueries {\n    role(id: $id) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}": types.RoleDocument,
+    "query rolePermissions($roleId: ID!) {\n  gaiaQueries {\n    rolePermissions(roleId: $roleId)\n  }\n}": types.RolePermissionsDocument,
+    "query roles {\n  gaiaQueries {\n    roles {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}": types.RolesDocument,
+    "mutation setAccountPermissions($accountId: ID!, $permissions: [String!]!) {\n  gaiaMutations {\n    setAccountPermissions(accountId: $accountId, permissions: $permissions) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.SetAccountPermissionsDocument,
+    "mutation setAccountRoles($accountId: ID!, $roleNames: [String!]!) {\n  gaiaMutations {\n    setAccountRoles(accountId: $accountId, roleNames: $roleNames) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.SetAccountRolesDocument,
+    "mutation setRolePermissions($roleId: ID!, $permissions: [String!]!) {\n  gaiaMutations {\n    setRolePermissions(roleId: $roleId, permissions: $permissions) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.SetRolePermissionsDocument,
     "mutation suspendAccount($id: ID!) {\n  gaiaMutations {\n    suspendAccount(id: $id) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.SuspendAccountDocument,
     "mutation unsuspendAccount($id: ID!) {\n  gaiaMutations {\n    unsuspendAccount(id: $id) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.UnsuspendAccountDocument,
     "mutation addComment($input: CommentInput!) {\n  hadesMutations {\n    addComment(input: $input) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.AddCommentDocument,
@@ -131,6 +151,14 @@ export function graphql(source: "query account($id: ID!) {\n  gaiaQueries {\n   
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "query accountPermissions($accountId: ID!) {\n  gaiaQueries {\n    accountPermissions(accountId: $accountId)\n  }\n}"): (typeof documents)["query accountPermissions($accountId: ID!) {\n  gaiaQueries {\n    accountPermissions(accountId: $accountId)\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query accountRoles($accountId: ID!) {\n  gaiaQueries {\n    accountRoles(accountId: $accountId)\n  }\n}"): (typeof documents)["query accountRoles($accountId: ID!) {\n  gaiaQueries {\n    accountRoles(accountId: $accountId)\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "query accounts($pagination: PaginationInput) {\n  gaiaQueries {\n    accounts(pagination: $pagination) {\n      items {\n        id\n        username\n        personId\n        status\n        provider\n        remoteUsers {\n          type\n          id\n        }\n        createdAt\n        updatedAt\n      }\n      pageInfo {\n        page\n        size\n        totalPages\n        totalCount\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n}"): (typeof documents)["query accounts($pagination: PaginationInput) {\n  gaiaQueries {\n    accounts(pagination: $pagination) {\n      items {\n        id\n        username\n        personId\n        status\n        provider\n        remoteUsers {\n          type\n          id\n        }\n        createdAt\n        updatedAt\n      }\n      pageInfo {\n        page\n        size\n        totalPages\n        totalCount\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -139,7 +167,15 @@ export function graphql(source: "mutation confirmAccountReactivation($token: Str
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "mutation createRole($name: String!, $description: String) {\n  gaiaMutations {\n    createRole(name: $name, description: $description) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}"): (typeof documents)["mutation createRole($name: String!, $description: String) {\n  gaiaMutations {\n    createRole(name: $name, description: $description) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "mutation deactivateAccount {\n  gaiaMutations {\n    deactivateAccount {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"): (typeof documents)["mutation deactivateAccount {\n  gaiaMutations {\n    deactivateAccount {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "mutation deleteRole($id: ID!) {\n  gaiaMutations {\n    deleteRole(id: $id) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"): (typeof documents)["mutation deleteRole($id: ID!) {\n  gaiaMutations {\n    deleteRole(id: $id) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -164,6 +200,30 @@ export function graphql(source: "query propertySet($ownerKey: String!, $name: St
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "mutation requestAccountReactivation($email: String!, $provider: String!) {\n  gaiaMutations {\n    requestAccountReactivation(email: $email, provider: $provider) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"): (typeof documents)["mutation requestAccountReactivation($email: String!, $provider: String!) {\n  gaiaMutations {\n    requestAccountReactivation(email: $email, provider: $provider) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query role($id: ID!) {\n  gaiaQueries {\n    role(id: $id) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}"): (typeof documents)["query role($id: ID!) {\n  gaiaQueries {\n    role(id: $id) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query rolePermissions($roleId: ID!) {\n  gaiaQueries {\n    rolePermissions(roleId: $roleId)\n  }\n}"): (typeof documents)["query rolePermissions($roleId: ID!) {\n  gaiaQueries {\n    rolePermissions(roleId: $roleId)\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query roles {\n  gaiaQueries {\n    roles {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}"): (typeof documents)["query roles {\n  gaiaQueries {\n    roles {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "mutation setAccountPermissions($accountId: ID!, $permissions: [String!]!) {\n  gaiaMutations {\n    setAccountPermissions(accountId: $accountId, permissions: $permissions) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"): (typeof documents)["mutation setAccountPermissions($accountId: ID!, $permissions: [String!]!) {\n  gaiaMutations {\n    setAccountPermissions(accountId: $accountId, permissions: $permissions) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "mutation setAccountRoles($accountId: ID!, $roleNames: [String!]!) {\n  gaiaMutations {\n    setAccountRoles(accountId: $accountId, roleNames: $roleNames) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"): (typeof documents)["mutation setAccountRoles($accountId: ID!, $roleNames: [String!]!) {\n  gaiaMutations {\n    setAccountRoles(accountId: $accountId, roleNames: $roleNames) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "mutation setRolePermissions($roleId: ID!, $permissions: [String!]!) {\n  gaiaMutations {\n    setRolePermissions(roleId: $roleId, permissions: $permissions) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"): (typeof documents)["mutation setRolePermissions($roleId: ID!, $permissions: [String!]!) {\n  gaiaMutations {\n    setRolePermissions(roleId: $roleId, permissions: $permissions) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

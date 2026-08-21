@@ -1,0 +1,11 @@
+query role($id: ID!) {
+  gaiaQueries {
+    role(id: $id) {
+      id
+      name
+      description
+      createdAt
+      updatedAt
+    }
+  }
+}

@@ -1,0 +1,15 @@
+mutation setRolePermissions($roleId: ID!, $permissions: [String!]!) {
+  gaiaMutations {
+    setRolePermissions(roleId: $roleId, permissions: $permissions) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}
