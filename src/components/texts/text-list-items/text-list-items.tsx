@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { usePageData } from "@sun/ssr/react";
 import { Badge, cn } from "@sun/components";
 import type { ListTextsQuery } from "~/generated/graphql";
@@ -7,30 +7,15 @@ import styles from "./text-list-items.module.css";
 
 type PagedTexts = ListTextsQuery["hadesQueries"]["texts"];
 
-type TextListItemsProps = {
-  /**
-   * Zero-based page index.
-   */
-  page: number;
-  /**
-   * Committed search query (empty string for no filter).
-   */
-  search: string;
-  /**
-   * Selected CEFR levels (empty for no filter).
-   */
-  levels: string[];
-};
-
 /**
  * Renders the filtered, paginated text list items. Suspends on data fetch.
- *
- * @param page zero-based page index
- * @param search committed search query
- * @param levels selected CEFR levels
  */
-const TextListItems = ({ page, search, levels }: TextListItemsProps) => {
+const TextListItems = () => {
   const { pathname, search: queryString } = useLocation();
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("search") ?? "";
+  const levels = searchParams.get("levels")?.split(",").filter(Boolean) ?? [];
+  const page = Number(searchParams.get("page") ?? "0");
   const { data } = usePageData<PagedTexts>("texts", "texts", {
     page,
     search: search || undefined,
@@ -55,7 +40,6 @@ const TextListItems = ({ page, search, levels }: TextListItemsProps) => {
               className={cn(styles.item, isActive && styles.item_active)}
             >
               <Badge
-                variant="secondary"
                 className={styles.item_level}
                 style={colour ? { backgroundColor: colour } : undefined}
               >

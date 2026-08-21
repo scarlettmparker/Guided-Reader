@@ -5,7 +5,6 @@ import styles from "./annotation-replies.module.css";
 
 type Comment =
   ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
-type LevelColours = Record<string, string>;
 
 type AnnotationRepliesProps = {
   /**
@@ -28,10 +27,6 @@ const AnnotationReplies = ({ annotationId, textId }: AnnotationRepliesProps) => 
     "annotations/:annotationId",
     { annotationId },
   );
-  const { data: colours } = usePageData<LevelColours | null>(
-    "levelColours",
-    "levelColours",
-  );
   const items = comments ?? [];
   if (items.length === 0) {
     return null;
@@ -43,8 +38,6 @@ const AnnotationReplies = ({ annotationId, textId }: AnnotationRepliesProps) => 
         <CommentItem
           key={comment.id}
           comment={comment}
-          profile={comment.authorProfile ?? undefined}
-          colours={colours}
           annotationId={annotationId}
           textId={textId}
         />

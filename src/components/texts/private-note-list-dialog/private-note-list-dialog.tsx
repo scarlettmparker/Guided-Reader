@@ -184,7 +184,6 @@ const PrivateNoteListDialog = ({
                       </span>
                       {profile?.cefrLevel && (
                         <Badge
-                          variant="secondary"
                           className={styles.level}
                           style={
                             colour ? { backgroundColor: colour } : undefined

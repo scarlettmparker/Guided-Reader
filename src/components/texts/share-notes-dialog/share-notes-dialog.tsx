@@ -46,8 +46,6 @@ type ShareNotesDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-
-
 /**
  * Dialog to share all private notes on a text.
  */
@@ -65,8 +63,11 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const handleAddSuggestion = (account: SearchReaderAccountsQuery["hadesQueries"]["searchReaderAccounts"][number]) => {
-    const label = account.globalName || account.discordUsername || account.gaiaAccountId;
+  const handleAddSuggestion = (
+    account: SearchReaderAccountsQuery["hadesQueries"]["searchReaderAccounts"][number],
+  ) => {
+    const label =
+      account.globalName || account.discordUsername || account.gaiaAccountId;
     setTags([...tags, { id: account.gaiaAccountId, label, isEmail: false }]);
     setQuery("");
   };
@@ -121,7 +122,7 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
             placeholder={t("share-notes-placeholder")}
           >
             {tags.map((tag) => (
-              <Badge key={tag.id} variant="primary" className={styles.tag}>
+              <Badge key={tag.id} className={styles.tag}>
                 <span className={styles.tag_label}>{tag.label}</span>
                 <Button
                   variant="secondary"
@@ -136,7 +137,11 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
             ))}
           </TaggedInput>
           <Suspense fallback={null}>
-            <SearchSuggestions query={debouncedQuery} tags={tags} onAdd={handleAddSuggestion} />
+            <SearchSuggestions
+              query={debouncedQuery}
+              tags={tags}
+              onAdd={handleAddSuggestion}
+            />
           </Suspense>
         </div>
       </DialogBody>

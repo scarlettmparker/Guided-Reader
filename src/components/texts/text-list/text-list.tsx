@@ -1,4 +1,4 @@
-import { Suspense, useState, useTransition } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@sun/components";
@@ -47,10 +47,8 @@ const TextList = () => {
 
   const search = searchParams.get("search") ?? "";
   const levels = searchParams.get("levels")?.split(",").filter(Boolean) ?? [];
-  const page = Number(searchParams.get("page") ?? "0");
 
   const [searchInput, setSearchInput] = useState(search);
-  const [, startTransition] = useTransition();
 
   /**
    * Sets the search query in the query params and resets the page to 0.
@@ -85,17 +83,6 @@ const TextList = () => {
       return updated;
     });
   };
-
-  const handlePageChange = (newPage: number) => {
-    // Wrap page change in startTransition to avoid blocking the UI while fetching new data.
-    startTransition(() => {
-      setSearchParams((prev) =>
-        updateParams(prev, "page", newPage > 0 ? String(newPage) : null),
-      );
-    });
-  };
-
-  const pagination = { page, search, levels };
 
   return (
     <>
@@ -141,16 +128,12 @@ const TextList = () => {
               </div>
             }
           >
-            <TextListItems {...pagination} />
+            <TextListItems />
           </Suspense>
         </CardBody>
       </Card>
       <Suspense fallback={null}>
-        <TextListPagination
-          {...pagination}
-          onPageChange={handlePageChange}
-          className={styles.pagination}
-        />
+        <TextListPagination className={styles.pagination} />
       </Suspense>
     </>
   );

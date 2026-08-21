@@ -31,7 +31,8 @@ import {
 import styles from "./annotation-list-dialog.module.css";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
-type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+type Annotation =
+  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 type LevelColours = Record<string, string>;
 
@@ -136,7 +137,9 @@ const AnnotationListDialog = ({
       position={position}
     >
       <DialogHeader>
-        <DialogTitle>{t("annotations-for", { snippet: titleSnippet })}</DialogTitle>
+        <DialogTitle>
+          {t("annotations-for", { snippet: titleSnippet })}
+        </DialogTitle>
       </DialogHeader>
       <DialogBody>
         {items.length === 0 ? (
@@ -166,7 +169,9 @@ const AnnotationListDialog = ({
                     className={styles.header}
                     title={
                       annotation.createdAt
-                        ? new Date(annotation.createdAt as string).toLocaleString()
+                        ? new Date(
+                            annotation.createdAt as string,
+                          ).toLocaleString()
                         : undefined
                     }
                   >
@@ -183,7 +188,6 @@ const AnnotationListDialog = ({
                     </span>
                     {profile?.cefrLevel && (
                       <Badge
-                        variant="secondary"
                         className={styles.level}
                         style={colour ? { backgroundColor: colour } : undefined}
                       >
@@ -221,7 +225,9 @@ const AnnotationListDialog = ({
                       myVote={annotation.myVote ?? null}
                       netScore={annotation.netScore}
                       onVoteChange={handleVoteChange}
-                      onVoted={(netScore) => handleVoted(annotation.id, netScore)}
+                      onVoted={(netScore) =>
+                        handleVoted(annotation.id, netScore)
+                      }
                     />
                     <a onClick={toggleReply}>{t("reply-action")}</a>
                   </div>

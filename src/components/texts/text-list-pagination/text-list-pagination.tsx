@@ -1,3 +1,5 @@
+import { useTransition } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { usePageData } from "@sun/ssr/react";
 import { Pagination } from "@sun/components";
@@ -5,43 +7,17 @@ import type { ListTextsQuery } from "~/generated/graphql";
 
 type PagedTexts = ListTextsQuery["hadesQueries"]["texts"];
 
-type TextListPaginationProps = {
-  /**
-   * Zero-based page index.
-   */
-  page: number;
-  /**
-   * Committed search query (empty string for no filter).
-   */
-  search: string;
-  /**
-   * Selected CEFR levels (empty for no filter).
-   */
-  levels: string[];
-  /**
-   * Called when the user navigates to a new page.
-   *
-   * @param page the new zero-based page index
-   */
-  onPageChange: (page: number) => void;
-} & React.HTMLAttributes<HTMLDivElement>;
-
 /**
  * Renders pagination for the text list. Shares the same cache key as TextListItems.
- *
- * @param page zero-based page index
- * @param search committed search query
- * @param levels selected CEFR levels
- * @param onPageChange callback on page navigation
  */
-const TextListPagination = ({
-  page,
-  search,
-  levels,
-  onPageChange,
-  ...rest
-}: TextListPaginationProps) => {
+const TextListPagination = (props: React.HTMLAttributes<HTMLDivElement>) => {
+  const { className, ...rest } = props;
   useTranslation("texts");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [, startTransition] = useTransition();
+  const search = searchParams.get("search") ?? "";
+  const levels = searchParams.get("levels")?.split(",").filter(Boolean) ?? [];
+  const page = Number(searchParams.get("page") ?? "0");
   const { data } = usePageData<PagedTexts>("texts", "texts", {
     page,
     search: search || undefined,
@@ -54,11 +30,24 @@ const TextListPagination = ({
     return null;
   }
 
+  /**
+   * Handles page change via URL params.
+   */
+  const handlePageChange = (newPage: number) => {
+    startTransition(() => {
+      const next = new URLSearchParams(searchParams);
+      if (newPage > 0) next.set("page", String(newPage));
+      else next.delete("page");
+      setSearchParams(next);
+    });
+  };
+
   return (
     <Pagination
+      className={className}
       page={page + 1}
       totalPages={pageInfo.totalPages}
-      onPageChange={(p: number) => onPageChange(p - 1)}
+      onPageChange={(p: number) => handlePageChange(p - 1)}
       {...rest}
     />
   );

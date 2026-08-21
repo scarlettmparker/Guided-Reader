@@ -20,25 +20,16 @@ import ConfirmUnsuspendAccountDialog from "~/components/admin/confirm-unsuspend-
 import type { PagedAccounts } from "~/generated/graphql";
 import styles from "./user-list-items.module.css";
 
-type AdminUserListItemsProps = {
-  /**
-   * Committed search query.
-   */
-  search: string;
-  /**
-   * Zero-based page index.
-   */
-  page: number;
-};
-
 /**
  * Renders the account list body.
  */
-const AdminUserListItems = ({ search, page }: AdminUserListItemsProps) => {
+const AdminUserListItems = () => {
   const { t } = useTranslation("admin");
   const [suspendId, setSuspendId] = useState<string | null>(null);
   const [unsuspendId, setUnsuspendId] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
+  const search = searchParams.get("search") ?? "";
+  const page = Number(searchParams.get("page") ?? "0");
   const { data } = usePageData<PagedAccounts>("accounts", "accounts", {
     page: String(page),
     search: search || undefined,

@@ -42,10 +42,6 @@ type ForumPostItemProps = {
    */
   profile?: Profile;
   /**
-   * CEFR level to colour map for badges.
-   */
-  colours?: LevelColours | null;
-  /**
    * Parent thread, used to invalidate its post list on delete.
    */
   threadId: string;
@@ -54,16 +50,15 @@ type ForumPostItemProps = {
 /**
  * A single comment on a text discussion.
  */
-const ForumPostItem = ({
-  post,
-  profile,
-  colours,
-  threadId,
-}: ForumPostItemProps) => {
+const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
   const { t } = useTranslation("texts");
   const { data: currentUser } = usePageData<ReaderAccount | null>(
     "currentUser",
     "currentUser",
+  );
+  const { data: colours } = usePageData<LevelColours | null>(
+    "levelColours",
+    "levelColours",
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -93,10 +88,7 @@ const ForumPostItem = ({
           {profile?.globalName ?? profile?.discordUsername}
         </span>
         {profile?.cefrLevel && (
-          <Badge
-            variant="secondary"
-            style={colour ? { backgroundColor: colour } : undefined}
-          >
+          <Badge style={colour ? { backgroundColor: colour } : undefined}>
             {profile.cefrLevel}
           </Badge>
         )}

@@ -1,4 +1,5 @@
 import { Suspense, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Card, CardBody, CardHeader, CardTitle, SearchBar, Skeleton } from "@sun/components";
 import AdminUserListItems from "~/components/admin/user-list-items";
@@ -6,31 +7,25 @@ import AdminUserListFooter from "~/components/admin/user-list-footer";
 import AdminUserListPagination from "~/components/admin/user-list-pagination";
 import styles from "./user-list.module.css";
 
-type AdminUserListProps = {
-  /**
-   * Committed search query.
-   */
-  search: string;
-  /**
-   * Zero-based page index.
-   */
-  page: number;
-  /**
-   * Called when the user submits a search.
-   */
-  onSearch: (value: string) => void;
-  /**
-   * Called when the user navigates to a new page.
-   */
-  onPageChange: (page: number) => void;
-};
-
 /**
  * Searchable, paginated list of accounts.
  */
-const AdminUserList = ({ search, page, onSearch, onPageChange }: AdminUserListProps) => {
+const AdminUserList = () => {
   const { t } = useTranslation("admin");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get("search") ?? "";
   const [searchInput, setSearchInput] = useState(search);
+
+  /**
+   * Updates search query and resets pagination.
+   */
+  const handleSearch = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set("search", value);
+    else next.delete("search");
+    next.delete("page");
+    setSearchParams(next);
+  };
 
   return (
     <>
@@ -43,7 +38,7 @@ const AdminUserList = ({ search, page, onSearch, onPageChange }: AdminUserListPr
             <SearchBar
               value={searchInput}
               onChange={setSearchInput}
-              onSearch={onSearch}
+              onSearch={handleSearch}
               placeholder={t("search-placeholder")}
             />
           </div>
@@ -54,15 +49,15 @@ const AdminUserList = ({ search, page, onSearch, onPageChange }: AdminUserListPr
               </div>
             }
           >
-            <AdminUserListItems search={search} page={page} />
+            <AdminUserListItems />
           </Suspense>
         </CardBody>
         <Suspense fallback={null}>
-          <AdminUserListFooter search={search} page={page} />
+          <AdminUserListFooter />
         </Suspense>
       </Card>
       <Suspense fallback={null}>
-        <AdminUserListPagination search={search} page={page} onPageChange={onPageChange} />
+        <AdminUserListPagination />
       </Suspense>
     </>
   );

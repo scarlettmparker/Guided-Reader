@@ -34,7 +34,6 @@ import {
 import styles from "./comment-item.module.css";
 
 type Comment = ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
-type Profile = Comment["authorProfile"];
 type LevelColours = Record<string, string>;
 
 type CommentItemProps = {
@@ -42,14 +41,6 @@ type CommentItemProps = {
    * The comment to render.
    */
   comment: Comment;
-  /**
-   * The resolved author profile, if found.
-   */
-  profile?: Profile;
-  /**
-   * CEFR level to colour map for badges.
-   */
-  colours?: LevelColours | null;
   /**
    * Parent annotation, used to invalidate its comment list on delete.
    */
@@ -63,20 +54,19 @@ type CommentItemProps = {
 /**
  * A single reply on an annotation.
  */
-const CommentItem = ({
-  comment,
-  profile,
-  colours,
-  annotationId,
-  textId,
-}: CommentItemProps) => {
+const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
   const { t } = useTranslation("texts");
   const { data: currentUser } = usePageData<ReaderAccount | null>(
     "currentUser",
     "currentUser",
   );
+  const { data: colours } = usePageData<LevelColours | null>(
+    "levelColours",
+    "levelColours",
+  );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const profile = comment.authorProfile;
   const colour = profile?.cefrLevel
     ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
     : undefined;
@@ -103,10 +93,7 @@ const CommentItem = ({
           {profile?.globalName ?? profile?.discordUsername}
         </span>
         {profile?.cefrLevel && (
-          <Badge
-            variant="secondary"
-            style={colour ? { backgroundColor: colour } : undefined}
-          >
+          <Badge style={colour ? { backgroundColor: colour } : undefined}>
             {profile.cefrLevel}
           </Badge>
         )}
