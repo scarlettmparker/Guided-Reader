@@ -17,7 +17,7 @@ const TextListItems = () => {
   const levels = searchParams.get("levels")?.split(",").filter(Boolean) ?? [];
   const page = Number(searchParams.get("page") ?? "0");
   const { data } = usePageData<PagedTexts>("texts", "texts", {
-    page,
+    page: String(page),
     search: search || undefined,
     levels: levels.length > 0 ? levels : undefined,
   });

@@ -5,6 +5,7 @@ import AdminPageSkeleton from "./components/admin/admin-page-skeleton";
 import LibrarySkeleton from "./components/library-skeleton";
 import PageSkeleton from "./components/page-skeleton";
 import TextsPageSkeleton from "./components/texts/skeletons/texts-page-skeleton";
+import { TextDetailsPageSkeleton } from "./components/texts/skeletons";
 
 const Library = lazy(() => import("./routes/library"));
 const TextsPage = lazy(() => import("./routes/texts"));
@@ -40,7 +41,11 @@ export const routes: RouteObject[] = [
     children: [
       {
         path: ":id",
-        element: <TextDetailsPage />,
+        element: (
+          <Suspense fallback={<TextDetailsPageSkeleton />}>
+            <TextDetailsPage />
+          </Suspense>
+        ),
       },
     ],
   },

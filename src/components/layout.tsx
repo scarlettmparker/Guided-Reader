@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { BreadcrumbProvider, CookieBanner } from "@sun/components";
-import { getBackgroundHex } from "@sun/utils";
+import { getBackgroundHex } from "@sun/utils/background-colour";
 import {
   ThemeSwitcher,
   THEME_APPLIED_EVENT,

@@ -65,3 +65,23 @@ export async function setRolePermissions(
 ) {
   return executeMutation("gaia/setRolePermissions", { roleId, permissions });
 }
+
+/**
+ * Suspends an account.
+ *
+ * @param id the account id
+ * @return the mutation result
+ */
+export async function suspendAccount(id: string) {
+  return executeMutation("gaia/suspendAccount", { id });
+}
+
+/**
+ * Unsuspends an account.
+ *
+ * @param id the account id
+ * @return the mutation result
+ */
+export async function unsuspendAccount(id: string) {
+  return executeMutation("gaia/unsuspendAccount", { id });
+}

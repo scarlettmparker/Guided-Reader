@@ -105,6 +105,7 @@ const NotesAuthorToggleDialog = (props: NotesAuthorToggleDialogProps) => {
       <DialogFooter>
         <Button
           onClick={() => onOpenChange(false)}
+          variant="secondary"
           title={t("close")}
           aria-label={t("close")}
         >

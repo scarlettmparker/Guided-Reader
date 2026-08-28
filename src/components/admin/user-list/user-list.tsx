@@ -14,10 +14,22 @@ import AdminUserListFooter from "~/components/admin/user-list-footer";
 import AdminUserListPagination from "~/components/admin/user-list-pagination";
 import styles from "./user-list.module.css";
 
+type AdminUserListProps = {
+  /**
+   * Called when suspend is requested.
+   */
+  onSuspend: (account: { id: string; username: string }) => void;
+  /**
+   * Called when unsuspend is requested.
+   */
+  onUnsuspend: (account: { id: string; username: string }) => void;
+} & Omit<React.HTMLAttributes<HTMLDivElement>, "onSuspend">;
+
 /**
  * Searchable, paginated list of accounts.
  */
-const AdminUserList = () => {
+const AdminUserList = (props: AdminUserListProps) => {
+  const { onSuspend, onUnsuspend } = props;
   const { t } = useTranslation("admin");
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") ?? "";
@@ -56,7 +68,7 @@ const AdminUserList = () => {
               </div>
             }
           >
-            <AdminUserListItems />
+            <AdminUserListItems onSuspend={onSuspend} onUnsuspend={onUnsuspend} />
           </Suspense>
         </CardBody>
         <Suspense fallback={null}>

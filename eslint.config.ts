@@ -48,4 +48,10 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ["cypress/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    rules: {
+      "@typescript-eslint/no-namespace": "off",
+    },
+  },
 ]);

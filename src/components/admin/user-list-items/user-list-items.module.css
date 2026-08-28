@@ -4,25 +4,27 @@
   gap: var(--lg);
 }
 
-.item_link {
-  text-decoration: none;
-  color: inherit;
-  flex: 1;
-  min-width: 0;
-}
-
-.list_button {
+.item_row {
   display: flex;
   align-items: center;
   gap: var(--lg);
   width: 100%;
 }
 
+.item_link {
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .list_name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  pointer-events: none;
   max-width: 50%;
 }
 

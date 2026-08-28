@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Button } from "@sun/components";
+import { Button, cn } from "@sun/components";
 import {
   ChevronRightIcon,
   ChevronLeftIcon,
@@ -38,7 +38,7 @@ const TransferActions = (props: TransferActionsProps) => {
 
   return (
     <section
-      className={styles.actions}
+      className={cn(styles.actions, className)}
       aria-label={t("transfer-actions")}
       {...rest}
     >

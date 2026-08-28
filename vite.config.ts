@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { visualizer } from "rollup-plugin-visualizer";
+import { compression } from "vite-plugin-compression2";
 import path from "path";
 
 export default defineConfig(() => {
@@ -10,7 +11,15 @@ export default defineConfig(() => {
       .filter(Boolean) ?? [];
 
   return {
-    plugins: [react()],
+    plugins: [
+      react({
+        babel: {
+          plugins: [["babel-plugin-react-compiler", { target: "19" }]],
+        },
+      }),
+      compression({ algorithm: "gzip", exclude: [/\.(br)$/] }),
+      compression({ algorithm: "brotliCompress", exclude: [/\.(gz)$/] }),
+    ],
     resolve: {
       alias: {
         "~": path.resolve(__dirname, "./src"),
@@ -26,6 +35,11 @@ export default defineConfig(() => {
     },
     build: {
       manifest: true,
+      minify: "esbuild",
+      cssMinify: true,
+      esbuild: {
+        drop: process.env.NODE_ENV === "production" ? ["console", "debugger"] : [],
+      },
       rollupOptions: {
         input: {
           client: "/src/entry-client.tsx",
@@ -50,8 +64,17 @@ export default defineConfig(() => {
             if (id.includes("@sun/components")) {
               return "vendor-components";
             }
-            if (id.includes("posthog")) {
-              return "vendor-posthog";
+            if (
+              id.includes("lucide-react") ||
+              id.includes("@heroicons")
+            ) {
+              return "vendor-icons";
+            }
+            if (
+              id.includes("react-i18next") ||
+              id.includes("i18next")
+            ) {
+              return "vendor-i18n";
             }
             if (
               id.includes("/react-dom/") ||

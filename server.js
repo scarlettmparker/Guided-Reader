@@ -21,6 +21,12 @@ import { setupRoutes } from "./routes/index.js";
 const configure = async (app) => {
   const { default: formbody } = await import("@fastify/formbody");
   await app.register(formbody);
+  const { default: compress } = await import("@fastify/compress");
+  await app.register(compress, {
+    global: true,
+    threshold: 1024,
+    encodings: ["gzip", "br"],
+  });
 };
 
 await createServer({
