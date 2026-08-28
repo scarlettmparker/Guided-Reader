@@ -1,0 +1,23 @@
+query viewedReaderTexts($pagination: PaginationInput) {
+  hadesQueries {
+    viewedReaderTexts(pagination: $pagination) {
+      items {
+        id
+        title
+        language
+        level
+        ownerId
+        sourceId
+        status
+      }
+      pageInfo {
+        page
+        size
+        totalPages
+        totalCount
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

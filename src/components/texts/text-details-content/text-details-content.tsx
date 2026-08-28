@@ -34,7 +34,7 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
 
   useEffect(() => {
     if (!text) return;
-    invalidateCacheKeys([makeCacheKey("library:viewedTexts", {})]);
+    invalidateCacheKeys([makeCacheKey("library:viewedTexts")]);
   }, [text, textId]);
 
   const { data: privateNotes } = usePageData<
