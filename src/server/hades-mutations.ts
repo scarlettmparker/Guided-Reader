@@ -35,9 +35,6 @@ import {
   MarkViewedDocument,
   type MarkViewedMutation,
   type MarkViewedMutationVariables,
-  EditTextDocument,
-  type EditTextMutation,
-  type EditTextMutationVariables,
 } from "~/generated/graphql";
 
 /**
@@ -325,33 +322,6 @@ defineMutation({
         message: result.error || "Failed to mark viewed.",
       }),
       invalidated: [makeCacheKey("library:viewedTexts", {})],
-    };
-  },
-});
-
-/**
- * Edits a text.
- */
-defineMutation({
-  path: "hades/editText",
-  async handler(body: EditTextMutationVariables, context) {
-    const result = await executeDocument<EditTextMutation, EditTextMutationVariables>(
-      EditTextDocument,
-      body,
-      tokenFrom(context),
-    );
-    const data = result.data?.hadesMutations.editText;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to edit text.",
-      }),
-      invalidated: [
-        makeCacheKey("texts/:id:text", { id: body.id }),
-        makeCacheKey("texts/:id/versions:versions", { id: body.id }),
-        makeCacheKey("library:viewedTexts", {}),
-        makeCacheKey("texts:texts", { page: "*" }),
-      ],
     };
   },
 });

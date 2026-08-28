@@ -1,6 +1,17 @@
-.card {
-  max-width: 48rem;
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--xl);
+  padding: var(--xl);
+  max-width: 36rem;
   margin: 0 auto;
+  width: 100%;
+}
+
+.card {
+  max-width: 36rem;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .skeleton_title {

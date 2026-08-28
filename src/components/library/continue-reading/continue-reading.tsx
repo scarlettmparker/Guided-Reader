@@ -23,8 +23,13 @@ const ContinueReading = () => {
     "levelColours",
   );
 
-  const viewedIds = new Set((viewed?.items ?? []).map((v) => v.textId));
-  const items = (texts?.items ?? []).filter((item) => viewedIds.has(item.id));
+  const viewedOrder = new Map(
+    (viewed?.items ?? []).map((v, i) => [v.textId, i]),
+  );
+  const items = (texts?.items ?? [])
+    .filter((item) => viewedOrder.has(item.id))
+    .sort((a, b) => (viewedOrder.get(a.id) ?? 0) - (viewedOrder.get(b.id) ?? 0))
+    .slice(0, 10);
 
   if (items.length === 0) {
     return (
@@ -45,30 +50,24 @@ const ContinueReading = () => {
         <CardTitle>{t("continue-reading")}</CardTitle>
       </CardHeader>
       <CardBody>
-        <div className={styles.grid}>
+        <ul className={styles.list}>
           {items.map((item) => {
             const colour = levelColours?.[CEFR_TO_KEY[item.level]];
             return (
-              <Link
-                key={item.id}
-                to={`/texts/${item.id}`}
-                className={styles.card_link}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{item.title}</CardTitle>
-                  </CardHeader>
-                  <CardBody>
-                    <Badge style={colour ? { backgroundColor: colour } : undefined}>
-                      {item.level}
-                    </Badge>
-                    <Badge variant="secondary">{t("viewed")}</Badge>
-                  </CardBody>
-                </Card>
-              </Link>
+              <li key={item.id}>
+                <Link to={`/texts/${item.id}`} className={styles.item}>
+                  <Badge
+                    className={styles.item_level}
+                    style={colour ? { backgroundColor: colour } : undefined}
+                  >
+                    {item.level}
+                  </Badge>
+                  <span className={styles.item_title}>{item.title}</span>
+                </Link>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </CardBody>
     </Card>
   );

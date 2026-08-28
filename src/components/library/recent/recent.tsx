@@ -40,29 +40,24 @@ const Recent = () => {
         <CardTitle>{t("recent")}</CardTitle>
       </CardHeader>
       <CardBody>
-        <div className={styles.grid}>
+        <ul className={styles.list}>
           {items.map((item) => {
             const colour = levelColours?.[CEFR_TO_KEY[item.level]];
             return (
-              <Link
-                key={item.id}
-                to={`/texts/${item.id}`}
-                className={styles.card_link}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{item.title}</CardTitle>
-                  </CardHeader>
-                  <CardBody>
-                    <Badge style={colour ? { backgroundColor: colour } : undefined}>
-                      {item.level}
-                    </Badge>
-                  </CardBody>
-                </Card>
-              </Link>
+              <li key={item.id}>
+                <Link to={`/texts/${item.id}`} className={styles.item}>
+                  <Badge
+                    className={styles.item_level}
+                    style={colour ? { backgroundColor: colour } : undefined}
+                  >
+                    {item.level}
+                  </Badge>
+                  <span className={styles.item_title}>{item.title}</span>
+                </Link>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </CardBody>
     </Card>
   );

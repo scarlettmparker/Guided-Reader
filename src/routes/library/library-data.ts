@@ -33,7 +33,7 @@ defineLoader({
     try {
       const result = await executeDocument<ViewedTextsQuery, ViewedTextsQueryVariables>(
         ViewedTextsDocument,
-        { pagination: { page: 0, size: 20 } },
+        { pagination: { page: 0, size: 10 } },
         token,
       );
       const viewedTexts = result.success ? result.data?.hadesQueries.viewedTexts : null;

@@ -1,15 +1,13 @@
-import { useEffect, useState, useTransition } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePageData } from "@sun/ssr/react";
-import { Button, Card, CardBody, CardFooter } from "@sun/components";
-import { markViewed } from "~/server/actions/hades";
+import { Card, CardBody } from "@sun/components";
 import AnnotationLayer from "~/components/texts/annotation-layer";
 import DefinitionToolbar from "~/components/texts/definition-toolbar";
 import DefinitionDialog from "~/components/texts/definition-dialog";
 import NotesAuthorToggleDialog from "~/components/texts/notes-author-toggle-dialog";
 import ShareNotesDialog from "~/components/texts/share-notes-dialog";
-import TextVersions from "~/components/texts/text-versions";
-import type { LocateTextQuery, PrivateNotesQuery, ViewedTextsQuery } from "~/generated/graphql";
+import type { LocateTextQuery, PrivateNotesQuery } from "~/generated/graphql";
 import { useHiddenAuthors } from "./hooks/use-hidden-authors";
 import TextHeader from "./text-header";
 
@@ -35,28 +33,10 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
   const { data: privateNotes } = usePageData<
     PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"]
   >("privateNotes", "privateNotes/:textId", { textId });
-  const { data: viewedPage } = usePageData<
-    ViewedTextsQuery["hadesQueries"]["viewedTexts"]
-  >("viewedTexts", "library", {});
   const { hiddenAuthors, handleToggle } = useHiddenAuthors(textId);
   const [definitionOpen, setDefinitionOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [toggleOpen, setToggleOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  const isViewed = (viewedPage?.items ?? []).some((v) => v.textId === textId);
-
-  useEffect(() => {
-    if (textId) {
-      void markViewed(textId);
-    }
-  }, [textId]);
-
-  const handleMarkViewed = () => {
-    startTransition(async () => {
-      await markViewed(textId);
-    });
-  };
 
   const visiblePrivateNotes = (privateNotes ?? []).filter((note) => {
     const authorId = note.authorProfile?.id ?? note.author?.id ?? "";
@@ -90,20 +70,8 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
             className={className}
           />
         </CardBody>
-        <CardFooter>
-          <Button
-            variant={isViewed ? "secondary" : "default"}
-            onClick={handleMarkViewed}
-            disabled={isPending || isViewed}
-            title={isViewed ? t("viewed") : t("mark-as-read")}
-            aria-label={isViewed ? t("viewed") : t("mark-as-read")}
-          >
-            {isViewed ? t("viewed") : t("mark-as-read")}
-          </Button>
-        </CardFooter>
         <DefinitionToolbar onDefine={() => setDefinitionOpen(true)} />
       </Card>
-      <TextVersions textId={textId} />
       <DefinitionDialog
         open={definitionOpen}
         onOpenChange={setDefinitionOpen}

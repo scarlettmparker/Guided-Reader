@@ -19,7 +19,7 @@ defineLoader({
         {
           pagination: {
             page: 0,
-            size: 20,
+            size: 10,
             sortBy: "createdAt",
             sortDir: SortDirection.Desc,
           },

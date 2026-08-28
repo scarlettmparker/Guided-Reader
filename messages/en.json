@@ -187,5 +187,11 @@
     "search-permissions": "Search permissions...",
     "no-roles-found": "No roles found",
     "no-permissions-found": "No permissions found"
+  },
+  "library": {
+    "continue-reading": "Continue reading",
+    "no-viewed": "No viewed texts yet — open a text to get started",
+    "recent": "Recent texts",
+    "no-recent": "No recent texts"
   }
 }
