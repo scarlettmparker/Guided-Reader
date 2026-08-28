@@ -1,0 +1,6 @@
+.library_layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--xl);
+  padding: var(--xl);
+}

@@ -1,47 +1,25 @@
-import {
-  Button,
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  Separator,
-} from "@sun/components";
+import { Suspense } from "react";
+import { Skeleton } from "@sun/components";
+import ContinueReading from "~/components/library/continue-reading";
+import Recent from "~/components/library/recent";
+import ByLevel from "~/components/library/by-level";
+import styles from "./library.module.css";
 
 /**
- * Home page used to verify that the configured theme is applied.
+ * Real library page with viewed, recent, and by-level sections.
  */
 const Library = () => {
   return (
-    <div
-      style={{
-        padding: "var(--xl, 12px)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--xl, 12px)",
-      }}
-    >
-      <br />
-      <div style={{ display: "flex", gap: "var(--md, 5px)", flexWrap: "wrap" }}>
-        <Button variant="default">Primary</Button>
-        <Button variant="secondary">Secondary</Button>
-        <Button variant="destructive">Destructive</Button>
-      </div>
-
-      <Card style={{ width: "500px" }}>
-        <CardHeader>
-          <CardTitle>Theme card</CardTitle>
-          <CardDescription>
-            Buttons, cards and inputs pull from the themed CSS custom
-            properties.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button variant="default">Save</Button>
-        </CardFooter>
-      </Card>
-
-      <Separator />
+    <div className={styles.library_layout}>
+      <Suspense fallback={<Skeleton style={{ width: "100%", height: "12rem" }} />}>
+        <ContinueReading />
+      </Suspense>
+      <Suspense fallback={<Skeleton style={{ width: "100%", height: "12rem" }} />}>
+        <Recent />
+      </Suspense>
+      <Suspense fallback={<Skeleton style={{ width: "100%", height: "12rem" }} />}>
+        <ByLevel />
+      </Suspense>
     </div>
   );
 };

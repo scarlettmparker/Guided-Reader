@@ -1,0 +1,15 @@
+query textVersions($textId: ID!) {
+  hadesQueries {
+    textVersions(textId: $textId) {
+      id
+      textId
+      version
+      title
+      content
+      level
+      language
+      editedBy
+      createdAt
+    }
+  }
+}

@@ -32,6 +32,12 @@ import {
   ShareNotesDocument,
   type ShareNotesMutation,
   type ShareNotesMutationVariables,
+  MarkViewedDocument,
+  type MarkViewedMutation,
+  type MarkViewedMutationVariables,
+  EditTextDocument,
+  type EditTextMutation,
+  type EditTextMutationVariables,
 } from "~/generated/graphql";
 
 /**
@@ -296,6 +302,55 @@ defineMutation({
         makeCacheKey("privateNotes/:textId:privateNotes", {
           textId: body.input.textId,
         }),
+      ],
+    };
+  },
+});
+
+/**
+ * Marks a text as viewed.
+ */
+defineMutation({
+  path: "hades/markViewed",
+  async handler(body: MarkViewedMutationVariables, context) {
+    const result = await executeDocument<MarkViewedMutation, MarkViewedMutationVariables>(
+      MarkViewedDocument,
+      body,
+      tokenFrom(context),
+    );
+    const data = result.data?.hadesMutations.markViewed;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to mark viewed.",
+      }),
+      invalidated: [makeCacheKey("library:viewedTexts", {})],
+    };
+  },
+});
+
+/**
+ * Edits a text.
+ */
+defineMutation({
+  path: "hades/editText",
+  async handler(body: EditTextMutationVariables, context) {
+    const result = await executeDocument<EditTextMutation, EditTextMutationVariables>(
+      EditTextDocument,
+      body,
+      tokenFrom(context),
+    );
+    const data = result.data?.hadesMutations.editText;
+    return {
+      ...(data ?? {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to edit text.",
+      }),
+      invalidated: [
+        makeCacheKey("texts/:id:text", { id: body.id }),
+        makeCacheKey("texts/:id/versions:versions", { id: body.id }),
+        makeCacheKey("library:viewedTexts", {}),
+        makeCacheKey("texts:texts", { page: "*" }),
       ],
     };
   },

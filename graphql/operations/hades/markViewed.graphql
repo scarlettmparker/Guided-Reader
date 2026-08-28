@@ -1,0 +1,15 @@
+mutation markViewed($textId: ID!) {
+  hadesMutations {
+    markViewed(textId: $textId) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

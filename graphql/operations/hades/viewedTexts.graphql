@@ -1,0 +1,18 @@
+query viewedTexts($pagination: PaginationInput) {
+  hadesQueries {
+    viewedTexts(pagination: $pagination) {
+      items {
+        textId
+        viewedAt
+      }
+      pageInfo {
+        page
+        size
+        totalPages
+        totalCount
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

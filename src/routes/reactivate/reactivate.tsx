@@ -74,13 +74,29 @@ const Reactivate = () => {
         </CardHeader>
         <CardBody>
           {token ? (
-            <p className={styles.status}>
-              {confirm === "success" && t("confirmed")}
-              {confirm === "error" && t("confirm-error")}
-              {confirm === "idle" && t("confirming")}
-            </p>
+            <div className={styles.status_group}>
+              <p className={styles.status}>
+                {confirm === "success" && t("confirmed")}
+                {confirm === "error" && t("confirm-error")}
+                {confirm === "idle" && t("confirming")}
+              </p>
+              {(confirm === "error" || confirm === "success") && (
+                <Link className={styles.back_link} to="/login">
+                  <Button type="button" variant="secondary">
+                    {t("back-to-login")}
+                  </Button>
+                </Link>
+              )}
+            </div>
           ) : sent ? (
-            <p className={styles.status}>{t("sent")}</p>
+            <div className={styles.status_group}>
+              <p className={styles.status}>{t("sent")}</p>
+              <Link className={styles.back_link} to="/login">
+                <Button type="button" variant="secondary">
+                  {t("back-to-login")}
+                </Button>
+              </Link>
+            </div>
           ) : (
             <Form onSubmit={handleSend}>
               <FormField name="email">
@@ -97,7 +113,16 @@ const Reactivate = () => {
                   />
                 </FormItem>
               </FormField>
-              {error && <p className={styles.error}>{t("send-error")}</p>}
+              {error && (
+                <div className={styles.status_group}>
+                  <p className={styles.error}>{t("send-error")}</p>
+                  <Link className={styles.back_link} to="/login">
+                    <Button type="button" variant="secondary">
+                      {t("back-to-login")}
+                    </Button>
+                  </Link>
+                </div>
+              )}
               <FormFooter className={styles.form_footer}>
                 <Link to="/login">
                   <Button type="button" variant="secondary">

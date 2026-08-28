@@ -15,6 +15,17 @@
   margin: 0;
 }
 
+.status_group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lg);
+  align-items: center;
+}
+
+.back_link {
+  text-decoration: none;
+}
+
 .error {
   color: var(--destructive);
   margin-block: var(--sm);

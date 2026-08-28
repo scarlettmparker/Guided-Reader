@@ -249,6 +249,28 @@ input VoteInput {
   value: VoteValue!
 }
 
+type TextView {
+  textId: ID!
+  viewedAt: DateTime!
+}
+
+type TextVersion {
+  id: ID!
+  textId: ID!
+  version: Int!
+  title: String!
+  content: String!
+  level: CefrLevel!
+  language: String!
+  editedBy: ID
+  createdAt: DateTime!
+}
+
+type PagedTextViews {
+  items: [TextView!]!
+  pageInfo: PageInfo!
+}
+
 type HadesQueries {
   text(id: ID!): ReaderText
   source(id: ID!): ReaderSource
@@ -273,12 +295,16 @@ type HadesQueries {
   myVote(targetType: ReaderVoteTarget!, targetId: ID!): VoteValue
   locateRemoteObjects(ids: [String!]!): [ReaderObjectReference!]!
   defineWord(word: String!, scope: [WordScope!]): Word
+  viewedTexts(pagination: PaginationInput): PagedTextViews!
+  textVersions(textId: ID!): [TextVersion!]!
 }
 
 type HadesMutations {
   createSource(name: String!, url: String!): QueryResult
   createText(input: ReaderTextInput!): QueryResult
   archiveText(id: ID!): QueryResult
+  editText(id: ID!, input: ReaderTextInput!): QueryResult
+  markViewed(textId: ID!): QueryResult
   createAnnotation(input: AnnotationInput!): QueryResult
   editAnnotation(id: ID!, body: String!): QueryResult
   deleteAnnotation(id: ID!): QueryResult

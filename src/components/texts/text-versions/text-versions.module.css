@@ -1,0 +1,23 @@
+.table_wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lg);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--md);
+  word-break: break-all;
+}
+
+.content_preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lg);
+  word-break: break-all;
+}
+
+.empty {
+  margin: 0;
+}
