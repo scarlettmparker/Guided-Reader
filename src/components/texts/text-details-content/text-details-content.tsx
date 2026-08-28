@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { invalidateCacheKeys, makeCacheKey } from "@sun/ssr";
 import { usePageData } from "@sun/ssr/react";
 import { Card, CardBody } from "@sun/components";
 import AnnotationLayer from "~/components/texts/annotation-layer";
@@ -30,6 +31,12 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
   const { data: text } = usePageData<ReaderText>("text", "texts/:id", {
     id: textId,
   });
+
+  useEffect(() => {
+    if (!text) return;
+    invalidateCacheKeys([makeCacheKey("library:viewedTexts", {})]);
+  }, [text, textId]);
+
   const { data: privateNotes } = usePageData<
     PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"]
   >("privateNotes", "privateNotes/:textId", { textId });

@@ -18,6 +18,7 @@ import ReaderRoleItem from "~/components/reader-role-item";
 import { CsrfField } from "@sun/ssr/react";
 import type { ReaderAccount } from "~/generated/graphql";
 import styles from "./user-menu.module.css";
+import { Link } from "react-router-dom";
 
 type LevelColours = Record<string, string>;
 
@@ -83,9 +84,9 @@ const UserMenu = () => {
             )}
           </CardBody>
           <CardFooter className={styles.footer}>
-            <a href="/profile">
+            <Link to="/profile" onClick={(e) => e.stopPropagation()}>
               <Button>{t("manage-profile")}</Button>
-            </a>
+            </Link>
             <Form action="/__logout" method="post">
               <CsrfField />
               <Button
