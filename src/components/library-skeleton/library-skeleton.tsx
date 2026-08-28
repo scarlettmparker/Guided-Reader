@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader, Skeleton } from "@sun/components";
+import { Card, CardBody, Skeleton } from "@sun/components";
 import styles from "./library-skeleton.module.css";
 
 /**
@@ -6,14 +6,10 @@ import styles from "./library-skeleton.module.css";
  */
 const LibrarySkeleton = () => (
   <div className={styles.wrapper}>
-    {Array.from({ length: 3 }).map((_, i) => (
+    {Array.from({ length: 2 }).map((_, i) => (
       <Card key={i} className={styles.card}>
-        <CardHeader>
-          <Skeleton className={styles.skeleton_title} />
-        </CardHeader>
         <CardBody className={styles.body}>
           <Skeleton className={styles.skeleton_block} />
-          <Skeleton className={styles.skeleton_row} />
         </CardBody>
       </Card>
     ))}
