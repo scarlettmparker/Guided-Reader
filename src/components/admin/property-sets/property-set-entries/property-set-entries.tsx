@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardBody, CardHeader, CardTitle } from "@sun/components";
 import PropertySetEntriesItems from "~/components/admin/property-sets/property-set-entries-items";
 import { PropertySetEntriesSkeleton } from "./skeletons";
@@ -20,11 +21,12 @@ type PropertySetEntriesProps = {
  */
 const PropertySetEntries = (props: PropertySetEntriesProps) => {
   const { owner, name } = props;
+  const { t } = useTranslation("admin");
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{name}</CardTitle>
+        <CardTitle>{t("entries")}</CardTitle>
       </CardHeader>
       <CardBody>
         <div className={styles.inner}>

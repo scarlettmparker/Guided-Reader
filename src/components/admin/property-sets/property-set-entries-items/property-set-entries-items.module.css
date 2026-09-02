@@ -15,16 +15,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 35%;
 }
 
-.entry_values {
-  margin-left: auto;
+.entry_button {
   display: flex;
   align-items: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  gap: var(--lg);
+  width: 100%;
 }
 
 .no_items {

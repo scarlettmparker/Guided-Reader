@@ -56,42 +56,52 @@ const AdminUserListItems = (props: AdminUserListItemsProps) => {
               }}
               className={styles.item_link}
             >
-              <span className={styles.list_name}>{account.username}</span>
+              <Button variant="secondary" className={styles.list_button}>
+                <p className={styles.list_name}>{account.username}</p>
+                <span className={styles.list_actions}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <EllipsisVerticalIcon
+                        width={16}
+                        height={16}
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {account.status === "SUSPENDED" ? (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            onUnsuspend({
+                              id: account.id,
+                              username: account.username,
+                            })
+                          }
+                        >
+                          <LockOpenIcon width={16} height={16} />
+                          {t("unsuspend-account")}
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() =>
+                            onSuspend({
+                              id: account.id,
+                              username: account.username,
+                            })
+                          }
+                        >
+                          <LockClosedIcon width={16} height={16} />
+                          {t("suspend-account")}
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </span>
+              </Button>
             </Link>
-            <span className={styles.list_actions}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    title={t("suspend-account")}
-                    aria-label={t("suspend-account")}
-                  >
-                    <EllipsisVerticalIcon width={16} height={16} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {account.status === "SUSPENDED" ? (
-                    <DropdownMenuItem
-                      onClick={() =>
-                        onUnsuspend({ id: account.id, username: account.username })
-                      }
-                    >
-                      <LockOpenIcon width={16} height={16} />
-                      {t("unsuspend-account")}
-                    </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem
-                      onClick={() =>
-                        onSuspend({ id: account.id, username: account.username })
-                      }
-                    >
-                      <LockClosedIcon width={16} height={16} />
-                      {t("suspend-account")}
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </span>
           </div>
         ))
       )}

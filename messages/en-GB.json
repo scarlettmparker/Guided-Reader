@@ -193,10 +193,13 @@
     "no-property-sets": "No property sets found",
     "no-entries-found": "No entries found",
     "entries-count": "{{count}} entries",
+    "entries": "Entries",
     "entry-name": "Entry name",
     "values": "Values",
     "schema": "Schema",
     "save-schema": "Save schema",
+    "save-entry": "Save entry",
+    "edit-entry": "Edit entry",
     "cover-image": "Cover image",
     "search-property-sets": "Search property sets...",
     "search-entries": "Search entries..."
