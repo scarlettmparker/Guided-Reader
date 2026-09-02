@@ -1,0 +1,23 @@
+mutation upsertPropertyEntry(
+  $ownerKey: String!
+  $name: String!
+  $entry: String!
+  $input: UpsertPropertyEntryInput!
+) {
+  gaiaMutations {
+    upsertPropertyEntry(
+      ownerKey: $ownerKey
+      name: $name
+      entry: $entry
+      input: $input
+    ) {
+      id
+      ownerKey
+      propertySet
+      entryName
+      values
+      configurable
+      status
+    }
+  }
+}

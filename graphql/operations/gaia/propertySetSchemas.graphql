@@ -1,0 +1,12 @@
+query propertySetSchemas($ownerKey: String) {
+  gaiaQueries {
+    propertySetSchemas(ownerKey: $ownerKey) {
+      id
+      ownerKey
+      name
+      properties
+      configurable
+      status
+    }
+  }
+}

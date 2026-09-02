@@ -31,9 +31,51 @@ type Role {
   updatedAt: DateTime
 }
 
+type PropertySetEntry {
+  id: String!
+  ownerKey: String!
+  propertySet: String!
+  entryName: String!
+  values: JSON!
+  configurable: Boolean!
+  status: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type PropertySetSchema {
+  id: String!
+  ownerKey: String
+  name: String!
+  properties: JSON!
+  configurable: Boolean!
+  status: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PropertySetSchemaInput {
+  ownerKey: String
+  name: String!
+  configurable: Boolean
+  properties: JSON!
+}
+
+input UpsertPropertyEntryInput {
+  values: JSON!
+}
+
+input SetPropertyInput {
+  property: String!
+  value: JSON!
+}
+
 type GaiaQueries {
   me: Account
   propertySet(ownerKey: String!, name: String!, entry: String): JSON
+  propertySets(ownerKey: String!, name: String!): [PropertySetEntry!]!
+  propertySetSchemas(ownerKey: String): [PropertySetSchema!]!
+  propertySetSchema(ownerKey: String!, name: String!): PropertySetSchema
   myRoles: [String!]!
   account(id: ID!): Account
   accounts(pagination: PaginationInput): PagedAccounts!
@@ -69,6 +111,19 @@ type GaiaMutations {
   deactivateAccount: QueryResult
   requestAccountReactivation(email: String!, provider: String!): QueryResult
   confirmAccountReactivation(token: String!): QueryResult
+  upsertPropertyEntry(
+    ownerKey: String!
+    name: String!
+    entry: String!
+    input: UpsertPropertyEntryInput!
+  ): PropertySetEntry
+  setProperty(
+    ownerKey: String!
+    name: String!
+    entry: String!
+    input: SetPropertyInput!
+  ): PropertySetEntry
+  registerPropertySetSchema(input: PropertySetSchemaInput!): PropertySetSchema
 }
 
 extend type Query {

@@ -1,0 +1,23 @@
+mutation setProperty(
+  $ownerKey: String!
+  $name: String!
+  $entry: String!
+  $input: SetPropertyInput!
+) {
+  gaiaMutations {
+    setProperty(
+      ownerKey: $ownerKey
+      name: $name
+      entry: $entry
+      input: $input
+    ) {
+      id
+      ownerKey
+      propertySet
+      entryName
+      values
+      configurable
+      status
+    }
+  }
+}
