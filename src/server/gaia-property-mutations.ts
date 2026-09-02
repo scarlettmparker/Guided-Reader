@@ -32,12 +32,7 @@ defineMutation({
       message: "Property entry saved.",
       id: data.id,
       invalidated: [
-        makeCacheKey("admin/property-sets:propertySetSchemas", {
-          ownerKey: body.ownerKey,
-        }),
-        makeCacheKey("admin/property-sets:propertySetSchemas", {
-          ownerKey: "*",
-        }),
+        makeCacheKey("admin/property-sets:propertySetSchemas", {}),
         makeCacheKey("admin/property-sets/:owner/:name:propertySetEntries", {
           owner: body.ownerKey,
           name: body.name,

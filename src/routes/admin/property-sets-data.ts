@@ -15,7 +15,7 @@ import {
 } from "~/generated/graphql";
 
 /**
- * Loads all Knowledge property-set schemas.
+ * Loads all property-set schemas.
  */
 defineLoader({
   pattern: "admin/property-sets",
@@ -25,7 +25,7 @@ defineLoader({
       const result = await executeDocument<
         PropertySetSchemasQuery,
         PropertySetSchemasQueryVariables
-      >(PropertySetSchemasDocument, { ownerKey: "Knowledge" }, token ?? undefined);
+      >(PropertySetSchemasDocument, {}, token ?? undefined);
       const items = result.data?.gaiaQueries?.propertySetSchemas ?? [];
       return { propertySetSchemas: items };
     } catch {
