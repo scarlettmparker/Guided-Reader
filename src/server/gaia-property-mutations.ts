@@ -5,12 +5,15 @@ import {
   UpsertPropertyEntryDocument,
   SetPropertyDocument,
   RegisterPropertySetSchemaDocument,
+  DeletePropertyEntryDocument,
   type UpsertPropertyEntryMutation,
   type UpsertPropertyEntryMutationVariables,
   type SetPropertyMutation,
   type SetPropertyMutationVariables,
   type RegisterPropertySetSchemaMutation,
   type RegisterPropertySetSchemaMutationVariables,
+  type DeletePropertyEntryMutation,
+  type DeletePropertyEntryMutationVariables,
 } from "~/generated/graphql";
 
 /**
@@ -111,6 +114,43 @@ defineMutation({
         makeCacheKey("admin/property-sets/:owner/:name:propertySetSchema", {
           owner: body.input.ownerKey ?? "",
           name: body.input.name,
+        }),
+      ],
+    };
+  },
+});
+
+/**
+ * Deletes a property-set entry.
+ */
+defineMutation({
+  path: "gaia/deletePropertyEntry",
+  async handler(body: DeletePropertyEntryMutationVariables, context) {
+    const result = await executeDocument<
+      DeletePropertyEntryMutation,
+      DeletePropertyEntryMutationVariables
+    >(DeletePropertyEntryDocument, body, tokenFrom(context));
+    const data = result.data?.gaiaMutations?.deletePropertyEntry;
+    if (!data) {
+      return {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to delete entry.",
+      };
+    }
+    if (data.__typename === "StandardError") {
+      return data;
+    }
+    return {
+      ...data,
+      invalidated: [
+        makeCacheKey("admin/property-sets:propertySetSchemas", {}),
+        makeCacheKey("admin/property-sets/:owner/:name:propertySetEntries", {
+          owner: body.ownerKey,
+          name: body.name,
+        }),
+        makeCacheKey("admin/property-sets/:owner/:name:propertySetSchema", {
+          owner: body.ownerKey,
+          name: body.name,
         }),
       ],
     };

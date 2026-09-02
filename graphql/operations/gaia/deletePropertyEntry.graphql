@@ -1,0 +1,15 @@
+mutation deletePropertyEntry($ownerKey: String!, $name: String!, $entry: String!) {
+  gaiaMutations {
+    deletePropertyEntry(ownerKey: $ownerKey, name: $name, entry: $entry) {
+      ... on QuerySuccess {
+        __typename
+        message
+        id
+      }
+      ... on StandardError {
+        __typename
+        message
+      }
+    }
+  }
+}

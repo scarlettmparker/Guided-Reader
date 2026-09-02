@@ -82,7 +82,6 @@ const PropertySetSchemaEditorContent = (
       <Card>
         <CardHeader className={styles.header}>
           <CardTitle>{name}</CardTitle>
-          <Badge>{owner}</Badge>
         </CardHeader>
         <CardBody>
           <div className={styles.inner}>

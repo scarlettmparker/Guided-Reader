@@ -1,5 +1,6 @@
 import { Suspense, useCallback, useState } from "react";
 import { useOutlet } from "react-router-dom";
+import { revalidatePageData } from "@sun/ssr";
 import AdminUserList from "~/components/admin/user-list";
 import AdminDetailPlaceholder from "~/components/admin/admin-detail-placeholder";
 import { AdminDetailSkeleton } from "~/components/admin/skeletons";
@@ -29,6 +30,7 @@ const Admin = () => {
     const id = suspendTarget.id;
     setSuspendTarget(null);
     await suspendAccount(id);
+    revalidatePageData();
   }, [suspendTarget]);
 
   const handleUnsuspend = useCallback(async () => {
@@ -36,6 +38,7 @@ const Admin = () => {
     const id = unsuspendTarget.id;
     setUnsuspendTarget(null);
     await unsuspendAccount(id);
+    revalidatePageData();
   }, [unsuspendTarget]);
 
   return (

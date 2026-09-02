@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@sun/components";
 import PropertySetEntriesItems from "~/components/admin/property-sets/property-set-entries-items";
 import { PropertySetEntriesSkeleton } from "./skeletons";
 import styles from "./property-set-entries.module.css";
+import { ScrollArea } from "@sun/components";
 
 type PropertySetEntriesProps = {
   /**
@@ -31,7 +32,9 @@ const PropertySetEntries = (props: PropertySetEntriesProps) => {
       <CardBody>
         <div className={styles.inner}>
           <Suspense fallback={<PropertySetEntriesSkeleton />}>
-            <PropertySetEntriesItems owner={owner} name={name} />
+            <ScrollArea maxHeight="16rem">
+              <PropertySetEntriesItems owner={owner} name={name} />
+            </ScrollArea>
           </Suspense>
         </div>
       </CardBody>

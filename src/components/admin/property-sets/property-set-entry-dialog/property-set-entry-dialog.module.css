@@ -1,3 +1,8 @@
+.dialog {
+  width: 36rem;
+  max-width: 90vw;
+}
+
 .error {
   margin: 0;
 }

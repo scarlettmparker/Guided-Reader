@@ -77,7 +77,7 @@ const PropertySetEntryDialog = (props: PropertySetEntryDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} className={styles.dialog}>
       <DialogHeader>
         <DialogTitle>{t("edit-entry")}</DialogTitle>
       </DialogHeader>

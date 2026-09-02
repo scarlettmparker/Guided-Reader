@@ -4,26 +4,32 @@
   gap: var(--lg);
 }
 
-.item_row {
+.list_button {
   display: flex;
   align-items: center;
   gap: var(--lg);
   width: 100%;
 }
 
-.entry_name {
+.list_name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  pointer-events: none;
+  max-width: 50%;
 }
 
-.entry_button {
+.list_actions {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: var(--lg);
-  width: 100%;
 }
 
 .no_items {
   margin: 0;
+}
+
+.pending {
+  display: none;
 }

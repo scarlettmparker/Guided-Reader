@@ -200,6 +200,11 @@
     "save-schema": "Save schema",
     "save-entry": "Save entry",
     "edit-entry": "Edit entry",
+    "entry-actions": "Entry actions",
+    "delete-entry": "Delete entry",
+    "delete-entry-title": "Delete entry {{entryName}}?",
+    "delete-entry-body": "Are you sure you wish to delete this entry? This action cannot be undone.",
+    "delete": "Delete",
     "cover-image": "Cover image",
     "search-property-sets": "Search property sets...",
     "search-entries": "Search entries..."
