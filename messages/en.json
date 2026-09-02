@@ -196,6 +196,7 @@
     "entry-name": "Entry name",
     "values": "Values",
     "schema": "Schema",
+    "save-schema": "Save schema",
     "cover-image": "Cover image",
     "search-property-sets": "Search property sets...",
     "search-entries": "Search entries..."

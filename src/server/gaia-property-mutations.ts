@@ -4,10 +4,13 @@ import { tokenFrom } from "./context";
 import {
   UpsertPropertyEntryDocument,
   SetPropertyDocument,
+  RegisterPropertySetSchemaDocument,
   type UpsertPropertyEntryMutation,
   type UpsertPropertyEntryMutationVariables,
   type SetPropertyMutation,
   type SetPropertyMutationVariables,
+  type RegisterPropertySetSchemaMutation,
+  type RegisterPropertySetSchemaMutationVariables,
 } from "~/generated/graphql";
 
 /**
@@ -76,6 +79,38 @@ defineMutation({
         makeCacheKey("admin/property-sets/:owner/:name:propertySetSchema", {
           owner: body.ownerKey,
           name: body.name,
+        }),
+      ],
+    };
+  },
+});
+
+/**
+ * Registers a property-set schema.
+ */
+defineMutation({
+  path: "gaia/registerPropertySetSchema",
+  async handler(body: RegisterPropertySetSchemaMutationVariables, context) {
+    const result = await executeDocument<
+      RegisterPropertySetSchemaMutation,
+      RegisterPropertySetSchemaMutationVariables
+    >(RegisterPropertySetSchemaDocument, body, tokenFrom(context));
+    const data = result.data?.gaiaMutations?.registerPropertySetSchema;
+    if (!data) {
+      return {
+        __typename: "StandardError" as const,
+        message: result.error || "Failed to save schema.",
+      };
+    }
+    return {
+      __typename: "QuerySuccess" as const,
+      message: "Schema saved.",
+      id: data.id,
+      invalidated: [
+        makeCacheKey("admin/property-sets:propertySetSchemas", {}),
+        makeCacheKey("admin/property-sets/:owner/:name:propertySetSchema", {
+          owner: body.input.ownerKey ?? "",
+          name: body.input.name,
         }),
       ],
     };

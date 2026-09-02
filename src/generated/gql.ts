@@ -31,6 +31,7 @@ type Documents = {
     "query propertySetSchema($ownerKey: String!, $name: String!) {\n  gaiaQueries {\n    propertySetSchema(ownerKey: $ownerKey, name: $name) {\n      id\n      ownerKey\n      name\n      properties\n      configurable\n      status\n    }\n  }\n}": typeof types.PropertySetSchemaDocument,
     "query propertySetSchemas($ownerKey: String) {\n  gaiaQueries {\n    propertySetSchemas(ownerKey: $ownerKey) {\n      id\n      ownerKey\n      name\n      properties\n      configurable\n      status\n    }\n  }\n}": typeof types.PropertySetSchemasDocument,
     "query propertySets($ownerKey: String!, $name: String!) {\n  gaiaQueries {\n    propertySets(ownerKey: $ownerKey, name: $name) {\n      id\n      ownerKey\n      propertySet\n      entryName\n      values\n      configurable\n      status\n    }\n  }\n}": typeof types.PropertySetsDocument,
+    "mutation registerPropertySetSchema($input: PropertySetSchemaInput!) {\n  gaiaMutations {\n    registerPropertySetSchema(input: $input) {\n      id\n      ownerKey\n      name\n      properties\n      configurable\n      status\n    }\n  }\n}": typeof types.RegisterPropertySetSchemaDocument,
     "mutation requestAccountReactivation($email: String!, $provider: String!) {\n  gaiaMutations {\n    requestAccountReactivation(email: $email, provider: $provider) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": typeof types.RequestAccountReactivationDocument,
     "query role($id: ID!) {\n  gaiaQueries {\n    role(id: $id) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}": typeof types.RoleDocument,
     "query rolePermissions($roleId: ID!) {\n  gaiaQueries {\n    rolePermissions(roleId: $roleId)\n  }\n}": typeof types.RolePermissionsDocument,
@@ -98,6 +99,7 @@ const documents: Documents = {
     "query propertySetSchema($ownerKey: String!, $name: String!) {\n  gaiaQueries {\n    propertySetSchema(ownerKey: $ownerKey, name: $name) {\n      id\n      ownerKey\n      name\n      properties\n      configurable\n      status\n    }\n  }\n}": types.PropertySetSchemaDocument,
     "query propertySetSchemas($ownerKey: String) {\n  gaiaQueries {\n    propertySetSchemas(ownerKey: $ownerKey) {\n      id\n      ownerKey\n      name\n      properties\n      configurable\n      status\n    }\n  }\n}": types.PropertySetSchemasDocument,
     "query propertySets($ownerKey: String!, $name: String!) {\n  gaiaQueries {\n    propertySets(ownerKey: $ownerKey, name: $name) {\n      id\n      ownerKey\n      propertySet\n      entryName\n      values\n      configurable\n      status\n    }\n  }\n}": types.PropertySetsDocument,
+    "mutation registerPropertySetSchema($input: PropertySetSchemaInput!) {\n  gaiaMutations {\n    registerPropertySetSchema(input: $input) {\n      id\n      ownerKey\n      name\n      properties\n      configurable\n      status\n    }\n  }\n}": types.RegisterPropertySetSchemaDocument,
     "mutation requestAccountReactivation($email: String!, $provider: String!) {\n  gaiaMutations {\n    requestAccountReactivation(email: $email, provider: $provider) {\n      ... on QuerySuccess {\n        __typename\n        message\n        id\n      }\n      ... on StandardError {\n        __typename\n        message\n      }\n    }\n  }\n}": types.RequestAccountReactivationDocument,
     "query role($id: ID!) {\n  gaiaQueries {\n    role(id: $id) {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}": types.RoleDocument,
     "query rolePermissions($roleId: ID!) {\n  gaiaQueries {\n    rolePermissions(roleId: $roleId)\n  }\n}": types.RolePermissionsDocument,
@@ -230,6 +232,10 @@ export function graphql(source: "query propertySetSchemas($ownerKey: String) {\n
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "query propertySets($ownerKey: String!, $name: String!) {\n  gaiaQueries {\n    propertySets(ownerKey: $ownerKey, name: $name) {\n      id\n      ownerKey\n      propertySet\n      entryName\n      values\n      configurable\n      status\n    }\n  }\n}"): (typeof documents)["query propertySets($ownerKey: String!, $name: String!) {\n  gaiaQueries {\n    propertySets(ownerKey: $ownerKey, name: $name) {\n      id\n      ownerKey\n      propertySet\n      entryName\n      values\n      configurable\n      status\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "mutation registerPropertySetSchema($input: PropertySetSchemaInput!) {\n  gaiaMutations {\n    registerPropertySetSchema(input: $input) {\n      id\n      ownerKey\n      name\n      properties\n      configurable\n      status\n    }\n  }\n}"): (typeof documents)["mutation registerPropertySetSchema($input: PropertySetSchemaInput!) {\n  gaiaMutations {\n    registerPropertySetSchema(input: $input) {\n      id\n      ownerKey\n      name\n      properties\n      configurable\n      status\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -1,0 +1,11 @@
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--lg);
+}

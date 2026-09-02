@@ -47,3 +47,18 @@ export async function setProperty(
     input: { property, value },
   });
 }
+
+/**
+ * Registers a property-set schema.
+ *
+ * @param input the schema input
+ * @return the mutation result
+ */
+export async function registerPropertySetSchema(input: {
+  ownerKey?: string | null;
+  name: string;
+  configurable?: boolean | null;
+  properties: Record<string, unknown>;
+}) {
+  return executeMutation("gaia/registerPropertySetSchema", { input });
+}
