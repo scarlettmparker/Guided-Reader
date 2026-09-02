@@ -1,0 +1,40 @@
+.list_body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lg);
+}
+
+.item_row {
+  display: flex;
+  align-items: center;
+  gap: var(--lg);
+  width: 100%;
+}
+
+.item_link {
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list_name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 50%;
+}
+
+.list_actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--lg);
+}
+
+.no_items {
+  margin: 0;
+}

@@ -186,7 +186,19 @@
     "search-roles": "Search roles...",
     "search-permissions": "Search permissions...",
     "no-roles-found": "No roles found",
-    "no-permissions-found": "No permissions found"
+    "no-permissions-found": "No permissions found",
+    "property-sets-title": "Property sets",
+    "property-sets": "Property sets",
+    "select-property-set": "Select a property set",
+    "no-property-sets": "No property sets found",
+    "no-entries-found": "No entries found",
+    "entries-count": "{{count}} entries",
+    "entry-name": "Entry name",
+    "values": "Values",
+    "schema": "Schema",
+    "cover-image": "Cover image",
+    "search-property-sets": "Search property sets...",
+    "search-entries": "Search entries..."
   },
   "library": {
     "continue-reading": "Continue reading",

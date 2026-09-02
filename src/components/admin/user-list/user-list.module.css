@@ -5,6 +5,16 @@
   margin-bottom: var(--lg);
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--lg);
+}
+
+.header_link {
+  margin-left: auto;
+}
+
 .skeleton_list {
   display: flex;
   flex-direction: column;

@@ -15,19 +15,17 @@ import {
 } from "~/generated/graphql";
 
 /**
- * Loads all property-set schemas for an owner.
+ * Loads all Knowledge property-set schemas.
  */
 defineLoader({
   pattern: "admin/property-sets",
-  async loader(params, context) {
-    const ownerKey = (params.ownerKey as string | undefined) ?? "Knowledge";
+  async loader(_params, context) {
     const token = getCookieValue(context?.cookie, AUTH_COOKIE);
-    if (!token) return { propertySetSchemas: [] };
     try {
       const result = await executeDocument<
         PropertySetSchemasQuery,
         PropertySetSchemasQueryVariables
-      >(PropertySetSchemasDocument, { ownerKey }, token);
+      >(PropertySetSchemasDocument, { ownerKey: "Knowledge" }, token ?? undefined);
       const items = result.data?.gaiaQueries?.propertySetSchemas ?? [];
       return { propertySetSchemas: items };
     } catch {
@@ -46,18 +44,17 @@ defineLoader({
     const name = params.name as string;
     if (!owner || !name) return { propertySetEntries: [], propertySetSchema: null };
     const token = getCookieValue(context?.cookie, AUTH_COOKIE);
-    if (!token) return { propertySetEntries: [], propertySetSchema: null };
     try {
       const [entriesResult, schemaResult] = await Promise.all([
         executeDocument<PropertySetsQuery, PropertySetsQueryVariables>(
           PropertySetsDocument,
           { ownerKey: owner, name },
-          token,
+          token ?? undefined,
         ),
         executeDocument<PropertySetSchemaQuery, PropertySetSchemaQueryVariables>(
           PropertySetSchemaDocument,
           { ownerKey: owner, name },
-          token,
+          token ?? undefined,
         ),
       ]);
       return {

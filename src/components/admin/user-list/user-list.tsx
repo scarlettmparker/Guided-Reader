@@ -1,7 +1,8 @@
 import { Suspense, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
+  Button,
   Card,
   CardBody,
   CardHeader,
@@ -49,8 +50,17 @@ const AdminUserList = (props: AdminUserListProps) => {
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className={styles.header}>
           <CardTitle>{t("title")}</CardTitle>
+          <Link to="/admin/property-sets" className={styles.header_link}>
+            <Button
+              variant="secondary"
+              title={t("property-sets")}
+              aria-label={t("property-sets")}
+            >
+              {t("property-sets")}
+            </Button>
+          </Link>
         </CardHeader>
         <CardBody>
           <div className={styles.toolbar}>

@@ -14,6 +14,12 @@ const Admin = lazy(() => import("./routes/admin"));
 const AccountDetailPage = lazy(
   () => import("./routes/admin/account-detail-page"),
 );
+const PropertySetsPage = lazy(
+  () => import("./routes/admin/property-sets"),
+);
+const PropertySetEntriesPage = lazy(
+  () => import("./routes/admin/property-sets/property-set-entries-page"),
+);
 const Login = lazy(() => import("./routes/login"));
 const Profile = lazy(() => import("./routes/profile"));
 const Reactivate = lazy(() => import("./routes/reactivate"));
@@ -60,6 +66,20 @@ export const routes: RouteObject[] = [
       {
         path: ":id",
         element: <AccountDetailPage />,
+      },
+    ],
+  },
+  {
+    path: "admin/property-sets",
+    element: (
+      <Suspense fallback={<AdminPageSkeleton />}>
+        <PropertySetsPage />
+      </Suspense>
+    ),
+    children: [
+      {
+        path: ":owner/:name",
+        element: <PropertySetEntriesPage />,
       },
     ],
   },
@@ -120,6 +140,14 @@ export const routeMeta: Record<string, RouteMeta> = {
   reactivate: {
     title: "Reactivate | Guided Reader",
     description: "Reactivate your reader account.",
+  },
+  "admin/property-sets": {
+    title: "Property Sets | Guided Reader",
+    description: "Manage Knowledge property sets.",
+  },
+  "admin/property-sets/:owner/:name": {
+    title: "Property Set | Guided Reader",
+    description: "View property set entries.",
   },
 };
 
