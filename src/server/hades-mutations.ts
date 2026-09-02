@@ -310,11 +310,10 @@ defineMutation({
 defineMutation({
   path: "hades/markViewed",
   async handler(body: MarkViewedMutationVariables, context) {
-    const result = await executeDocument<MarkViewedMutation, MarkViewedMutationVariables>(
-      MarkViewedDocument,
-      body,
-      tokenFrom(context),
-    );
+    const result = await executeDocument<
+      MarkViewedMutation,
+      MarkViewedMutationVariables
+    >(MarkViewedDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.markViewed;
     return {
       ...(data ?? {

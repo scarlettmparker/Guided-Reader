@@ -23,7 +23,9 @@ type AccountRef = {
 const Admin = () => {
   const outlet = useOutlet();
   const [suspendTarget, setSuspendTarget] = useState<AccountRef | null>(null);
-  const [unsuspendTarget, setUnsuspendTarget] = useState<AccountRef | null>(null);
+  const [unsuspendTarget, setUnsuspendTarget] = useState<AccountRef | null>(
+    null,
+  );
 
   const handleSuspend = useCallback(async () => {
     if (!suspendTarget) return;

@@ -7,7 +7,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@sun/components";
-import { EllipsisVerticalIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  EllipsisVerticalIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { usePageData } from "@sun/ssr/react";
 import type { PropertySetEntry } from "~/generated/graphql";
 import PropertySetEntryDialog from "~/components/admin/property-sets/property-set-entry-dialog";
@@ -39,7 +43,9 @@ const PropertySetEntriesItems = (props: PropertySetEntriesItemsProps) => {
   );
   const entries = (data as PropertySetEntry[] | undefined) ?? [];
   const [selected, setSelected] = useState<PropertySetEntry | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<PropertySetEntry | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<PropertySetEntry | null>(
+    null,
+  );
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = () => {

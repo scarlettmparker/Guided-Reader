@@ -1,7 +1,6 @@
 import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Badge,
   Button,
   Card,
   CardBody,
@@ -13,6 +12,7 @@ import { usePageData } from "@sun/ssr/react";
 import type { PropertySetSchema } from "~/generated/graphql";
 import { registerPropertySetSchema } from "~/server/actions/propertySets";
 import styles from "./property-set-schema-editor-content.module.css";
+import { CardFooter } from "@sun/components";
 
 type PropertySetSchemaEditorContentProps = {
   /**
@@ -78,27 +78,25 @@ const PropertySetSchemaEditorContent = (
   };
 
   return (
-    <>
-      <Card>
-        <CardHeader className={styles.header}>
-          <CardTitle>{name}</CardTitle>
-        </CardHeader>
-        <CardBody>
-          <div className={styles.inner}>
-            <JsonTextArea
-              value={draft}
-              onChange={setDraft}
-              onError={setJsonError}
-              rows={8}
-              aria-label={t("schema")}
-              placeholder="{}"
-            />
-            {jsonError && <p className={styles.error}>{jsonError}</p>}
-            {error && <p className={styles.error}>{error}</p>}
-          </div>
-        </CardBody>
-      </Card>
-      <div className={styles.actions}>
+    <Card>
+      <CardHeader className={styles.header}>
+        <CardTitle>{name}</CardTitle>
+      </CardHeader>
+      <CardBody>
+        <div className={styles.inner}>
+          <JsonTextArea
+            value={draft}
+            onChange={setDraft}
+            onError={setJsonError}
+            rows={8}
+            aria-label={t("schema")}
+            placeholder="{}"
+          />
+          {jsonError && <p className={styles.error}>{jsonError}</p>}
+          {error && <p className={styles.error}>{error}</p>}
+        </div>
+      </CardBody>
+      <CardFooter className={styles.actions}>
         <Button
           onClick={handleSave}
           disabled={!hasChanges || hasJsonError || isPending}
@@ -106,8 +104,8 @@ const PropertySetSchemaEditorContent = (
         >
           {isPending ? t("saving") : t("save-schema")}
         </Button>
-      </div>
-    </>
+      </CardFooter>
+    </Card>
   );
 };
 

@@ -10,10 +10,14 @@ import styles from "./library.module.css";
 const Library = () => {
   return (
     <div className={styles.library_layout}>
-      <Suspense fallback={<Skeleton style={{ width: "100%", height: "12rem" }} />}>
+      <Suspense
+        fallback={<Skeleton style={{ width: "100%", height: "12rem" }} />}
+      >
         <ContinueReading />
       </Suspense>
-      <Suspense fallback={<Skeleton style={{ width: "100%", height: "12rem" }} />}>
+      <Suspense
+        fallback={<Skeleton style={{ width: "100%", height: "12rem" }} />}
+      >
         <Recent />
       </Suspense>
     </div>

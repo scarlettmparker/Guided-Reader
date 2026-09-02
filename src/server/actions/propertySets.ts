@@ -71,6 +71,10 @@ export async function registerPropertySetSchema(input: {
  * @param entry the entry name
  * @return the mutation result
  */
-export async function deletePropertyEntry(ownerKey: string, name: string, entry: string) {
+export async function deletePropertyEntry(
+  ownerKey: string,
+  name: string,
+  entry: string,
+) {
   return executeMutation("gaia/deletePropertyEntry", { ownerKey, name, entry });
 }

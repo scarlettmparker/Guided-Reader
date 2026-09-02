@@ -14,17 +14,17 @@ defineLoader({
   pattern: "recent",
   async loader() {
     try {
-      const result = await executeDocument<ListTextsQuery, ListTextsQueryVariables>(
-        ListTextsDocument,
-        {
-          pagination: {
-            page: 0,
-            size: 10,
-            sortBy: "createdAt",
-            sortDir: SortDirection.Desc,
-          },
+      const result = await executeDocument<
+        ListTextsQuery,
+        ListTextsQueryVariables
+      >(ListTextsDocument, {
+        pagination: {
+          page: 0,
+          size: 10,
+          sortBy: "createdAt",
+          sortDir: SortDirection.Desc,
         },
-      );
+      });
       const texts = result.success ? result.data?.hadesQueries.texts : null;
       return {
         recentTexts: texts ?? {

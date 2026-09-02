@@ -67,7 +67,12 @@ const PropertySetEntryDialog = (props: PropertySetEntryDialogProps) => {
     }
     startTransition(async () => {
       setError(null);
-      const result = await upsertPropertyEntry(owner, name, entry.entryName, parsed);
+      const result = await upsertPropertyEntry(
+        owner,
+        name,
+        entry.entryName,
+        parsed,
+      );
       if (result.__typename === "StandardError") {
         setError(result.message);
         return;

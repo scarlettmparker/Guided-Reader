@@ -78,7 +78,10 @@ const AdminUserList = (props: AdminUserListProps) => {
               </div>
             }
           >
-            <AdminUserListItems onSuspend={onSuspend} onUnsuspend={onUnsuspend} />
+            <AdminUserListItems
+              onSuspend={onSuspend}
+              onUnsuspend={onUnsuspend}
+            />
           </Suspense>
         </CardBody>
         <Suspense fallback={null}>

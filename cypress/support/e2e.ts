@@ -11,7 +11,10 @@ type MutationResult =
 declare global {
   namespace Cypress {
     interface Chainable {
-      mutate(name: string, body: Record<string, unknown>): Chainable<MutationResult>;
+      mutate(
+        name: string,
+        body: Record<string, unknown>,
+      ): Chainable<MutationResult>;
     }
   }
 }
@@ -33,7 +36,9 @@ beforeEach(() => {
 afterEach(() => {
   cy.url().then((url) =>
     cy.document().then((doc) => {
-      const text = (doc.body.textContent || "").replace(/\s+/g, " ").slice(0, 300);
+      const text = (doc.body.textContent || "")
+        .replace(/\s+/g, " ")
+        .slice(0, 300);
       cy.task("log", `[after ${url}] ${text}`);
     }),
   );

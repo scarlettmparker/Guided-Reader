@@ -58,11 +58,10 @@ defineMutation({
 defineMutation({
   path: "gaia/setProperty",
   async handler(body: SetPropertyMutationVariables, context) {
-    const result = await executeDocument<SetPropertyMutation, SetPropertyMutationVariables>(
-      SetPropertyDocument,
-      body,
-      tokenFrom(context),
-    );
+    const result = await executeDocument<
+      SetPropertyMutation,
+      SetPropertyMutationVariables
+    >(SetPropertyDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.setProperty;
     if (!data) {
       return {

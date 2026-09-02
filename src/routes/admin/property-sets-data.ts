@@ -42,7 +42,8 @@ defineLoader({
   async loader(params, context) {
     const owner = params.owner as string;
     const name = params.name as string;
-    if (!owner || !name) return { propertySetEntries: [], propertySetSchema: null };
+    if (!owner || !name)
+      return { propertySetEntries: [], propertySetSchema: null };
     const token = getCookieValue(context?.cookie, AUTH_COOKIE);
     try {
       const [entriesResult, schemaResult] = await Promise.all([
@@ -51,7 +52,10 @@ defineLoader({
           { ownerKey: owner, name },
           token ?? undefined,
         ),
-        executeDocument<PropertySetSchemaQuery, PropertySetSchemaQueryVariables>(
+        executeDocument<
+          PropertySetSchemaQuery,
+          PropertySetSchemaQueryVariables
+        >(
           PropertySetSchemaDocument,
           { ownerKey: owner, name },
           token ?? undefined,
@@ -59,7 +63,8 @@ defineLoader({
       ]);
       return {
         propertySetEntries: entriesResult.data?.gaiaQueries?.propertySets ?? [],
-        propertySetSchema: schemaResult.data?.gaiaQueries?.propertySetSchema ?? null,
+        propertySetSchema:
+          schemaResult.data?.gaiaQueries?.propertySetSchema ?? null,
       };
     } catch {
       return { propertySetEntries: [], propertySetSchema: null };

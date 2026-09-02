@@ -14,9 +14,7 @@ const Admin = lazy(() => import("./routes/admin"));
 const AccountDetailPage = lazy(
   () => import("./routes/admin/account-detail-page"),
 );
-const PropertySetsPage = lazy(
-  () => import("./routes/admin/property-sets"),
-);
+const PropertySetsPage = lazy(() => import("./routes/admin/property-sets"));
 const PropertySetEntriesPage = lazy(
   () => import("./routes/admin/property-sets/property-set-entries-page"),
 );
