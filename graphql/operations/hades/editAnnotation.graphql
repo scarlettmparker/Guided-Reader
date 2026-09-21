@@ -1,14 +1,37 @@
 mutation editAnnotation($id: ID!, $body: String!) {
   hadesMutations {
     editAnnotation(id: $id, body: $body) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      annotation {
         id
-      }
-      ... on StandardError {
-        __typename
-        message
+        positionId
+        body
+        status
+        upvotes
+        downvotes
+        netScore
+        replyCount
+        position {
+          id
+          textId
+          startOffset
+          endOffset
+        }
+        author {
+          type
+          id
+        }
+        authorProfile {
+          id
+          discordId
+          discordUsername
+          globalName
+          avatar
+          cefrLevel
+        }
+        myVote
+        createdAt
+        updatedAt
       }
     }
   }

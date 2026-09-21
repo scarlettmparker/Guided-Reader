@@ -1,14 +1,17 @@
 mutation icarusRemoveVote($postId: ID!) {
   icarusMutations {
     removeVote(postId: $postId) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      post {
         id
-      }
-      ... on StandardError {
-        __typename
-        message
+        threadId
+        body
+        status
+        upvotes
+        downvotes
+        netScore
+        myVote
+        updatedAt
       }
     }
   }

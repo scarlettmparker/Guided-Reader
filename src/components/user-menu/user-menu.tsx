@@ -51,7 +51,7 @@ const UserMenu = () => {
           />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className={styles.content}>
+      <DropdownMenuContent className={styles.content}>
         <Card className={styles.card}>
           <CardHeader className={styles.header}>
             <DiscordAvatar

@@ -2,6 +2,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import type { AccountPermissionsQuery } from "~/generated/graphql";
 import { setAccountPermissions } from "~/server/actions/roles";
 import AccountPermissionList from "./account-permission-list";
@@ -44,12 +45,18 @@ const AccountPermissionEditor = (props: AccountPermissionEditorProps) => {
   const handleSave = () => {
     setError(null);
     startTransition(async () => {
-      const result = (await setAccountPermissions(accountId, draft)) as {
-        __typename?: string;
-        message?: string;
-      };
-      if (result?.__typename === "StandardError") {
-        setError(result.message ?? "Failed to save permissions.");
+      try {
+        const response = await setAccountPermissions(accountId, draft);
+        patchPageData<AccountPermissionsData>(
+          "accountPermissions",
+          "admin/:id/permissions",
+          { id: accountId },
+          () => response.permissions,
+        );
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to save permissions.",
+        );
       }
     });
   };

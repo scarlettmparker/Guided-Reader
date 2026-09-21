@@ -1,13 +1,29 @@
 mutation createPrivateNote($input: PrivateNoteInput!) {
   hadesMutations {
     createPrivateNote(input: $input) {
-      __typename
-      ... on QuerySuccess {
-        message
+      message
+      note {
         id
-      }
-      ... on StandardError {
-        message
+        textId
+        startOffset
+        endOffset
+        body
+        visibility
+        remoteObject
+        author {
+          type
+          id
+        }
+        authorProfile {
+          id
+          discordId
+          discordUsername
+          globalName
+          avatar
+          cefrLevel
+        }
+        createdAt
+        updatedAt
       }
     }
   }

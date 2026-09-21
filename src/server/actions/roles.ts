@@ -1,4 +1,13 @@
 import { executeMutation } from "@sun/ssr";
+import type {
+  CreateRoleResponse,
+  DeleteRoleResponse,
+  SetAccountPermissionsResponse,
+  SetAccountRolesResponse,
+  SetRolePermissionsResponse,
+  SuspendAccountResponse,
+  UnsuspendAccountResponse,
+} from "~/generated/graphql";
 
 /**
  * Creates a new role.
@@ -7,8 +16,11 @@ import { executeMutation } from "@sun/ssr";
  * @param description the optional description
  * @return the mutation result
  */
-export async function createRole(name: string, description?: string) {
-  return executeMutation("gaia/createRole", {
+export async function createRole(
+  name: string,
+  description?: string,
+): Promise<CreateRoleResponse> {
+  return executeMutation<CreateRoleResponse>("gaia/createRole", {
     name,
     description: description ?? null,
   });
@@ -20,8 +32,8 @@ export async function createRole(name: string, description?: string) {
  * @param id the role id
  * @return the mutation result
  */
-export async function deleteRole(id: string) {
-  return executeMutation("gaia/deleteRole", { id });
+export async function deleteRole(id: string): Promise<DeleteRoleResponse> {
+  return executeMutation<DeleteRoleResponse>("gaia/deleteRole", { id });
 }
 
 /**
@@ -31,8 +43,14 @@ export async function deleteRole(id: string) {
  * @param roleNames the desired role names
  * @return the mutation result
  */
-export async function setAccountRoles(accountId: string, roleNames: string[]) {
-  return executeMutation("gaia/setAccountRoles", { accountId, roleNames });
+export async function setAccountRoles(
+  accountId: string,
+  roleNames: string[],
+): Promise<SetAccountRolesResponse> {
+  return executeMutation<SetAccountRolesResponse>("gaia/setAccountRoles", {
+    accountId,
+    roleNames,
+  });
 }
 
 /**
@@ -45,11 +63,11 @@ export async function setAccountRoles(accountId: string, roleNames: string[]) {
 export async function setAccountPermissions(
   accountId: string,
   permissions: string[],
-) {
-  return executeMutation("gaia/setAccountPermissions", {
-    accountId,
-    permissions,
-  });
+): Promise<SetAccountPermissionsResponse> {
+  return executeMutation<SetAccountPermissionsResponse>(
+    "gaia/setAccountPermissions",
+    { accountId, permissions },
+  );
 }
 
 /**
@@ -62,8 +80,11 @@ export async function setAccountPermissions(
 export async function setRolePermissions(
   roleId: string,
   permissions: string[],
-) {
-  return executeMutation("gaia/setRolePermissions", { roleId, permissions });
+): Promise<SetRolePermissionsResponse> {
+  return executeMutation<SetRolePermissionsResponse>(
+    "gaia/setRolePermissions",
+    { roleId, permissions },
+  );
 }
 
 /**
@@ -72,8 +93,10 @@ export async function setRolePermissions(
  * @param id the account id
  * @return the mutation result
  */
-export async function suspendAccount(id: string) {
-  return executeMutation("gaia/suspendAccount", { id });
+export async function suspendAccount(
+  id: string,
+): Promise<SuspendAccountResponse> {
+  return executeMutation<SuspendAccountResponse>("gaia/suspendAccount", { id });
 }
 
 /**
@@ -82,6 +105,10 @@ export async function suspendAccount(id: string) {
  * @param id the account id
  * @return the mutation result
  */
-export async function unsuspendAccount(id: string) {
-  return executeMutation("gaia/unsuspendAccount", { id });
+export async function unsuspendAccount(
+  id: string,
+): Promise<UnsuspendAccountResponse> {
+  return executeMutation<UnsuspendAccountResponse>("gaia/unsuspendAccount", {
+    id,
+  });
 }

@@ -39,9 +39,11 @@ const Profile = () => {
   }
 
   const handleDeactivate = async () => {
-    const result = await deactivateAccount();
-    if (result.__typename === "QuerySuccess") {
+    try {
+      await deactivateAccount();
       window.location.assign("/login?deactivated=1");
+    } catch {
+      return;
     }
   };
 

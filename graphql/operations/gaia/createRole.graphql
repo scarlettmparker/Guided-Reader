@@ -1,11 +1,14 @@
 mutation createRole($name: String!, $description: String) {
   gaiaMutations {
     createRole(name: $name, description: $description) {
-      id
-      name
-      description
-      createdAt
-      updatedAt
+      message
+      role {
+        id
+        name
+        description
+        createdAt
+        updatedAt
+      }
     }
   }
 }

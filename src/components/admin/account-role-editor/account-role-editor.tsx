@@ -2,6 +2,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import type { RolesQuery, AccountRolesQuery } from "~/generated/graphql";
 import { setAccountRoles } from "~/server/actions/roles";
 import AccountRoleTransferList from "./account-role-transfer-list";
@@ -43,12 +44,16 @@ const AccountRoleEditor = (props: AccountRoleEditorProps) => {
   const handleSave = () => {
     setError(null);
     startTransition(async () => {
-      const result = (await setAccountRoles(accountId, draft)) as {
-        __typename?: string;
-        message?: string;
-      };
-      if (result?.__typename === "StandardError") {
-        setError(result.message ?? "Failed to save roles.");
+      try {
+        const response = await setAccountRoles(accountId, draft);
+        patchPageData<AccountRolesData>(
+          "accountRoles",
+          "admin/:id/roles",
+          { id: accountId },
+          () => response.roles,
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save roles.");
       }
     });
   };

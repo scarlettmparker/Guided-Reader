@@ -9,6 +9,7 @@ import {
   JsonTextArea,
 } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import type { PropertySetSchema } from "~/generated/graphql";
 import { registerPropertySetSchema } from "~/server/actions/propertySets";
 import styles from "./property-set-schema-editor-content.module.css";
@@ -65,14 +66,34 @@ const PropertySetSchemaEditorContent = (
     }
     startTransition(async () => {
       setError(null);
-      const result = await registerPropertySetSchema({
-        ownerKey: owner,
-        name,
-        configurable: schema?.configurable ?? true,
-        properties: parsed,
-      });
-      if (result.__typename === "StandardError") {
-        setError(result.message);
+      try {
+        const response = await registerPropertySetSchema({
+          ownerKey: owner,
+          name,
+          configurable: schema?.configurable ?? true,
+          properties: parsed,
+        });
+        patchPageData<PropertySetSchema>(
+          "propertySetSchema",
+          "admin/property-sets/:owner/:name",
+          { owner, name },
+          () => response.schema,
+        );
+        patchPageData<PropertySetSchema[]>(
+          "propertySetSchemas",
+          "admin/property-sets",
+          {},
+          (current) => {
+            const list = current ?? [];
+            return list.some((item) => item.id === response.schema.id)
+              ? list.map((item) =>
+                  item.id === response.schema.id ? response.schema : item,
+                )
+              : [...list, response.schema];
+          },
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save schema.");
       }
     });
   };
@@ -87,7 +108,13 @@ const PropertySetSchemaEditorContent = (
           <JsonTextArea
             value={draft}
             onChange={setDraft}
-            onError={setJsonError}
+            onError={(
+              error: string | null | React.SyntheticEvent<HTMLTextAreaElement>,
+            ) =>
+              setJsonError(
+                typeof error === "string" || error === null ? error : null,
+              )
+            }
             rows={8}
             aria-label={t("schema")}
             placeholder="{}"

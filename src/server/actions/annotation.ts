@@ -1,8 +1,13 @@
-import { executeMutation, type MutationResult } from "@sun/ssr";
+import { executeMutation } from "@sun/ssr";
 import type {
+  AddCommentResponse,
   AnnotationInput,
   CommentInput,
+  CreateAnnotationResponse,
+  DeleteAnnotationResponse,
+  DeleteCommentResponse,
   ReaderVoteTarget,
+  VoteReaderResponse,
   VoteValue,
 } from "~/generated/graphql";
 
@@ -11,8 +16,10 @@ import type {
  */
 export async function createAnnotation(
   input: AnnotationInput,
-): Promise<MutationResult> {
-  return executeMutation("hades/createAnnotation", { input });
+): Promise<CreateAnnotationResponse> {
+  return executeMutation<CreateAnnotationResponse>("hades/createAnnotation", {
+    input,
+  });
 }
 
 /**
@@ -20,9 +27,8 @@ export async function createAnnotation(
  */
 export async function addComment(
   input: CommentInput,
-  textId?: string,
-): Promise<MutationResult> {
-  return executeMutation("hades/addComment", { input, textId });
+): Promise<AddCommentResponse> {
+  return executeMutation<AddCommentResponse>("hades/addComment", { input });
 }
 
 /**
@@ -30,9 +36,10 @@ export async function addComment(
  */
 export async function deleteAnnotation(
   id: string,
-  textId: string,
-): Promise<MutationResult> {
-  return executeMutation("hades/deleteAnnotation", { id, textId });
+): Promise<DeleteAnnotationResponse> {
+  return executeMutation<DeleteAnnotationResponse>("hades/deleteAnnotation", {
+    id,
+  });
 }
 
 /**
@@ -40,10 +47,8 @@ export async function deleteAnnotation(
  */
 export async function deleteComment(
   id: string,
-  annotationId: string,
-  textId?: string,
-): Promise<MutationResult> {
-  return executeMutation("hades/deleteComment", { id, annotationId, textId });
+): Promise<DeleteCommentResponse> {
+  return executeMutation<DeleteCommentResponse>("hades/deleteComment", { id });
 }
 
 /**
@@ -53,8 +58,8 @@ export async function vote(
   targetType: ReaderVoteTarget,
   targetId: string,
   value: VoteValue,
-): Promise<MutationResult> {
-  return executeMutation("hades/vote", {
+): Promise<VoteReaderResponse> {
+  return executeMutation<VoteReaderResponse>("hades/vote", {
     input: { targetType, targetId, value },
   });
 }
@@ -65,6 +70,9 @@ export async function vote(
 export async function removeVote(
   targetType: ReaderVoteTarget,
   targetId: string,
-): Promise<MutationResult> {
-  return executeMutation("hades/removeVote", { targetType, targetId });
+): Promise<VoteReaderResponse> {
+  return executeMutation<VoteReaderResponse>("hades/removeVote", {
+    targetType,
+    targetId,
+  });
 }

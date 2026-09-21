@@ -13,6 +13,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { usePageData } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import type { PropertySetEntry } from "~/generated/graphql";
 import PropertySetEntryDialog from "~/components/admin/property-sets/property-set-entry-dialog";
 import ConfirmDeleteEntryDialog from "~/components/admin/property-sets/confirm-delete-entry-dialog";
@@ -52,8 +53,18 @@ const PropertySetEntriesItems = (props: PropertySetEntriesItemsProps) => {
     if (!deleteTarget) return;
     const target = deleteTarget;
     startTransition(async () => {
-      await deletePropertyEntry(owner, name, target.entryName);
-      setDeleteTarget(null);
+      try {
+        const response = await deletePropertyEntry(owner, name, target.entryName);
+        patchPageData<PropertySetEntry[]>(
+          "propertySetEntries",
+          "admin/property-sets/:owner/:name",
+          { owner, name },
+          (current) =>
+            (current ?? []).filter((item) => item.id !== response.id),
+        );
+      } finally {
+        setDeleteTarget(null);
+      }
     });
   };
 

@@ -1,6 +1,7 @@
 import { Suspense, useCallback, useState } from "react";
 import { useOutlet } from "react-router-dom";
-import { revalidatePageData } from "@sun/ssr";
+import { patchPageData, revalidatePageData } from "@sun/ssr";
+import type { AccountQuery } from "~/generated/graphql";
 import AdminUserList from "~/components/admin/user-list";
 import AdminDetailPlaceholder from "~/components/admin/admin-detail-placeholder";
 import { AdminDetailSkeleton } from "~/components/admin/skeletons";
@@ -8,6 +9,8 @@ import ConfirmSuspendAccountDialog from "~/components/admin/confirm-suspend-acco
 import ConfirmUnsuspendAccountDialog from "~/components/admin/confirm-unsuspend-account-dialog";
 import { suspendAccount, unsuspendAccount } from "~/server/actions/roles";
 import styles from "./admin.module.css";
+
+type AccountData = AccountQuery["gaiaQueries"]["account"];
 
 type AccountRef = {
   /**
@@ -31,16 +34,36 @@ const Admin = () => {
     if (!suspendTarget) return;
     const id = suspendTarget.id;
     setSuspendTarget(null);
-    await suspendAccount(id);
-    revalidatePageData();
+    try {
+      const response = await suspendAccount(id);
+      patchPageData<AccountData>(
+        "account",
+        "admin/:id",
+        { id },
+        () => response.account,
+      );
+      revalidatePageData();
+    } catch {
+      return;
+    }
   }, [suspendTarget]);
 
   const handleUnsuspend = useCallback(async () => {
     if (!unsuspendTarget) return;
     const id = unsuspendTarget.id;
     setUnsuspendTarget(null);
-    await unsuspendAccount(id);
-    revalidatePageData();
+    try {
+      const response = await unsuspendAccount(id);
+      patchPageData<AccountData>(
+        "account",
+        "admin/:id",
+        { id },
+        () => response.account,
+      );
+      revalidatePageData();
+    } catch {
+      return;
+    }
   }, [unsuspendTarget]);
 
   return (

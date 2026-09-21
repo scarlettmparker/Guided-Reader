@@ -1,4 +1,4 @@
-import { defineMutation, makeCacheKey } from "@sun/ssr";
+import { defineMutation, MutationError } from "@sun/ssr";
 import { executeDocument } from "~/utils/api";
 import { tokenFrom } from "./context";
 import {
@@ -8,150 +8,105 @@ import {
   DeletePropertyEntryDocument,
   type UpsertPropertyEntryMutation,
   type UpsertPropertyEntryMutationVariables,
+  type UpsertPropertyEntryResponse,
   type SetPropertyMutation,
   type SetPropertyMutationVariables,
+  type SetPropertyResponse,
   type RegisterPropertySetSchemaMutation,
   type RegisterPropertySetSchemaMutationVariables,
+  type RegisterPropertySetSchemaResponse,
   type DeletePropertyEntryMutation,
   type DeletePropertyEntryMutationVariables,
+  type DeletePropertyEntryResponse,
 } from "~/generated/graphql";
 
 /**
  * Creates or replaces a property-set entry.
  */
-defineMutation({
-  path: "gaia/upsertPropertyEntry",
-  async handler(body: UpsertPropertyEntryMutationVariables, context) {
-    const result = await executeDocument<
-      UpsertPropertyEntryMutation,
-      UpsertPropertyEntryMutationVariables
-    >(UpsertPropertyEntryDocument, body, tokenFrom(context));
-    const data = result.data?.gaiaMutations?.upsertPropertyEntry;
-    if (!data) {
-      return {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to save property entry.",
-      };
-    }
-    return {
-      __typename: "QuerySuccess" as const,
-      message: "Property entry saved.",
-      id: data.id,
-      invalidated: [
-        makeCacheKey("admin/property-sets:propertySetSchemas", {}),
-        makeCacheKey("admin/property-sets/:owner/:name:propertySetEntries", {
-          owner: body.ownerKey,
-          name: body.name,
-        }),
-        makeCacheKey("admin/property-sets/:owner/:name:propertySetSchema", {
-          owner: body.ownerKey,
-          name: body.name,
-        }),
-      ],
-    };
+defineMutation<UpsertPropertyEntryMutationVariables, UpsertPropertyEntryResponse>(
+  {
+    path: "gaia/upsertPropertyEntry",
+    async handler(body, context) {
+      const result = await executeDocument<
+        UpsertPropertyEntryMutation,
+        UpsertPropertyEntryMutationVariables
+      >(UpsertPropertyEntryDocument, body, tokenFrom(context));
+      const data = result.data?.gaiaMutations?.upsertPropertyEntry;
+      if (data == null) {
+        throw new MutationError(
+          result.error || "Failed to save property entry.",
+          result.statusCode,
+        );
+      }
+      return data;
+    },
   },
-});
+);
 
 /**
  * Sets a single property on an entry.
  */
-defineMutation({
+defineMutation<SetPropertyMutationVariables, SetPropertyResponse>({
   path: "gaia/setProperty",
-  async handler(body: SetPropertyMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       SetPropertyMutation,
       SetPropertyMutationVariables
     >(SetPropertyDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.setProperty;
-    if (!data) {
-      return {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to set property.",
-      };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to set property.",
+        result.statusCode,
+      );
     }
-    return {
-      __typename: "QuerySuccess" as const,
-      message: "Property saved.",
-      id: data.id,
-      invalidated: [
-        makeCacheKey("admin/property-sets/:owner/:name:propertySetEntries", {
-          owner: body.ownerKey,
-          name: body.name,
-        }),
-        makeCacheKey("admin/property-sets/:owner/:name:propertySetSchema", {
-          owner: body.ownerKey,
-          name: body.name,
-        }),
-      ],
-    };
+    return data;
   },
 });
 
 /**
  * Registers a property-set schema.
  */
-defineMutation({
+defineMutation<
+  RegisterPropertySetSchemaMutationVariables,
+  RegisterPropertySetSchemaResponse
+>({
   path: "gaia/registerPropertySetSchema",
-  async handler(body: RegisterPropertySetSchemaMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       RegisterPropertySetSchemaMutation,
       RegisterPropertySetSchemaMutationVariables
     >(RegisterPropertySetSchemaDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.registerPropertySetSchema;
-    if (!data) {
-      return {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to save schema.",
-      };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to save schema.",
+        result.statusCode,
+      );
     }
-    return {
-      __typename: "QuerySuccess" as const,
-      message: "Schema saved.",
-      id: data.id,
-      invalidated: [
-        makeCacheKey("admin/property-sets:propertySetSchemas", {}),
-        makeCacheKey("admin/property-sets/:owner/:name:propertySetSchema", {
-          owner: body.input.ownerKey ?? "",
-          name: body.input.name,
-        }),
-      ],
-    };
+    return data;
   },
 });
 
 /**
  * Deletes a property-set entry.
  */
-defineMutation({
-  path: "gaia/deletePropertyEntry",
-  async handler(body: DeletePropertyEntryMutationVariables, context) {
-    const result = await executeDocument<
-      DeletePropertyEntryMutation,
-      DeletePropertyEntryMutationVariables
-    >(DeletePropertyEntryDocument, body, tokenFrom(context));
-    const data = result.data?.gaiaMutations?.deletePropertyEntry;
-    if (!data) {
-      return {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to delete entry.",
-      };
-    }
-    if (data.__typename === "StandardError") {
+defineMutation<DeletePropertyEntryMutationVariables, DeletePropertyEntryResponse>(
+  {
+    path: "gaia/deletePropertyEntry",
+    async handler(body, context) {
+      const result = await executeDocument<
+        DeletePropertyEntryMutation,
+        DeletePropertyEntryMutationVariables
+      >(DeletePropertyEntryDocument, body, tokenFrom(context));
+      const data = result.data?.gaiaMutations?.deletePropertyEntry;
+      if (data == null) {
+        throw new MutationError(
+          result.error || "Failed to delete entry.",
+          result.statusCode,
+        );
+      }
       return data;
-    }
-    return {
-      ...data,
-      invalidated: [
-        makeCacheKey("admin/property-sets:propertySetSchemas", {}),
-        makeCacheKey("admin/property-sets/:owner/:name:propertySetEntries", {
-          owner: body.ownerKey,
-          name: body.name,
-        }),
-        makeCacheKey("admin/property-sets/:owner/:name:propertySetSchema", {
-          owner: body.ownerKey,
-          name: body.name,
-        }),
-      ],
-    };
+    },
   },
-});
+);

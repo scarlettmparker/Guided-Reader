@@ -1,10 +1,18 @@
-import { executeMutation, type MutationResult } from "@sun/ssr";
+import { executeMutation } from "@sun/ssr";
+import type {
+  ConfirmAccountReactivationResponse,
+  DeactivateAccountResponse,
+  RequestAccountReactivationResponse,
+} from "~/generated/graphql";
 
 /**
  * Deactivates the calling account, revoking its sessions.
  */
-export async function deactivateAccount(): Promise<MutationResult> {
-  return executeMutation("gaia/deactivateAccount", {});
+export async function deactivateAccount(): Promise<DeactivateAccountResponse> {
+  return executeMutation<DeactivateAccountResponse>(
+    "gaia/deactivateAccount",
+    {},
+  );
 }
 
 /**
@@ -12,11 +20,11 @@ export async function deactivateAccount(): Promise<MutationResult> {
  */
 export async function requestAccountReactivation(
   email: string,
-): Promise<MutationResult> {
-  return executeMutation("gaia/requestAccountReactivation", {
-    email,
-    provider: "discord",
-  });
+): Promise<RequestAccountReactivationResponse> {
+  return executeMutation<RequestAccountReactivationResponse>(
+    "gaia/requestAccountReactivation",
+    { email, provider: "discord" },
+  );
 }
 
 /**
@@ -24,6 +32,9 @@ export async function requestAccountReactivation(
  */
 export async function confirmAccountReactivation(
   token: string,
-): Promise<MutationResult> {
-  return executeMutation("gaia/confirmAccountReactivation", { token });
+): Promise<ConfirmAccountReactivationResponse> {
+  return executeMutation<ConfirmAccountReactivationResponse>(
+    "gaia/confirmAccountReactivation",
+    { token },
+  );
 }

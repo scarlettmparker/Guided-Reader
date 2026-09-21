@@ -1,14 +1,18 @@
 mutation createText($input: ReaderTextInput!) {
   hadesMutations {
     createText(input: $input) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      text {
         id
-      }
-      ... on StandardError {
-        __typename
-        message
+        title
+        content
+        language
+        level
+        ownerId
+        sourceId
+        status
+        createdAt
+        updatedAt
       }
     }
   }

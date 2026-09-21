@@ -11,8 +11,16 @@ import {
   TaggedInput,
 } from "@sun/components";
 import { X } from "lucide-react";
+import { patchPageData } from "@sun/ssr";
 import { shareNotes } from "~/server/actions/private-note";
-import type { SearchReaderAccountsQuery } from "~/generated/graphql";
+import {
+  PrivateNoteVisibility,
+  type PrivateNotesQuery,
+  type SearchReaderAccountsQuery,
+} from "~/generated/graphql";
+
+type PrivateNote =
+  PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 import SearchSuggestions from "./search-suggestions";
 import styles from "./share-notes-dialog.module.css";
 
@@ -100,10 +108,24 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
       .map((tag) => tag.id);
     if (subjectIds.length === 0 && subjectEmails.length === 0) return;
     startTransition(async () => {
-      await shareNotes({ textId, subjectIds, subjectEmails });
-      setTags([]);
-      setQuery("");
-      onOpenChange(false);
+      try {
+        await shareNotes({ textId, subjectIds, subjectEmails });
+        patchPageData<PrivateNote[]>(
+          "privateNotes",
+          "privateNotes/:textId",
+          { textId },
+          (current) =>
+            (current ?? []).map((note) => ({
+              ...note,
+              visibility: PrivateNoteVisibility.Shared,
+            })),
+        );
+        setTags([]);
+        setQuery("");
+        onOpenChange(false);
+      } catch {
+        return;
+      }
     });
   };
 
@@ -117,7 +139,9 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
           <TaggedInput
             ref={inputRef}
             value={query}
-            onChange={setQuery}
+            onChange={(value: string | React.ChangeEvent<HTMLDivElement>) => {
+              if (typeof value === "string") setQuery(value);
+            }}
             onKeyDown={handleKeyDown}
             placeholder={t("share-notes-placeholder")}
           >

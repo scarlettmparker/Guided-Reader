@@ -1,4 +1,10 @@
 import { executeMutation } from "@sun/ssr";
+import type {
+  DeletePropertyEntryResponse,
+  RegisterPropertySetSchemaResponse,
+  SetPropertyResponse,
+  UpsertPropertyEntryResponse,
+} from "~/generated/graphql";
 
 /**
  * Creates or replaces a property-set entry.
@@ -14,13 +20,11 @@ export async function upsertPropertyEntry(
   name: string,
   entry: string,
   values: Record<string, unknown>,
-) {
-  return executeMutation("gaia/upsertPropertyEntry", {
-    ownerKey,
-    name,
-    entry,
-    input: { values },
-  });
+): Promise<UpsertPropertyEntryResponse> {
+  return executeMutation<UpsertPropertyEntryResponse>(
+    "gaia/upsertPropertyEntry",
+    { ownerKey, name, entry, input: { values } },
+  );
 }
 
 /**
@@ -39,8 +43,8 @@ export async function setProperty(
   entry: string,
   property: string,
   value: unknown,
-) {
-  return executeMutation("gaia/setProperty", {
+): Promise<SetPropertyResponse> {
+  return executeMutation<SetPropertyResponse>("gaia/setProperty", {
     ownerKey,
     name,
     entry,
@@ -59,8 +63,11 @@ export async function registerPropertySetSchema(input: {
   name: string;
   configurable?: boolean | null;
   properties: Record<string, unknown>;
-}) {
-  return executeMutation("gaia/registerPropertySetSchema", { input });
+}): Promise<RegisterPropertySetSchemaResponse> {
+  return executeMutation<RegisterPropertySetSchemaResponse>(
+    "gaia/registerPropertySetSchema",
+    { input },
+  );
 }
 
 /**
@@ -75,6 +82,9 @@ export async function deletePropertyEntry(
   ownerKey: string,
   name: string,
   entry: string,
-) {
-  return executeMutation("gaia/deletePropertyEntry", { ownerKey, name, entry });
+): Promise<DeletePropertyEntryResponse> {
+  return executeMutation<DeletePropertyEntryResponse>(
+    "gaia/deletePropertyEntry",
+    { ownerKey, name, entry },
+  );
 }

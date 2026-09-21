@@ -1,12 +1,15 @@
 mutation registerPropertySetSchema($input: PropertySetSchemaInput!) {
   gaiaMutations {
     registerPropertySetSchema(input: $input) {
-      id
-      ownerKey
-      name
-      properties
-      configurable
-      status
+      message
+      schema {
+        id
+        ownerKey
+        name
+        properties
+        configurable
+        status
+      }
     }
   }
 }

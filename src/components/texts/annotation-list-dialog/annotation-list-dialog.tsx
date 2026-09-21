@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EllipsisVerticalIcon } from "lucide-react";
 import {
@@ -15,18 +15,21 @@ import {
   DropdownMenuTrigger,
   MarkdownViewer,
 } from "@sun/components";
-import { usePageData } from "@sun/ssr/react";
+import { usePageData, useMutation } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
 import AnnotationDiscussion from "../annotation-discussion";
 import AnnotationConfirmDeleteDialog from "../annotation-confirm-delete-dialog";
 import { removeVote, vote as castVote } from "~/server/actions/annotation";
 import { CEFR_TO_KEY } from "~/utils/cefr";
+import { voteScoreDelta } from "~/utils/vote-score";
 import {
   ReaderVoteTarget,
   VoteValue,
   type ListAnnotationsQuery,
   type ReaderAccount,
+  type VoteReaderResponse,
 } from "~/generated/graphql";
 import styles from "./annotation-list-dialog.module.css";
 import { TrashIcon } from "@heroicons/react/24/outline";
@@ -35,6 +38,17 @@ type Annotation =
   ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 type LevelColours = Record<string, string>;
+
+type VotePayload = {
+  /**
+   * Annotation being voted on.
+   */
+  targetId: string;
+  /**
+   * Next vote value; null removes the vote.
+   */
+  next: VoteValue | null;
+};
 
 const TITLE_SNIPPET_LIMIT = 60;
 
@@ -70,7 +84,7 @@ type AnnotationListDialogProps = {
    */
   list: AnnotationListState;
   /**
-   * The live annotations for the position (refetches after mutations).
+   * The live annotations for the position.
    */
   annotations: Annotation[];
   /**
@@ -102,7 +116,6 @@ const AnnotationListDialog = ({
     "currentUser",
   );
   const { open, position, textId, snippet } = list;
-  const [items, setItems] = useState<Annotation[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Annotation | null>(null);
   const [replyOpenId, setReplyOpenId] = useState<string | null>(null);
 
@@ -111,23 +124,48 @@ const AnnotationListDialog = ({
       ? `${snippet.slice(0, TITLE_SNIPPET_LIMIT)}…`
       : snippet;
 
-  /**
-   * Keeps the local list in sync when a different position is opened.
-   */
-  useEffect(() => {
-    setItems([...annotations].sort((a, b) => b.netScore - a.netScore));
-  }, [annotations]);
+  const sorted = useMemo(
+    () => [...annotations].sort((a, b) => b.netScore - a.netScore),
+    [annotations],
+  );
 
-  /**
-   * Applies a vote change to one annotation and re-sorts the list by score.
-   */
-  const handleVoted = (id: string, netScore: number) => {
-    setItems((prev) =>
-      [...prev]
-        .map((item) => (item.id === id ? { ...item, netScore } : item))
+  const [items, runVote, votePending] = useMutation<
+    VotePayload,
+    VoteReaderResponse,
+    Annotation[]
+  >({
+    base: sorted,
+    reducer: (current, payload) =>
+      current
+        .map((item) =>
+          item.id === payload.targetId
+            ? {
+                ...item,
+                myVote: payload.next,
+                netScore:
+                  item.netScore + voteScoreDelta(item.myVote, payload.next),
+              }
+            : item,
+        )
         .sort((a, b) => b.netScore - a.netScore),
-    );
-  };
+    action: (payload) =>
+      payload.next === null
+        ? removeVote(ReaderVoteTarget.Annotation, payload.targetId)
+        : castVote(ReaderVoteTarget.Annotation, payload.targetId, payload.next),
+    onSuccess: (response) => {
+      const entity = response.annotation;
+      if (entity == null) return;
+      patchPageData<Annotation[]>(
+        "annotations",
+        "texts/:id",
+        { id: textId },
+        (current) =>
+          (current ?? []).map((item) =>
+            item.id === entity.id ? { ...item, ...entity } : item,
+          ),
+      );
+    },
+  });
 
   return (
     <Dialog
@@ -155,10 +193,6 @@ const AnnotationListDialog = ({
                 !!profile?.id &&
                 !!currentUser?.id &&
                 profile.id === currentUser.id;
-              const handleVoteChange = (next: VoteValue | null) =>
-                next === null
-                  ? removeVote(ReaderVoteTarget.Annotation, annotation.id)
-                  : castVote(ReaderVoteTarget.Annotation, annotation.id, next);
               const toggleReply = () =>
                 setReplyOpenId((current) =>
                   current === annotation.id ? null : annotation.id,
@@ -203,7 +237,7 @@ const AnnotationListDialog = ({
                             aria-label={t("annotation-actions")}
                           />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent>
                           <DropdownMenuItem
                             onClick={() => setDeleteTarget(annotation)}
                             asChild
@@ -224,9 +258,9 @@ const AnnotationListDialog = ({
                     <VoteControl
                       myVote={annotation.myVote ?? null}
                       netScore={annotation.netScore}
-                      onVoteChange={handleVoteChange}
-                      onVoted={(netScore) =>
-                        handleVoted(annotation.id, netScore)
+                      pending={votePending}
+                      onVoteChange={(next) =>
+                        runVote({ targetId: annotation.id, next })
                       }
                     />
                     <a onClick={toggleReply}>{t("reply-action")}</a>

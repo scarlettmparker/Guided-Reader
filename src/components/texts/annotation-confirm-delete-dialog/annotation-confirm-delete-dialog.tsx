@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@sun/components";
+import { patchPageData } from "@sun/ssr";
 import { deleteAnnotation } from "~/server/actions/annotation";
 import type { ListAnnotationsQuery } from "~/generated/graphql";
 
@@ -24,7 +25,7 @@ type AnnotationConfirmDeleteDialogProps = {
    */
   onOpenChange: (open: boolean) => void;
   /**
-   * The text the annotation belongs to (for cache invalidation).
+   * The text the annotation belongs to.
    */
   textId: string;
 };
@@ -42,8 +43,18 @@ const AnnotationConfirmDeleteDialog = ({
 
   const handleConfirm = () => {
     startTransition(async () => {
-      await deleteAnnotation(target.id, textId);
-      onOpenChange(false);
+      try {
+        const response = await deleteAnnotation(target.id);
+        patchPageData<Annotation[]>(
+          "annotations",
+          "texts/:id",
+          { id: textId },
+          (current) =>
+            (current ?? []).filter((item) => item.id !== response.id),
+        );
+      } finally {
+        onOpenChange(false);
+      }
     });
   };
 

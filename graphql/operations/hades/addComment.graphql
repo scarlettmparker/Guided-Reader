@@ -1,14 +1,31 @@
 mutation addComment($input: CommentInput!) {
   hadesMutations {
     addComment(input: $input) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      comment {
         id
-      }
-      ... on StandardError {
-        __typename
-        message
+        annotationId
+        parentId
+        body
+        status
+        upvotes
+        downvotes
+        netScore
+        author {
+          type
+          id
+        }
+        authorProfile {
+          id
+          discordId
+          discordUsername
+          globalName
+          avatar
+          cefrLevel
+        }
+        myVote
+        createdAt
+        updatedAt
       }
     }
   }

@@ -40,11 +40,17 @@ const Reactivate = () => {
     if (!token) return;
     let active = true;
     setPending(true);
-    confirmAccountReactivation(token).then((result) => {
-      if (!active) return;
-      setPending(false);
-      setConfirm(result.__typename === "QuerySuccess" ? "success" : "error");
-    });
+    confirmAccountReactivation(token)
+      .then(() => {
+        if (!active) return;
+        setPending(false);
+        setConfirm("success");
+      })
+      .catch(() => {
+        if (!active) return;
+        setPending(false);
+        setConfirm("error");
+      });
     return () => {
       active = false;
     };
@@ -55,14 +61,15 @@ const Reactivate = () => {
     if (!email.trim()) return;
     setPending(true);
     setError(false);
-    requestAccountReactivation(email.trim()).then((result) => {
-      setPending(false);
-      if (result.__typename === "QuerySuccess") {
+    requestAccountReactivation(email.trim())
+      .then(() => {
+        setPending(false);
         setSent(true);
-      } else {
+      })
+      .catch(() => {
+        setPending(false);
         setError(true);
-      }
-    });
+      });
   };
 
   return (

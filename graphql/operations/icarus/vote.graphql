@@ -1,14 +1,17 @@
 mutation icarusVote($input: ForumVoteInput!) {
   icarusMutations {
     vote(input: $input) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      post {
         id
-      }
-      ... on StandardError {
-        __typename
-        message
+        threadId
+        body
+        status
+        upvotes
+        downvotes
+        netScore
+        myVote
+        updatedAt
       }
     }
   }

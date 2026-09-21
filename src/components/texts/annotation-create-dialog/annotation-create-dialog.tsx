@@ -10,9 +10,14 @@ import {
   Form,
   MarkdownEditor,
 } from "@sun/components";
+import { patchPageData } from "@sun/ssr";
 import { createAnnotation } from "~/server/actions/annotation";
 import { centeredDialogPosition } from "~/utils/dialog-position";
+import type { ListAnnotationsQuery } from "~/generated/graphql";
 import styles from "./annotation-create-dialog.module.css";
+
+type Annotation =
+  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 const TITLE_SNIPPET_LIMIT = 60;
 
@@ -115,25 +120,30 @@ const AnnotationCreateDialog = ({
     const { startOffset, endOffset } = selection;
     startTransition(async () => {
       setError(null);
-      const result = await createAnnotation({
-        textId,
-        startOffset,
-        endOffset,
-        body: trimmed,
-      });
-      if (result.__typename === "QuerySuccess") {
+      try {
+        const response = await createAnnotation({
+          textId,
+          startOffset,
+          endOffset,
+          body: trimmed,
+        });
+        patchPageData<Annotation[]>(
+          "annotations",
+          "texts/:id",
+          { id: textId },
+          (current) => [...(current ?? []), response.annotation],
+        );
         setBody("");
         onOpenChange(false);
-        if (result.id) {
-          onCreated?.(result.id);
+        onCreated?.(response.annotation.id);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "";
+        const statusCode = (err as { statusCode?: number }).statusCode;
+        if (statusCode === 429 || message === "rate_limited") {
+          setError(t("rate-limit-message"));
+        } else {
+          setError(t("annotation-error"));
         }
-      } else if (
-        result.__typename === "StandardError" &&
-        (result.message.includes("429") || result.message === "rate_limited")
-      ) {
-        setError(t("rate-limit-message"));
-      } else {
-        setError(t("annotation-error"));
       }
     });
   };

@@ -16,6 +16,7 @@ import {
   MarkdownViewer,
 } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import DiscordAvatar from "~/components/discord-avatar";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import { deletePrivateNote } from "~/server/actions/private-note";
@@ -128,9 +129,20 @@ const PrivateNoteListDialog = ({
 
   const handleDelete = () => {
     if (!deleteTarget) return;
+    const target = deleteTarget;
     startTransition(async () => {
-      await deletePrivateNote(deleteTarget.id, textId);
-      setDeleteTarget(null);
+      try {
+        const response = await deletePrivateNote(target.id);
+        patchPageData<PrivateNote[]>(
+          "privateNotes",
+          "privateNotes/:textId",
+          { textId },
+          (current) =>
+            (current ?? []).filter((item) => item.id !== response.id),
+        );
+      } finally {
+        setDeleteTarget(null);
+      }
     });
   };
 
@@ -201,7 +213,7 @@ const PrivateNoteListDialog = ({
                               aria-label={t("private-note-actions")}
                             />
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent>
                             <DropdownMenuItem
                               onClick={() => setDeleteTarget(note)}
                               asChild

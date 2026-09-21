@@ -10,12 +10,14 @@ import {
   MarkdownEditor,
 } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import { createPost, createThread } from "~/server/actions/forum";
-import type { ThreadsForQuery } from "~/generated/graphql";
+import type { ListPostsQuery, ThreadsForQuery } from "~/generated/graphql";
 import ThreadPosts from "../thread-posts";
 import styles from "./text-discussion-card.module.css";
 
 type Thread = ThreadsForQuery["icarusQueries"]["threadsFor"]["items"][number];
+type Post = ListPostsQuery["icarusQueries"]["posts"]["items"][number];
 
 /**
  * Title stored on the single thread backing a text discussion. Never shown to
@@ -54,20 +56,38 @@ const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
     startTransition(async () => {
       let id: string | undefined = threadId;
       if (!id) {
-        const created = await createThread(
-          { title: THREAD_TITLE, remoteObject: `hades:text:${textId}` },
-          textId,
-        );
-        if (created.__typename === "QuerySuccess") {
-          id = created.id ?? undefined;
+        try {
+          const created = await createThread({
+            title: THREAD_TITLE,
+            remoteObject: `hades:text:${textId}`,
+          });
+          patchPageData<Thread[]>(
+            "threads",
+            "texts/:id/discussion",
+            { id: textId },
+            (current) => [...(current ?? []), created.thread],
+          );
+          id = created.thread.id;
+        } catch {
+          return;
         }
       }
       if (!id) return;
-      const result = await createPost(
-        { threadId: id, parentId: null, body: trimmed },
-        textId,
-      );
-      if (result.__typename !== "QuerySuccess") return;
+      try {
+        const response = await createPost({
+          threadId: id,
+          parentId: null,
+          body: trimmed,
+        });
+        patchPageData<Post[]>(
+          "posts",
+          "threads/:threadId",
+          { threadId: id },
+          (current) => [...(current ?? []), response.post],
+        );
+      } catch {
+        return;
+      }
       setBody("");
       setResetKey((k) => k + 1);
     });

@@ -1,4 +1,4 @@
-import { defineMutation, makeCacheKey } from "@sun/ssr";
+import { defineMutation, MutationError } from "@sun/ssr";
 import { executeDocument } from "~/utils/api";
 import { tokenFrom } from "./context";
 import {
@@ -19,123 +19,115 @@ import {
   type IcarusVoteMutationVariables,
 } from "~/generated/graphql";
 
+type CreateThreadResponse =
+  CreateThreadMutation["icarusMutations"]["createThread"];
+type CreatePostResponse = CreatePostMutation["icarusMutations"]["createPost"];
+type DeletePostResponse = DeletePostMutation["icarusMutations"]["deletePost"];
+type VoteForumResponse = IcarusVoteMutation["icarusMutations"]["vote"];
+type RemoveVoteResponse =
+  IcarusRemoveVoteMutation["icarusMutations"]["removeVote"];
+
 /**
- * Creates a discussion thread on a text; invalidates that text's threads.
+ * Creates a discussion thread on a text.
  */
-defineMutation({
+defineMutation<CreateThreadMutationVariables, CreateThreadResponse>({
   path: "icarus/createThread",
-  async handler(
-    body: CreateThreadMutationVariables & { textId?: string },
-    context,
-  ) {
+  async handler(body, context) {
     const result = await executeDocument<
       CreateThreadMutation,
       CreateThreadMutationVariables
-    >(CreateThreadDocument, { input: body.input }, tokenFrom(context));
+    >(CreateThreadDocument, body, tokenFrom(context));
     const data = result.data?.icarusMutations.createThread;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to create thread.",
-      }),
-      invalidated: body.textId
-        ? [makeCacheKey("texts/:id/discussion:threads", { id: body.textId })]
-        : [],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to create thread.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
- * Creates a post (or reply) in a thread; invalidates that thread's posts.
+ * Creates a post (or reply) in a thread.
  */
-defineMutation({
+defineMutation<CreatePostMutationVariables, CreatePostResponse>({
   path: "icarus/createPost",
-  async handler(
-    body: CreatePostMutationVariables & { textId?: string },
-    context,
-  ) {
+  async handler(body, context) {
     const result = await executeDocument<
       CreatePostMutation,
       CreatePostMutationVariables
-    >(CreatePostDocument, { input: body.input }, tokenFrom(context));
+    >(CreatePostDocument, body, tokenFrom(context));
     const data = result.data?.icarusMutations.createPost;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to create post.",
-      }),
-      invalidated: [
-        makeCacheKey("threads/:threadId:posts", {
-          threadId: body.input.threadId,
-        }),
-        ...(body.textId
-          ? [makeCacheKey("texts/:id/discussion:threads", { id: body.textId })]
-          : []),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to create post.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
- * Deletes a post from a thread; invalidates that thread's posts.
+ * Deletes a post from a thread.
  */
-defineMutation({
+defineMutation<DeletePostMutationVariables, DeletePostResponse>({
   path: "icarus/deletePost",
-  async handler(
-    body: DeletePostMutationVariables & { threadId?: string },
-    context,
-  ) {
+  async handler(body, context) {
     const result = await executeDocument<
       DeletePostMutation,
       DeletePostMutationVariables
-    >(DeletePostDocument, { id: body.id }, tokenFrom(context));
+    >(DeletePostDocument, body, tokenFrom(context));
     const data = result.data?.icarusMutations.deletePost;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to delete post.",
-      }),
-      invalidated: body.threadId
-        ? [makeCacheKey("threads/:threadId:posts", { threadId: body.threadId })]
-        : [],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to delete post.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Casts a vote on a forum post.
  */
-defineMutation({
+defineMutation<IcarusVoteMutationVariables, VoteForumResponse>({
   path: "icarus/vote",
-  async handler(body: IcarusVoteMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       IcarusVoteMutation,
       IcarusVoteMutationVariables
     >(IcarusVoteDocument, body, tokenFrom(context));
-    return (
-      result.data?.icarusMutations.vote ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to vote.",
-      }
-    );
+    const data = result.data?.icarusMutations.vote;
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to vote.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Removes the caller's vote on a forum post.
  */
-defineMutation({
+defineMutation<IcarusRemoveVoteMutationVariables, RemoveVoteResponse>({
   path: "icarus/removeVote",
-  async handler(body: IcarusRemoveVoteMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       IcarusRemoveVoteMutation,
       IcarusRemoveVoteMutationVariables
     >(IcarusRemoveVoteDocument, body, tokenFrom(context));
-    return (
-      result.data?.icarusMutations.removeVote ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to remove vote.",
-      }
-    );
+    const data = result.data?.icarusMutations.removeVote;
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to remove vote.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });

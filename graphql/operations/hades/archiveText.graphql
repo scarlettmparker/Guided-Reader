@@ -1,14 +1,18 @@
 mutation archiveText($id: ID!) {
   hadesMutations {
     archiveText(id: $id) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      text {
         id
-      }
-      ... on StandardError {
-        __typename
-        message
+        title
+        content
+        language
+        level
+        ownerId
+        sourceId
+        status
+        createdAt
+        updatedAt
       }
     }
   }

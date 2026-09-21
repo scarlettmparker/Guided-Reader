@@ -16,7 +16,8 @@ import {
   MarkdownViewer,
 } from "@sun/components";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { usePageData } from "@sun/ssr/react";
+import { usePageData, useMutation } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
 import {
@@ -25,16 +26,31 @@ import {
   vote as castVote,
 } from "~/server/actions/annotation";
 import { CEFR_TO_KEY } from "~/utils/cefr";
+import { voteScoreDelta } from "~/utils/vote-score";
 import {
   ReaderVoteTarget,
   VoteValue,
+  type ListAnnotationsQuery,
   type ListCommentsQuery,
   type ReaderAccount,
+  type VoteReaderResponse,
 } from "~/generated/graphql";
 import styles from "./comment-item.module.css";
 
 type Comment = ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 type LevelColours = Record<string, string>;
+
+type VotePayload = {
+  /**
+   * Comment being voted on.
+   */
+  targetId: string;
+  /**
+   * Next vote value; null removes the vote.
+   */
+  next: VoteValue | null;
+};
 
 type CommentItemProps = {
   /**
@@ -42,11 +58,11 @@ type CommentItemProps = {
    */
   comment: Comment;
   /**
-   * Parent annotation, used to invalidate its comment list on delete.
+   * Parent annotation, used to update its reply count on delete.
    */
   annotationId: string;
   /**
-   * Owning text, used to refresh the annotation reply count on delete.
+   * Owning text, used to update the annotation reply count on delete.
    */
   textId: string;
 };
@@ -65,8 +81,40 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
     "levelColours",
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-  const profile = comment.authorProfile;
+  const [deletePending, startDelete] = useTransition();
+
+  const [optimisticComment, runVote, votePending] = useMutation<
+    VotePayload,
+    VoteReaderResponse,
+    Comment
+  >({
+    base: comment,
+    reducer: (current, payload) => ({
+      ...current,
+      myVote: payload.next,
+      netScore:
+        current.netScore + voteScoreDelta(current.myVote, payload.next),
+    }),
+    action: (payload) =>
+      payload.next === null
+        ? removeVote(ReaderVoteTarget.Comment, payload.targetId)
+        : castVote(ReaderVoteTarget.Comment, payload.targetId, payload.next),
+    onSuccess: (response) => {
+      const entity = response.comment;
+      if (entity == null) return;
+      patchPageData<Comment[]>(
+        "comments",
+        "annotations/:annotationId",
+        { annotationId },
+        (current) =>
+          (current ?? []).map((item) =>
+            item.id === entity.id ? { ...item, ...entity } : item,
+          ),
+      );
+    },
+  });
+
+  const profile = optimisticComment.authorProfile;
   const colour = profile?.cefrLevel
     ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
     : undefined;
@@ -74,9 +122,30 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
     !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
 
   const confirmDelete = () => {
-    startTransition(async () => {
-      await deleteComment(comment.id, annotationId, textId);
-      setConfirmOpen(false);
+    startDelete(async () => {
+      try {
+        const response = await deleteComment(optimisticComment.id);
+        patchPageData<Comment[]>(
+          "comments",
+          "annotations/:annotationId",
+          { annotationId },
+          (current) =>
+            (current ?? []).filter((item) => item.id !== response.id),
+        );
+        patchPageData<Annotation[]>(
+          "annotations",
+          "texts/:id",
+          { id: textId },
+          (current) =>
+            (current ?? []).map((item) =>
+              item.id === annotationId
+                ? { ...item, replyCount: Math.max(0, item.replyCount - 1) }
+                : item,
+            ),
+        );
+      } finally {
+        setConfirmOpen(false);
+      }
     });
   };
 
@@ -106,7 +175,7 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
                 aria-label={t("comment-actions")}
               />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setConfirmOpen(true)} asChild>
                 <span className={styles.delete_action}>
                   <TrashIcon width={16} height={16} />
@@ -117,14 +186,15 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
           </DropdownMenu>
         )}
       </div>
-      <MarkdownViewer className={styles.body}>{comment.body}</MarkdownViewer>
+      <MarkdownViewer className={styles.body}>
+        {optimisticComment.body}
+      </MarkdownViewer>
       <VoteControl
-        myVote={comment.myVote ?? null}
-        netScore={comment.netScore}
-        onVoteChange={(next: VoteValue | null) =>
-          next === null
-            ? removeVote(ReaderVoteTarget.Comment, comment.id)
-            : castVote(ReaderVoteTarget.Comment, comment.id, next)
+        myVote={optimisticComment.myVote ?? null}
+        netScore={optimisticComment.netScore}
+        pending={votePending}
+        onVoteChange={(next) =>
+          runVote({ targetId: optimisticComment.id, next })
         }
       />
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
@@ -145,7 +215,7 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
           <Button
             type="button"
             variant="destructive"
-            disabled={pending}
+            disabled={deletePending}
             onClick={confirmDelete}
           >
             {t("delete")}

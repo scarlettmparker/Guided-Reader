@@ -3,10 +3,7 @@
  * Shared commands + seed helpers for the functional tests.
  */
 
-type MutationResult =
-  | { __typename: "QuerySuccess"; id?: string | null; message: string }
-  | { __typename: "StandardError"; message: string }
-  | { __typename: "Redirect"; redirectTo: string };
+type MutationResponse = { message: string } & Record<string, unknown>;
 
 declare global {
   namespace Cypress {
@@ -14,13 +11,13 @@ declare global {
       mutate(
         name: string,
         body: Record<string, unknown>,
-      ): Chainable<MutationResult>;
+      ): Chainable<MutationResponse>;
     }
   }
 }
 
 Cypress.Commands.add("mutate", (name, body) =>
-  cy.request("POST", `/${name}`, body).then((r) => r.body as MutationResult),
+  cy.request("POST", `/${name}`, body).then((r) => r.body as MutationResponse),
 );
 
 beforeEach(() => {

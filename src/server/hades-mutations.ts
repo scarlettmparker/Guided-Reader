@@ -1,4 +1,4 @@
-import { defineMutation, makeCacheKey } from "@sun/ssr";
+import { defineMutation, MutationError } from "@sun/ssr";
 import { executeDocument } from "~/utils/api";
 import { tokenFrom } from "./context";
 import {
@@ -37,290 +37,254 @@ import {
   type MarkViewedMutationVariables,
 } from "~/generated/graphql";
 
+type CreateAnnotationResponse =
+  CreateAnnotationMutation["hadesMutations"]["createAnnotation"];
+type EditAnnotationResponse =
+  EditAnnotationMutation["hadesMutations"]["editAnnotation"];
+type DeleteAnnotationResponse =
+  DeleteAnnotationMutation["hadesMutations"]["deleteAnnotation"];
+type AddCommentResponse =
+  AddCommentMutation["hadesMutations"]["addComment"];
+type DeleteCommentResponse =
+  DeleteCommentMutation["hadesMutations"]["deleteComment"];
+type VoteReaderResponse = HadesVoteMutation["hadesMutations"]["vote"];
+type CreatePrivateNoteResponse =
+  CreatePrivateNoteMutation["hadesMutations"]["createPrivateNote"];
+type DeletePrivateNoteResponse =
+  DeletePrivateNoteMutation["hadesMutations"]["deletePrivateNote"];
+type ShareNotesResponse = ShareNotesMutation["hadesMutations"]["shareNotes"];
+type MarkViewedResponse = MarkViewedMutation["hadesMutations"]["markViewed"];
+
 /**
- * Creates an annotation on a text range; invalidates that text's annotations.
+ * Creates an annotation on a text range.
  */
-defineMutation({
+defineMutation<CreateAnnotationMutationVariables, CreateAnnotationResponse>({
   path: "hades/createAnnotation",
-  async handler(body: CreateAnnotationMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       CreateAnnotationMutation,
       CreateAnnotationMutationVariables
     >(CreateAnnotationDocument, body, tokenFrom(context));
-    const invalidated = [
-      makeCacheKey("texts/:id:annotations", { id: body.input.textId }),
-    ];
     if (result.statusCode === 429 || result.error?.includes("429")) {
-      return {
-        __typename: "StandardError" as const,
-        message: "rate_limited",
-        invalidated,
-      };
+      throw new MutationError("rate_limited", 429);
     }
     const data = result.data?.hadesMutations.createAnnotation;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to create annotation.",
-      }),
-      invalidated,
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to create annotation.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Updates an annotation's body.
  */
-defineMutation({
+defineMutation<EditAnnotationMutationVariables, EditAnnotationResponse>({
   path: "hades/editAnnotation",
-  async handler(body: EditAnnotationMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       EditAnnotationMutation,
       EditAnnotationMutationVariables
     >(EditAnnotationDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.editAnnotation;
-    return (
-      data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to edit annotation.",
-      }
-    );
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to edit annotation.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
- * Deletes an annotation; invalidates the parent text's annotations.
+ * Deletes an annotation.
  */
-defineMutation({
+defineMutation<DeleteAnnotationMutationVariables, DeleteAnnotationResponse>({
   path: "hades/deleteAnnotation",
-  async handler(
-    body: DeleteAnnotationMutationVariables & { textId?: string },
-    context,
-  ) {
+  async handler(body, context) {
     const result = await executeDocument<
       DeleteAnnotationMutation,
       DeleteAnnotationMutationVariables
-    >(DeleteAnnotationDocument, { id: body.id }, tokenFrom(context));
+    >(DeleteAnnotationDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.deleteAnnotation;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to delete annotation.",
-      }),
-      invalidated: body.textId
-        ? [makeCacheKey("texts/:id:annotations", { id: body.textId })]
-        : [],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to delete annotation.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
- * Adds a comment (or reply) to an annotation; invalidates that annotation's
- * comments.
+ * Adds a comment (or reply) to an annotation.
  */
-defineMutation({
+defineMutation<AddCommentMutationVariables, AddCommentResponse>({
   path: "hades/addComment",
-  async handler(
-    body: AddCommentMutationVariables & { textId?: string },
-    context,
-  ) {
+  async handler(body, context) {
     const result = await executeDocument<
       AddCommentMutation,
       AddCommentMutationVariables
-    >(AddCommentDocument, { input: body.input }, tokenFrom(context));
+    >(AddCommentDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.addComment;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to add comment.",
-      }),
-      invalidated: [
-        makeCacheKey("annotations/:annotationId:comments", {
-          annotationId: body.input.annotationId,
-        }),
-        ...(body.textId
-          ? [makeCacheKey("texts/:id:annotations", { id: body.textId })]
-          : []),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to add comment.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
- * Deletes a comment on an annotation; invalidates that annotation's comments.
+ * Deletes a comment on an annotation.
  */
-defineMutation({
+defineMutation<DeleteCommentMutationVariables, DeleteCommentResponse>({
   path: "hades/deleteComment",
-  async handler(
-    body: DeleteCommentMutationVariables & {
-      annotationId?: string;
-      textId?: string;
-    },
-    context,
-  ) {
+  async handler(body, context) {
     const result = await executeDocument<
       DeleteCommentMutation,
       DeleteCommentMutationVariables
-    >(DeleteCommentDocument, { id: body.id }, tokenFrom(context));
+    >(DeleteCommentDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.deleteComment;
-    const invalidated: string[] = [];
-    if (body.annotationId) {
-      invalidated.push(
-        makeCacheKey("annotations/:annotationId:comments", {
-          annotationId: body.annotationId,
-        }),
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to delete comment.",
+        result.statusCode,
       );
     }
-    if (body.textId) {
-      invalidated.push(
-        makeCacheKey("texts/:id:annotations", { id: body.textId }),
-      );
-    }
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to delete comment.",
-      }),
-      invalidated,
-    };
+    return data;
   },
 });
 
 /**
  * Casts a vote on an annotation or comment.
  */
-defineMutation({
+defineMutation<HadesVoteMutationVariables, VoteReaderResponse>({
   path: "hades/vote",
-  async handler(body: HadesVoteMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       HadesVoteMutation,
       HadesVoteMutationVariables
     >(HadesVoteDocument, body, tokenFrom(context));
-    return (
-      result.data?.hadesMutations.vote ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to vote.",
-      }
-    );
+    const data = result.data?.hadesMutations.vote;
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to vote.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Removes the caller's vote on an annotation or comment.
  */
-defineMutation({
+defineMutation<RemoveVoteMutationVariables, VoteReaderResponse>({
   path: "hades/removeVote",
-  async handler(body: RemoveVoteMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       RemoveVoteMutation,
       RemoveVoteMutationVariables
     >(RemoveVoteDocument, body, tokenFrom(context));
-    return (
-      result.data?.hadesMutations.removeVote ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to remove vote.",
-      }
-    );
+    const data = result.data?.hadesMutations.removeVote;
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to remove vote.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Creates a private note on a text range.
  */
-defineMutation({
+defineMutation<CreatePrivateNoteMutationVariables, CreatePrivateNoteResponse>({
   path: "hades/createPrivateNote",
-  async handler(body: CreatePrivateNoteMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       CreatePrivateNoteMutation,
       CreatePrivateNoteMutationVariables
     >(CreatePrivateNoteDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.createPrivateNote;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to create private note.",
-      }),
-      invalidated: [
-        makeCacheKey("privateNotes/:textId:privateNotes", {
-          textId: body.input.textId,
-        }),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to create private note.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Deletes a private note.
  */
-defineMutation({
+defineMutation<DeletePrivateNoteMutationVariables, DeletePrivateNoteResponse>({
   path: "hades/deletePrivateNote",
-  async handler(
-    body: DeletePrivateNoteMutationVariables & { textId?: string },
-    context,
-  ) {
+  async handler(body, context) {
     const result = await executeDocument<
       DeletePrivateNoteMutation,
       DeletePrivateNoteMutationVariables
-    >(DeletePrivateNoteDocument, { id: body.id }, tokenFrom(context));
+    >(DeletePrivateNoteDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.deletePrivateNote;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to delete private note.",
-      }),
-      invalidated: body.textId
-        ? [
-            makeCacheKey("privateNotes/:textId:privateNotes", {
-              textId: body.textId,
-            }),
-          ]
-        : [],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to delete private note.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Shares all private notes on a text.
  */
-defineMutation({
+defineMutation<ShareNotesMutationVariables, ShareNotesResponse>({
   path: "hades/shareNotes",
-  async handler(body: ShareNotesMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       ShareNotesMutation,
       ShareNotesMutationVariables
     >(ShareNotesDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.shareNotes;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to share notes.",
-      }),
-      invalidated: [
-        makeCacheKey("privateNotes/:textId:privateNotes", {
-          textId: body.input.textId,
-        }),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to share notes.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Marks a text as viewed.
  */
-defineMutation({
+defineMutation<MarkViewedMutationVariables, MarkViewedResponse>({
   path: "hades/markViewed",
-  async handler(body: MarkViewedMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       MarkViewedMutation,
       MarkViewedMutationVariables
     >(MarkViewedDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.markViewed;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to mark viewed.",
-      }),
-      invalidated: [makeCacheKey("library:viewedTexts", {})],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to mark viewed.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });

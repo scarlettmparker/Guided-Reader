@@ -1,14 +1,19 @@
 mutation suspendAccount($id: ID!) {
   gaiaMutations {
     suspendAccount(id: $id) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      account {
         id
-      }
-      ... on StandardError {
-        __typename
-        message
+        username
+        personId
+        status
+        provider
+        remoteUsers {
+          type
+          id
+        }
+        createdAt
+        updatedAt
       }
     }
   }

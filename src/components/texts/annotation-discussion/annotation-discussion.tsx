@@ -8,10 +8,19 @@ import {
   Form,
   MarkdownEditor,
 } from "@sun/components";
+import { patchPageData } from "@sun/ssr";
 import { addComment } from "~/server/actions/annotation";
+import type {
+  ListAnnotationsQuery,
+  ListCommentsQuery,
+} from "~/generated/graphql";
 import AnnotationReplies from "../annotation-replies";
 import RepliesSkeleton from "./skeletons/replies-skeleton";
 import styles from "./annotation-discussion.module.css";
+
+type Annotation =
+  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+type Comment = ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
 
 type AnnotationDiscussionProps = {
   /**
@@ -23,7 +32,7 @@ type AnnotationDiscussionProps = {
    */
   replyCount: number;
   /**
-   * The owning text, used to invalidate the annotation list on reply.
+   * The owning text, used to update the annotation list on reply.
    */
   textId: string;
   /**
@@ -70,14 +79,35 @@ const AnnotationDiscussion = ({
     const trimmed = body.trim();
     if (!trimmed) return;
     startTransition(async () => {
-      const result = await addComment(
-        { annotationId, parentId: null, body: trimmed },
-        textId,
-      );
-      if (result.__typename !== "QuerySuccess") return;
-      setBody("");
-      setResetKey((key) => key + 1);
-      onComposerOpenChange(false);
+      try {
+        const response = await addComment({
+          annotationId,
+          parentId: null,
+          body: trimmed,
+        });
+        patchPageData<Comment[]>(
+          "comments",
+          "annotations/:annotationId",
+          { annotationId },
+          (current) => [...(current ?? []), response.comment],
+        );
+        patchPageData<Annotation[]>(
+          "annotations",
+          "texts/:id",
+          { id: textId },
+          (current) =>
+            (current ?? []).map((item) =>
+              item.id === annotationId
+                ? { ...item, replyCount: item.replyCount + 1 }
+                : item,
+            ),
+        );
+        setBody("");
+        setResetKey((key) => key + 1);
+        onComposerOpenChange(false);
+      } catch {
+        return;
+      }
     });
   };
 

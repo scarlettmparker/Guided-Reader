@@ -1,14 +1,29 @@
 mutation removeVote($targetType: ReaderVoteTarget!, $targetId: ID!) {
   hadesMutations {
     removeVote(targetType: $targetType, targetId: $targetId) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      annotation {
         id
+        positionId
+        body
+        status
+        upvotes
+        downvotes
+        netScore
+        replyCount
+        myVote
+        updatedAt
       }
-      ... on StandardError {
-        __typename
-        message
+      comment {
+        id
+        annotationId
+        body
+        status
+        upvotes
+        downvotes
+        netScore
+        myVote
+        updatedAt
       }
     }
   }

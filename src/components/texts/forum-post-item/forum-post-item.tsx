@@ -16,21 +16,36 @@ import {
   MarkdownViewer,
 } from "@sun/components";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { usePageData } from "@sun/ssr/react";
+import { usePageData, useMutation } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
 import { deletePost, removePostVote, votePost } from "~/server/actions/forum";
 import { CEFR_TO_KEY } from "~/utils/cefr";
+import { voteScoreDelta } from "~/utils/vote-score";
 import {
   VoteValue,
   type ListPostsQuery,
   type ReaderAccount,
+  type RemoveVoteResponse,
+  type VoteForumResponse,
 } from "~/generated/graphql";
 import styles from "./forum-post-item.module.css";
 
 type Post = ListPostsQuery["icarusQueries"]["posts"]["items"][number];
 type Profile = Post["authorProfile"];
 type LevelColours = Record<string, string>;
+
+type VotePayload = {
+  /**
+   * Post being voted on.
+   */
+  targetId: string;
+  /**
+   * Next vote value; null removes the vote.
+   */
+  next: VoteValue | null;
+};
 
 type ForumPostItemProps = {
   /**
@@ -42,7 +57,7 @@ type ForumPostItemProps = {
    */
   profile?: Profile;
   /**
-   * Parent thread, used to invalidate its post list on delete.
+   * Parent thread, used to update its post list on delete.
    */
   threadId: string;
 };
@@ -61,7 +76,38 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
     "levelColours",
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [deletePending, startDelete] = useTransition();
+
+  const [optimisticPost, runVote, votePending] = useMutation<
+    VotePayload,
+    VoteForumResponse | RemoveVoteResponse,
+    Post
+  >({
+    base: post,
+    reducer: (current, payload) => ({
+      ...current,
+      myVote: payload.next,
+      netScore:
+        current.netScore + voteScoreDelta(current.myVote, payload.next),
+    }),
+    action: (payload) =>
+      payload.next === null
+        ? removePostVote(payload.targetId)
+        : votePost(payload.targetId, payload.next),
+    onSuccess: (response) => {
+      const entity = response.post;
+      patchPageData<Post[]>(
+        "posts",
+        "threads/:threadId",
+        { threadId },
+        (current) =>
+          (current ?? []).map((item) =>
+            item.id === entity.id ? { ...item, ...entity } : item,
+          ),
+      );
+    },
+  });
+
   const colour = profile?.cefrLevel
     ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
     : undefined;
@@ -69,9 +115,19 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
     !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
 
   const confirmDelete = () => {
-    startTransition(async () => {
-      await deletePost(post.id, threadId);
-      setConfirmOpen(false);
+    startDelete(async () => {
+      try {
+        const response = await deletePost(optimisticPost.id);
+        patchPageData<Post[]>(
+          "posts",
+          "threads/:threadId",
+          { threadId },
+          (current) =>
+            (current ?? []).filter((item) => item.id !== response.id),
+        );
+      } finally {
+        setConfirmOpen(false);
+      }
     });
   };
 
@@ -101,7 +157,7 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
                 aria-label={t("comment-actions")}
               />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setConfirmOpen(true)} asChild>
                 <span className={styles.delete_action}>
                   <TrashIcon width={16} height={16} />
@@ -112,13 +168,14 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
           </DropdownMenu>
         )}
       </div>
-      <MarkdownViewer className={styles.body}>{post.body}</MarkdownViewer>
+      <MarkdownViewer className={styles.body}>
+        {optimisticPost.body}
+      </MarkdownViewer>
       <VoteControl
-        myVote={post.myVote ?? null}
-        netScore={post.netScore}
-        onVoteChange={(next: VoteValue | null) =>
-          next === null ? removePostVote(post.id) : votePost(post.id, next)
-        }
+        myVote={optimisticPost.myVote ?? null}
+        netScore={optimisticPost.netScore}
+        pending={votePending}
+        onVoteChange={(next) => runVote({ targetId: optimisticPost.id, next })}
       />
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogHeader>
@@ -138,7 +195,7 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
           <Button
             type="button"
             variant="destructive"
-            disabled={pending}
+            disabled={deletePending}
             onClick={confirmDelete}
           >
             {t("delete")}

@@ -10,11 +10,16 @@ import {
   Form,
   MarkdownEditor,
 } from "@sun/components";
+import { patchPageData } from "@sun/ssr";
 import { createPrivateNote } from "~/server/actions/private-note";
 import { centeredDialogPosition } from "~/utils/dialog-position";
+import type { PrivateNotesQuery } from "~/generated/graphql";
 import styles from "./private-note-create-dialog.module.css";
 
 import type { AnnotationSelection } from "../annotation-create-dialog";
+
+type PrivateNote =
+  PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 
 export type PrivateNoteCreateState = {
   /**
@@ -77,21 +82,23 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
     const { startOffset, endOffset } = selection;
     startTransition(async () => {
       setError(null);
-      const result = await createPrivateNote({
-        textId,
-        startOffset,
-        endOffset,
-        body: trimmed,
-      });
-      if (result.__typename === "QuerySuccess") {
+      try {
+        const response = await createPrivateNote({
+          textId,
+          startOffset,
+          endOffset,
+          body: trimmed,
+        });
+        patchPageData<PrivateNote[]>(
+          "privateNotes",
+          "privateNotes/:textId",
+          { textId },
+          (current) => [...(current ?? []), response.note],
+        );
         setBody("");
         onOpenChange(false);
-        if (result.id) {
-          onCreated?.(result.id);
-        } else {
-          onCreated?.("");
-        }
-      } else {
+        onCreated?.(response.note.id);
+      } catch {
         setError(t("private-note-error"));
       }
     });

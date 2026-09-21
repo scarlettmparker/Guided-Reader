@@ -10,6 +10,7 @@ import {
   Form,
   JsonTextArea,
 } from "@sun/components";
+import { patchPageData } from "@sun/ssr";
 import { upsertPropertyEntry } from "~/server/actions/propertySets";
 import type { PropertySetEntry } from "~/generated/graphql";
 import styles from "./property-set-entry-dialog.module.css";
@@ -67,17 +68,30 @@ const PropertySetEntryDialog = (props: PropertySetEntryDialogProps) => {
     }
     startTransition(async () => {
       setError(null);
-      const result = await upsertPropertyEntry(
-        owner,
-        name,
-        entry.entryName,
-        parsed,
-      );
-      if (result.__typename === "StandardError") {
-        setError(result.message);
-        return;
+      try {
+        const response = await upsertPropertyEntry(
+          owner,
+          name,
+          entry.entryName,
+          parsed,
+        );
+        patchPageData<PropertySetEntry[]>(
+          "propertySetEntries",
+          "admin/property-sets/:owner/:name",
+          { owner, name },
+          (current) => {
+            const list = current ?? [];
+            return list.some((item) => item.id === response.entry.id)
+              ? list.map((item) =>
+                  item.id === response.entry.id ? response.entry : item,
+                )
+              : [...list, response.entry];
+          },
+        );
+        onOpenChange(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save entry.");
       }
-      onOpenChange(false);
     });
   };
 
@@ -91,7 +105,13 @@ const PropertySetEntryDialog = (props: PropertySetEntryDialogProps) => {
           <JsonTextArea
             value={draft}
             onChange={setDraft}
-            onError={setJsonError}
+            onError={(
+              error: string | null | React.SyntheticEvent<HTMLTextAreaElement>,
+            ) =>
+              setJsonError(
+                typeof error === "string" || error === null ? error : null,
+              )
+            }
             rows={8}
             aria-label={t("values")}
             placeholder="{}"

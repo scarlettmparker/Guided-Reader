@@ -1,14 +1,14 @@
 mutation createThread($input: CreateThreadInput!) {
   icarusMutations {
     createThread(input: $input) {
-      ... on QuerySuccess {
-        __typename
-        message
+      message
+      thread {
         id
-      }
-      ... on StandardError {
-        __typename
-        message
+        title
+        status
+        remoteObject
+        createdAt
+        updatedAt
       }
     }
   }

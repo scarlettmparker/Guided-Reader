@@ -1,26 +1,8 @@
-import { useTransition, useState } from "react";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button, cn } from "@sun/components";
-import type { MutationResult } from "@sun/ssr";
 import { VoteValue } from "~/generated/graphql";
 import styles from "./vote-control.module.css";
-
-/**
- * Score change applied for each vote transition.
- */
-const NONE = "none";
-const SCORE_DELTA: Record<string, number> = {
-  "UP-UP": 0,
-  "UP-DOWN": -2,
-  "UP-none": -1,
-  "DOWN-UP": 2,
-  "DOWN-DOWN": 0,
-  "DOWN-none": 1,
-  "none-UP": 1,
-  "none-DOWN": -1,
-  "none-none": 0,
-};
 
 type VoteControlProps = {
   /**
@@ -32,56 +14,32 @@ type VoteControlProps = {
    */
   netScore: number;
   /**
-   * Casts or removes a vote. The resolved result is checked so the control can
-   * roll back on failure.
+   * Called with the next vote value; null removes the vote.
    */
-  onVoteChange: (next: VoteValue | null) => Promise<MutationResult>;
+  onVoteChange: (next: VoteValue | null) => void;
   /**
-   * Called with the new score after a successful change, for parent re-sort.
+   * Whether a vote mutation is in flight.
    */
-  onVoted?: (netScore: number) => void;
+  pending?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 /**
- * Up/down vote control with an optimistic score and rollback.
+ * Up/down vote control; the parent owns the optimistic score.
  */
 const VoteControl = ({
   myVote,
   netScore,
   onVoteChange,
-  onVoted,
+  pending = false,
   className,
 }: VoteControlProps) => {
   const { t } = useTranslation("texts");
-  const [vote, setVote] = useState<VoteValue | null>(myVote ?? null);
-  const [score, setScore] = useState(netScore);
-  const [pending, startTransition] = useTransition();
+  const vote = myVote ?? null;
 
-  /**
-   * Applies a vote change: updates the optimistic score, notifies the parent,
-   * and rolls back if the mutation fails.
-   */
-  const applyVote = (next: VoteValue | null) => {
-    const delta = SCORE_DELTA[`${vote ?? NONE}-${next ?? NONE}`] ?? 0;
-    const nextScore = score + delta;
-    const prevVote = vote;
-    const prevScore = score;
-    setVote(next);
-    setScore(nextScore);
-    onVoted?.(nextScore);
-    startTransition(async () => {
-      const result = await onVoteChange(next);
-      if (result.__typename !== "QuerySuccess") {
-        setVote(prevVote);
-        setScore(prevScore);
-        onVoted?.(prevScore);
-      }
-    });
-  };
-
-  const handleUp = () => applyVote(vote === VoteValue.Up ? null : VoteValue.Up);
+  const handleUp = () =>
+    onVoteChange(vote === VoteValue.Up ? null : VoteValue.Up);
   const handleDown = () =>
-    applyVote(vote === VoteValue.Down ? null : VoteValue.Down);
+    onVoteChange(vote === VoteValue.Down ? null : VoteValue.Down);
 
   return (
     <div className={cn(styles.vote_control, className)}>
@@ -97,7 +55,7 @@ const VoteControl = ({
       >
         <ThumbsUp />
       </Button>
-      <span className={styles.score}>{score}</span>
+      <span className={styles.score}>{netScore}</span>
       <Button
         type="button"
         variant="secondary"

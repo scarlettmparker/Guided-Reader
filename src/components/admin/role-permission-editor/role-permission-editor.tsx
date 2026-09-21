@@ -2,6 +2,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
+import { patchPageData } from "@sun/ssr";
 import type { RolePermissionsQuery } from "~/generated/graphql";
 import { setRolePermissions } from "~/server/actions/roles";
 import RolePermissionList from "./role-permission-list";
@@ -44,12 +45,18 @@ const RolePermissionEditor = (props: RolePermissionEditorProps) => {
   const handleSave = () => {
     setError(null);
     startTransition(async () => {
-      const result = (await setRolePermissions(roleId, draft)) as {
-        __typename?: string;
-        message?: string;
-      };
-      if (result?.__typename === "StandardError") {
-        setError(result.message ?? "Failed to save permissions.");
+      try {
+        const response = await setRolePermissions(roleId, draft);
+        patchPageData<RolePermissionsData>(
+          "rolePermissions",
+          "admin/roles/:id/permissions",
+          { id: roleId },
+          () => response.permissions,
+        );
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to save permissions.",
+        );
       }
     });
   };

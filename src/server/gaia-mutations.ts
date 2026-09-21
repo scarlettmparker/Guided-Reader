@@ -1,4 +1,4 @@
-import { defineMutation, makeCacheKey } from "@sun/ssr";
+import { defineMutation, MutationError } from "@sun/ssr";
 import { executeDocument } from "~/utils/api";
 import { tokenFrom } from "./context";
 import {
@@ -14,138 +14,151 @@ import {
   SetRolePermissionsDocument,
   type SuspendAccountMutation,
   type SuspendAccountMutationVariables,
+  type SuspendAccountResponse,
   type UnsuspendAccountMutation,
   type UnsuspendAccountMutationVariables,
+  type UnsuspendAccountResponse,
   type DeactivateAccountMutation,
   type DeactivateAccountMutationVariables,
+  type DeactivateAccountResponse,
   type RequestAccountReactivationMutation,
   type RequestAccountReactivationMutationVariables,
+  type RequestAccountReactivationResponse,
   type ConfirmAccountReactivationMutation,
   type ConfirmAccountReactivationMutationVariables,
+  type ConfirmAccountReactivationResponse,
   type CreateRoleMutation,
   type CreateRoleMutationVariables,
+  type CreateRoleResponse,
   type DeleteRoleMutation,
   type DeleteRoleMutationVariables,
+  type DeleteRoleResponse,
   type SetAccountRolesMutation,
   type SetAccountRolesMutationVariables,
+  type SetAccountRolesResponse,
   type SetAccountPermissionsMutation,
   type SetAccountPermissionsMutationVariables,
+  type SetAccountPermissionsResponse,
   type SetRolePermissionsMutation,
   type SetRolePermissionsMutationVariables,
-  type Role,
+  type SetRolePermissionsResponse,
 } from "~/generated/graphql";
 
 /**
  * Suspends an account, revoking all active sessions.
  */
-defineMutation({
+defineMutation<SuspendAccountMutationVariables, SuspendAccountResponse>({
   path: "gaia/suspendAccount",
-  async handler(body: SuspendAccountMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       SuspendAccountMutation,
       SuspendAccountMutationVariables
-    >(SuspendAccountDocument, { id: body.id }, tokenFrom(context));
+    >(SuspendAccountDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.suspendAccount;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to suspend account.",
-      }),
-      invalidated: [
-        makeCacheKey("accounts:accounts", { page: "*" }),
-        makeCacheKey("admin/:id:account", { id: body.id }),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to suspend account.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Re-activates a suspended account.
  */
-defineMutation({
+defineMutation<UnsuspendAccountMutationVariables, UnsuspendAccountResponse>({
   path: "gaia/unsuspendAccount",
-  async handler(body: UnsuspendAccountMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       UnsuspendAccountMutation,
       UnsuspendAccountMutationVariables
-    >(UnsuspendAccountDocument, { id: body.id }, tokenFrom(context));
+    >(UnsuspendAccountDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.unsuspendAccount;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to unsuspend account.",
-      }),
-      invalidated: [
-        makeCacheKey("accounts:accounts", { page: "*" }),
-        makeCacheKey("admin/:id:account", { id: body.id }),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to unsuspend account.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Deactivates the calling account, revoking its sessions.
  */
-defineMutation({
+defineMutation<DeactivateAccountMutationVariables, DeactivateAccountResponse>({
   path: "gaia/deactivateAccount",
-  async handler(body: DeactivateAccountMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       DeactivateAccountMutation,
       DeactivateAccountMutationVariables
     >(DeactivateAccountDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.deactivateAccount;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to deactivate account.",
-      }),
-      invalidated: [makeCacheKey("currentUser:currentUser", {})],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to deactivate account.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Emails a reactivation link to the given address.
  */
-defineMutation({
+defineMutation<
+  RequestAccountReactivationMutationVariables,
+  RequestAccountReactivationResponse
+>({
   path: "gaia/requestAccountReactivation",
-  async handler(body: RequestAccountReactivationMutationVariables, _context) {
+  async handler(body, _context) {
     const result = await executeDocument<
       RequestAccountReactivationMutation,
       RequestAccountReactivationMutationVariables
     >(RequestAccountReactivationDocument, body);
-    return (
-      result.data?.gaiaMutations?.requestAccountReactivation ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to request reactivation.",
-      }
-    );
+    const data = result.data?.gaiaMutations?.requestAccountReactivation;
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to request reactivation.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Reactivates an account using a confirmation token.
  */
-defineMutation({
+defineMutation<
+  ConfirmAccountReactivationMutationVariables,
+  ConfirmAccountReactivationResponse
+>({
   path: "gaia/confirmAccountReactivation",
-  async handler(body: ConfirmAccountReactivationMutationVariables, _context) {
+  async handler(body, _context) {
     const result = await executeDocument<
       ConfirmAccountReactivationMutation,
       ConfirmAccountReactivationMutationVariables
     >(ConfirmAccountReactivationDocument, body);
-    return (
-      result.data?.gaiaMutations?.confirmAccountReactivation ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to confirm reactivation.",
-      }
-    );
+    const data = result.data?.gaiaMutations?.confirmAccountReactivation;
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to confirm reactivation.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Creates a new role.
  */
-defineMutation<CreateRoleMutationVariables, Role>({
+defineMutation<CreateRoleMutationVariables, CreateRoleResponse>({
   path: "gaia/createRole",
   async handler(body, context) {
     const result = await executeDocument<
@@ -153,111 +166,99 @@ defineMutation<CreateRoleMutationVariables, Role>({
       CreateRoleMutationVariables
     >(CreateRoleDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.createRole;
-    if (!data) {
-      return {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to create role.",
-      };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to create role.",
+        result.statusCode,
+      );
     }
-    return {
-      ...data,
-      invalidated: [makeCacheKey("admin/roles:roles", {})],
-    };
+    return data;
   },
 });
 
 /**
  * Deletes a role.
  */
-defineMutation({
+defineMutation<DeleteRoleMutationVariables, DeleteRoleResponse>({
   path: "gaia/deleteRole",
-  async handler(body: DeleteRoleMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       DeleteRoleMutation,
       DeleteRoleMutationVariables
     >(DeleteRoleDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.deleteRole;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to delete role.",
-      }),
-      invalidated: [makeCacheKey("admin/roles:roles", {})],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to delete role.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Replaces the account's roles.
  */
-defineMutation({
+defineMutation<SetAccountRolesMutationVariables, SetAccountRolesResponse>({
   path: "gaia/setAccountRoles",
-  async handler(body: SetAccountRolesMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       SetAccountRolesMutation,
       SetAccountRolesMutationVariables
     >(SetAccountRolesDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.setAccountRoles;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to set account roles.",
-      }),
-      invalidated: [
-        makeCacheKey("admin/:id/roles:accountRoles", { id: body.accountId }),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to set account roles.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Replaces the account's direct permissions.
  */
-defineMutation({
+defineMutation<
+  SetAccountPermissionsMutationVariables,
+  SetAccountPermissionsResponse
+>({
   path: "gaia/setAccountPermissions",
-  async handler(body: SetAccountPermissionsMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       SetAccountPermissionsMutation,
       SetAccountPermissionsMutationVariables
     >(SetAccountPermissionsDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.setAccountPermissions;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to set account permissions.",
-      }),
-      invalidated: [
-        makeCacheKey("admin/:id/permissions:accountPermissions", {
-          id: body.accountId,
-        }),
-        makeCacheKey("admin/all-permissions:allPermissions", {}),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to set account permissions.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });
 
 /**
  * Replaces a role's permissions.
  */
-defineMutation({
+defineMutation<SetRolePermissionsMutationVariables, SetRolePermissionsResponse>({
   path: "gaia/setRolePermissions",
-  async handler(body: SetRolePermissionsMutationVariables, context) {
+  async handler(body, context) {
     const result = await executeDocument<
       SetRolePermissionsMutation,
       SetRolePermissionsMutationVariables
     >(SetRolePermissionsDocument, body, tokenFrom(context));
     const data = result.data?.gaiaMutations?.setRolePermissions;
-    return {
-      ...(data ?? {
-        __typename: "StandardError" as const,
-        message: result.error || "Failed to set role permissions.",
-      }),
-      invalidated: [
-        makeCacheKey("admin/roles/:id/permissions:rolePermissions", {
-          id: body.roleId,
-        }),
-        makeCacheKey("admin/all-permissions:allPermissions", {}),
-      ],
-    };
+    if (data == null) {
+      throw new MutationError(
+        result.error || "Failed to set role permissions.",
+        result.statusCode,
+      );
+    }
+    return data;
   },
 });

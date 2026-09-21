@@ -26,7 +26,7 @@ type DefinitionDialogProps = {
    * Called when the open state changes.
    */
   onOpenChange: (open: boolean) => void;
-} & React.HTMLAttributes<HTMLDivElement>;
+} & Omit<React.HTMLAttributes<HTMLDivElement>, "draggable">;
 
 /**
  * Draggable dialog with a search bar that fetches a WordReference definition.
@@ -36,17 +36,6 @@ const DefinitionDialog = (props: DefinitionDialogProps) => {
   const { t } = useTranslation("texts");
   const [inputValue, setInputValue] = useState("");
   const [searchWord, setSearchWord] = useState("");
-
-  const handleSearch = () => {
-    setSearchWord(inputValue.trim());
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleSearch();
-    }
-  };
 
   const title = searchWord
     ? t("definition.dialog-title", { word: searchWord })
@@ -78,8 +67,7 @@ const DefinitionDialog = (props: DefinitionDialogProps) => {
           <SearchBar
             value={inputValue}
             onChange={(value: string) => setInputValue(value)}
-            onKeyDown={handleKeyDown}
-            onBlur={handleSearch}
+            onSearch={(value: string) => setSearchWord(value.trim())}
             placeholder={t("definition.placeholder")}
             aria-label={t("definition.placeholder")}
           />
