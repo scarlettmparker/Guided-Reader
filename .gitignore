@@ -1,6 +1,8 @@
 node_modules/
 dist/
-public/
+public/*
+!public/.well-known/
+!public/.well-known/security.txt
 .env*
 
 # Generated
