@@ -1,0 +1,24 @@
+when:
+  - event: push
+    branch: main
+
+steps:
+  build:
+    image: node:24
+    volumes:
+      - reader-npm-cache:/root/.npm
+    commands:
+      - npm ci --no-audit --no-fund
+      - npm run build
+
+  deploy:
+    image: alpine:3.21
+    volumes:
+      - /opt/woodpecker/keys/ci-deploy:/root/.ssh/ci-deploy:ro
+      - /opt/woodpecker/keys/known_hosts:/root/.ssh/known_hosts:ro
+    environment:
+      SSH_KEY: /root/.ssh/ci-deploy
+    commands:
+      - apk add --no-cache openssh-client rsync bash
+      - printf 'Host *\n  BatchMode yes\n  IdentitiesOnly yes\n' > ~/.ssh/config
+      - ./deploy.sh --skip-build

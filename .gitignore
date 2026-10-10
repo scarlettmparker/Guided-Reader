@@ -24,5 +24,8 @@ opencode.json
 
 # Local crap only 
 scripts/
-vm/
+vm/*
+!vm/systemd/
+!vm/systemd/*
 deploy.sh
+!deploy.sh
