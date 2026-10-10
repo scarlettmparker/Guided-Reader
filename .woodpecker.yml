@@ -4,12 +4,12 @@ when:
 
 steps:
   build:
-    image: node:24
+    image: oven/bun:1.4.3
     volumes:
-      - reader-npm-cache:/root/.npm
+      - reader-bun-cache:/root/.bun/install/cache
     commands:
-      - npm ci --no-audit --no-fund
-      - npm run build
+      - bun install --frozen-lockfile --no-progress
+      - bun run build
 
   deploy:
     image: alpine:3.21

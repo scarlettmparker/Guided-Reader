@@ -6,7 +6,7 @@
 # Usage:
 #   ./e2e.sh                     # build the app image, then run the suite headless
 #   ./e2e.sh up                  # bring up db + backend + app detached, no tests
-#   ./e2e.sh open                # bring the stack up, then `npx cypress open` on the host
+#   ./e2e.sh open                # bring the stack up, then `bunx cypress open` on the host
 #   ./e2e.sh down                # stop the stack and wipe the DB volume
 #   ./e2e.sh --no-cache          # rebuild the app image without docker layer cache
 #   ./e2e.sh --rebuild-backend   # force a rebuild of the sun-graphql image
@@ -56,8 +56,8 @@ build_app() {
   local hash
   hash=$(
     {
-      cat Dockerfile package.json package-lock.json vite.config.ts tsconfig.json 2>/dev/null
-      find src routes server.js css-loader.mjs -type f -not -path "*/node_modules/*" 2>/dev/null \
+      cat Dockerfile package.json bun.lock vite.config.ts tsconfig.json 2>/dev/null
+      find src routes server.js css-plugin.ts -type f -not -path "*/node_modules/*" 2>/dev/null \
         | sort | xargs cat 2>/dev/null
     } | sha1sum | cut -c1-12
   )
@@ -96,7 +96,7 @@ case "$COMMAND" in
     build_app
     $COMPOSE up -d db backend app
     echo "Opening Cypress against http://localhost:3000 ..."
-    npx cypress open
+    bunx cypress open
     ;;
   run)
     build_backend_if_needed
