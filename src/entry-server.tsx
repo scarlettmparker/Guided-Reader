@@ -9,6 +9,7 @@ import {
   autoDiscoverRegistrations,
   type RouteMeta,
 } from "@sun/ssr/server";
+import { sharedCall, SHARED_TTL } from "@sun/ssr";
 import { createI18nInstance } from "./utils/i18n";
 import { fetchPropertySet } from "./utils/api";
 import { configureApi } from "@sun/api";
@@ -52,22 +53,26 @@ const renderer = createRenderer({
     });
   },
   async resolveTheme() {
-    const result = await fetchPropertySet("ReactApp", "themes");
-    const map = result?.success
-      ? (result.data as { gaiaQueries?: { propertySet?: unknown } })
-          ?.gaiaQueries?.propertySet
-      : null;
-    if (map && typeof map === "object") {
-      const themeMap = map as Record<string, Record<string, string>>;
-      return {
-        current: themeMap["greek"] ?? null,
-        all: Object.entries(themeMap).map(([name, values]) => ({
-          name,
-          values,
-        })),
-      };
-    }
-    return { current: null, all: [] };
+    return sharedCall("shared:themes", SHARED_TTL.CONFIG, async () => {
+      const result = await fetchPropertySet("ReactApp", "themes");
+      if (!result?.success) {
+        throw new Error("themes unavailable");
+      }
+      const map = (result.data as { gaiaQueries?: { propertySet?: unknown } })
+        ?.gaiaQueries?.propertySet;
+      if (map && typeof map === "object") {
+        const themeMap = map as Record<string, Record<string, string>>;
+        const entries = Object.entries(themeMap);
+        return {
+          current: entries[0]?.[1] ?? null,
+          all: entries.map(([name, values]) => ({
+            name,
+            values,
+          })),
+        };
+      }
+      return { current: null, all: [] };
+    }).catch(() => ({ current: null, all: [] }));
   },
 });
 

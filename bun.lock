@@ -17,7 +17,7 @@
         "@sun/events": "^0.1.1",
         "@sun/security": "^0.1.8",
         "@sun/shared": "^0.2.12",
-        "@sun/ssr": "^0.6.1",
+        "@sun/ssr": "^0.6.2",
         "@sun/themes": "^0.2.10",
         "@sun/utils": "^0.1.22",
         "dotenv": "^16.5.0",
@@ -470,7 +470,7 @@
 
     "@sun/shared": ["@sun/shared@0.2.12", "https://registry.int.scarlettparker.co.uk/@sun/shared/-/shared-0.2.12.tgz", {}, "sha512-spDJFUSnio/Xv9/+v0USInoxcrrP6OuIl7mk9NG/1dp5zPg+ipnuOGoy3y7Tqjh1Zf4T+m5DhoKKwiNlYMkWjw=="],
 
-    "@sun/ssr": ["@sun/ssr@0.6.1", "https://registry.int.scarlettparker.co.uk/@sun/ssr/-/ssr-0.6.1.tgz", { "dependencies": { "@sun/security": "^0.1.5", "@sun/utils": "^0.1.6" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-dYUZHrSmgWBNO4RO4EGBseLIrClahy9nH34eObR9vdHrI9GaPQCCnUUlBXoBmAodrSr7hMbZLkpjaZP0dRVyJw=="],
+    "@sun/ssr": ["@sun/ssr@0.6.2", "https://registry.int.scarlettparker.co.uk/@sun/ssr/-/ssr-0.6.2.tgz", { "dependencies": { "@sun/security": "^0.1.5", "@sun/utils": "^0.1.6" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-GfSVm0ZIg1Yfd8aw3oQpmwO/S8Iv+qcbY7V8OE3Vf7JySaSBKECtltLHyNCF5YGuHXusruF8jk6Hp5pditjoDw=="],
 
     "@sun/themes": ["@sun/themes@0.2.13", "https://registry.int.scarlettparker.co.uk/@sun/themes/-/themes-0.2.13.tgz", { "peerDependencies": { "@sun/components": ">=0.11.35", "react": "^19.0.0" } }, "sha512-1PiYNT1fNBPtOt8MW7yLgSJwKlp1cFeTFhVxXevDkXP4QNXRMz7tyHMwIYAw7YZB6fFYXsiMwfcQjAEANJUyzA=="],
 
