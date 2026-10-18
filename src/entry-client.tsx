@@ -7,10 +7,13 @@ import { Suspense } from "react";
 import ErrorBoundary from "./components/error-boundary";
 import Layout from "./components/layout";
 import { initClientBootstrap } from "@sun/ssr";
+import { ensureDefaultTrustedPolicy } from "@sun/security/trusted-types";
 import { loadPersistedTheme, applyTheme } from "@sun/themes";
 import "./utils/configure-framework";
 import "@sun/components/style.css";
 import "@sun/themes/style.css";
+
+ensureDefaultTrustedPolicy();
 
 // Apply the server-rendered theme before mount so there is no flash; a
 // persisted user choice takes precedence.

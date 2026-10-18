@@ -37,6 +37,9 @@ async function forward(request: Request): Promise<Response> {
   const headers = new Headers(request.headers);
   headers.set("x-forwarded-proto", "https");
   headers.set("x-forwarded-host", request.headers.get("host") ?? "");
+  // Bun's fetch decodes compressed bodies but keeps the headers, so the browser
+  // would try to decode plain text. Ask for identity and drop the encoding.
+  headers.delete("accept-encoding");
 
   const origin = headers.get("origin");
   if (origin) headers.set("origin", allowedOrigin(origin));
@@ -44,11 +47,19 @@ async function forward(request: Request): Promise<Response> {
   if (referer) headers.set("referer", allowedOrigin(referer));
 
   try {
-    return await fetch(`${upstream}${url.pathname}${url.search}`, {
+    const response = await fetch(`${upstream}${url.pathname}${url.search}`, {
       method: request.method,
       headers,
       body: request.body,
       redirect: "manual",
+    });
+    const responseHeaders = new Headers(response.headers);
+    responseHeaders.delete("content-encoding");
+    responseHeaders.delete("content-length");
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders,
     });
   } catch (error) {
     return new Response(`edge: upstream unreachable (${error})`, {
