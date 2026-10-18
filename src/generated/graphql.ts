@@ -176,6 +176,120 @@ export type AttachedText = {
   title: Scalars['String']['output'];
 };
 
+export type AuditChainVerification = {
+  __typename?: 'AuditChainVerification';
+  brokenAt?: Maybe<Scalars['DateTime']['output']>;
+  brokenId?: Maybe<Scalars['ID']['output']>;
+  checked: Scalars['Int']['output'];
+  intact: Scalars['Boolean']['output'];
+  keyed: Scalars['Boolean']['output'];
+};
+
+export type AuditEvent = {
+  __typename?: 'AuditEvent';
+  correlationId?: Maybe<Scalars['ID']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  durationMs?: Maybe<Scalars['Long']['output']>;
+  endpoint?: Maybe<Scalars['String']['output']>;
+  errorMessage?: Maybe<Scalars['String']['output']>;
+  eventType?: Maybe<Scalars['String']['output']>;
+  hasEncryptedBeforePayload: Scalars['Boolean']['output'];
+  hasEncryptedPayload: Scalars['Boolean']['output'];
+  httpStatus?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['ID']['output'];
+  ipAddress?: Maybe<Scalars['String']['output']>;
+  namespace?: Maybe<Scalars['String']['output']>;
+  operationName?: Maybe<Scalars['String']['output']>;
+  operationType?: Maybe<AuditOperationType>;
+  outcome?: Maybe<AuditOutcome>;
+  payloadBefore?: Maybe<Scalars['String']['output']>;
+  payloadRedacted?: Maybe<Scalars['String']['output']>;
+  prevHash?: Maybe<Scalars['String']['output']>;
+  rowHash?: Maybe<Scalars['String']['output']>;
+  targetEntity?: Maybe<Scalars['String']['output']>;
+  targetEntityId?: Maybe<Scalars['ID']['output']>;
+  userAgent?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['ID']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+  userRoles?: Maybe<Scalars['String']['output']>;
+};
+
+export type AuditEventFilterInput = {
+  eventType?: InputMaybe<Scalars['String']['input']>;
+  eventTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  from?: InputMaybe<Scalars['DateTime']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  outcome?: InputMaybe<AuditOutcome>;
+  outcomes?: InputMaybe<Array<AuditOutcome>>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  targetEntity?: InputMaybe<Scalars['String']['input']>;
+  targetEntityId?: InputMaybe<Scalars['ID']['input']>;
+  to?: InputMaybe<Scalars['DateTime']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  userIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+export type AuditFacetValue = {
+  __typename?: 'AuditFacetValue';
+  count: Scalars['Long']['output'];
+  label: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type AuditFacets = {
+  __typename?: 'AuditFacets';
+  actors: Array<AuditFacetValue>;
+  eventTypes: Array<AuditFacetValue>;
+  outcomes: Array<AuditFacetValue>;
+  totalCount: Scalars['Long']['output'];
+};
+
+export enum AuditOperationType {
+  Mutation = 'MUTATION',
+  Query = 'QUERY',
+  Rest = 'REST'
+}
+
+export enum AuditOutcome {
+  Failure = 'FAILURE',
+  Success = 'SUCCESS'
+}
+
+export type AuditPage = {
+  __typename?: 'AuditPage';
+  events: PagedAuditEvents;
+  facets: AuditFacets;
+};
+
+export type AuditQueries = {
+  __typename?: 'AuditQueries';
+  auditEvent?: Maybe<AuditEvent>;
+  auditEventsByCorrelationId: Array<AuditEvent>;
+  auditPage: AuditPage;
+  verifyAuditChain: AuditChainVerification;
+};
+
+
+export type AuditQueriesAuditEventArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type AuditQueriesAuditEventsByCorrelationIdArgs = {
+  correlationId: Scalars['ID']['input'];
+};
+
+
+export type AuditQueriesAuditPageArgs = {
+  filter?: InputMaybe<AuditEventFilterInput>;
+  pagination?: InputMaybe<PaginationInput>;
+};
+
+
+export type AuditQueriesVerifyAuditChainArgs = {
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AuthResult = {
   __typename?: 'AuthResult';
   accountId: Scalars['ID']['output'];
@@ -2604,6 +2718,12 @@ export type PagedAnswers = {
   pageInfo: PageInfo;
 };
 
+export type PagedAuditEvents = {
+  __typename?: 'PagedAuditEvents';
+  items: Array<AuditEvent>;
+  pageInfo: PageInfo;
+};
+
 export type PagedBlogPosts = {
   __typename?: 'PagedBlogPosts';
   items: Array<BlogPost>;
@@ -2830,6 +2950,7 @@ export type PutKeyResponse = {
 export type Query = {
   __typename?: 'Query';
   _service: _Service;
+  auditQueries: AuditQueries;
   blogQueries: BlogQueries;
   checklistQueries: ChecklistQueries;
   fatesQueries: FatesQueries;
@@ -3614,6 +3735,11 @@ export type _Service = {
   sdl: Scalars['String']['output'];
 };
 
+export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CurrentUserQuery = { __typename?: 'Query', gaiaQueries: { __typename?: 'GaiaQueries', me?: { __typename?: 'Account', id: string, username: string, personId: string, status: AccountStatus, createdAt?: any | null, updatedAt?: any | null } | null }, hadesQueries: { __typename?: 'HadesQueries', readerAccount?: { __typename?: 'ReaderAccount', id: string, gaiaAccountId: string, discordId: string, discordUsername?: string | null, globalName?: string | null, avatar?: string | null, cefrLevel?: CefrLevel | null, roles: Array<{ __typename?: 'ReaderRole', key: string, name: string, cefrLevel?: CefrLevel | null }> } | null } };
+
 export type AccountQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -4098,6 +4224,7 @@ export type IcarusVoteMutationVariables = Exact<{
 export type IcarusVoteMutation = { __typename?: 'Mutation', icarusMutations: { __typename?: 'IcarusMutations', vote: { __typename?: 'VoteForumResponse', message: string, post: { __typename?: 'ForumPost', id: string, threadId: string, body: string, status: PostStatus, upvotes: number, downvotes: number, netScore: number, myVote?: VoteValue | null, updatedAt?: any | null } } } };
 
 
+export const CurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"currentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"gaiaQueries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"personId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"hadesQueries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"readerAccount"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"gaiaAccountId"}},{"kind":"Field","name":{"kind":"Name","value":"discordId"}},{"kind":"Field","name":{"kind":"Name","value":"discordUsername"}},{"kind":"Field","name":{"kind":"Name","value":"globalName"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"cefrLevel"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"cefrLevel"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CurrentUserQuery, CurrentUserQueryVariables>;
 export const AccountDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"account"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"gaiaQueries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"account"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"personId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"provider"}},{"kind":"Field","name":{"kind":"Name","value":"remoteUsers"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]}}]} as unknown as DocumentNode<AccountQuery, AccountQueryVariables>;
 export const AccountPermissionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"accountPermissions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"accountId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"gaiaQueries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountPermissions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"accountId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"accountId"}}}]}]}}]}}]} as unknown as DocumentNode<AccountPermissionsQuery, AccountPermissionsQueryVariables>;
 export const AccountRolesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"accountRoles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"accountId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"gaiaQueries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accountRoles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"accountId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"accountId"}}}]}]}}]}}]} as unknown as DocumentNode<AccountRolesQuery, AccountRolesQueryVariables>;

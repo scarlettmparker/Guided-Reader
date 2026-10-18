@@ -1,0 +1,28 @@
+query currentUser {
+  gaiaQueries {
+    me {
+      id
+      username
+      personId
+      status
+      createdAt
+      updatedAt
+    }
+  }
+  hadesQueries {
+    readerAccount {
+      id
+      gaiaAccountId
+      discordId
+      discordUsername
+      globalName
+      avatar
+      cefrLevel
+      roles {
+        key
+        name
+        cefrLevel
+      }
+    }
+  }
+}

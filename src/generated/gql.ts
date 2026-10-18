@@ -14,6 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
+    "query currentUser {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n  hadesQueries {\n    readerAccount {\n      id\n      gaiaAccountId\n      discordId\n      discordUsername\n      globalName\n      avatar\n      cefrLevel\n      roles {\n        key\n        name\n        cefrLevel\n      }\n    }\n  }\n}": typeof types.CurrentUserDocument,
     "query account($id: ID!) {\n  gaiaQueries {\n    account(id: $id) {\n      id\n      username\n      personId\n      status\n      provider\n      remoteUsers {\n        type\n        id\n      }\n      createdAt\n      updatedAt\n    }\n  }\n}": typeof types.AccountDocument,
     "query accountPermissions($accountId: ID!) {\n  gaiaQueries {\n    accountPermissions(accountId: $accountId)\n  }\n}": typeof types.AccountPermissionsDocument,
     "query accountRoles($accountId: ID!) {\n  gaiaQueries {\n    accountRoles(accountId: $accountId)\n  }\n}": typeof types.AccountRolesDocument,
@@ -83,6 +84,7 @@ type Documents = {
     "mutation icarusVote($input: ForumVoteInput!) {\n  icarusMutations {\n    vote(input: $input) {\n      message\n      post {\n        id\n        threadId\n        body\n        status\n        upvotes\n        downvotes\n        netScore\n        myVote\n        updatedAt\n      }\n    }\n  }\n}": typeof types.IcarusVoteDocument,
 };
 const documents: Documents = {
+    "query currentUser {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n  hadesQueries {\n    readerAccount {\n      id\n      gaiaAccountId\n      discordId\n      discordUsername\n      globalName\n      avatar\n      cefrLevel\n      roles {\n        key\n        name\n        cefrLevel\n      }\n    }\n  }\n}": types.CurrentUserDocument,
     "query account($id: ID!) {\n  gaiaQueries {\n    account(id: $id) {\n      id\n      username\n      personId\n      status\n      provider\n      remoteUsers {\n        type\n        id\n      }\n      createdAt\n      updatedAt\n    }\n  }\n}": types.AccountDocument,
     "query accountPermissions($accountId: ID!) {\n  gaiaQueries {\n    accountPermissions(accountId: $accountId)\n  }\n}": types.AccountPermissionsDocument,
     "query accountRoles($accountId: ID!) {\n  gaiaQueries {\n    accountRoles(accountId: $accountId)\n  }\n}": types.AccountRolesDocument,
@@ -166,6 +168,10 @@ const documents: Documents = {
  */
 export function graphql(source: string): unknown;
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query currentUser {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n  hadesQueries {\n    readerAccount {\n      id\n      gaiaAccountId\n      discordId\n      discordUsername\n      globalName\n      avatar\n      cefrLevel\n      roles {\n        key\n        name\n        cefrLevel\n      }\n    }\n  }\n}"): (typeof documents)["query currentUser {\n  gaiaQueries {\n    me {\n      id\n      username\n      personId\n      status\n      createdAt\n      updatedAt\n    }\n  }\n  hadesQueries {\n    readerAccount {\n      id\n      gaiaAccountId\n      discordId\n      discordUsername\n      globalName\n      avatar\n      cefrLevel\n      roles {\n        key\n        name\n        cefrLevel\n      }\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

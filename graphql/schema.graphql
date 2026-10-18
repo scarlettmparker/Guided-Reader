@@ -158,6 +158,93 @@ type AttachedText {
   title: String!
 }
 
+type AuditChainVerification {
+  brokenAt: DateTime
+  brokenId: ID
+  checked: Int!
+  intact: Boolean!
+  keyed: Boolean!
+}
+
+type AuditEvent {
+  correlationId: ID
+  createdAt: DateTime
+  durationMs: Long
+  endpoint: String
+  errorMessage: String
+  eventType: String
+  hasEncryptedBeforePayload: Boolean!
+  hasEncryptedPayload: Boolean!
+  httpStatus: Int
+  id: ID!
+  ipAddress: String
+  namespace: String
+  operationName: String
+  operationType: AuditOperationType
+  outcome: AuditOutcome
+  payloadBefore: String
+  payloadRedacted: String
+  prevHash: String
+  rowHash: String
+  targetEntity: String
+  targetEntityId: ID
+  userAgent: String
+  userId: ID
+  userName: String
+  userRoles: String
+}
+
+input AuditEventFilterInput {
+  eventType: String
+  eventTypes: [String!]
+  from: DateTime
+  namespace: String
+  outcome: AuditOutcome
+  outcomes: [AuditOutcome!]
+  search: String
+  targetEntity: String
+  targetEntityId: ID
+  to: DateTime
+  userId: ID
+  userIds: [ID!]
+}
+
+type AuditFacetValue {
+  count: Long!
+  label: String!
+  value: String!
+}
+
+type AuditFacets {
+  actors: [AuditFacetValue!]!
+  eventTypes: [AuditFacetValue!]!
+  outcomes: [AuditFacetValue!]!
+  totalCount: Long!
+}
+
+enum AuditOperationType {
+  MUTATION
+  QUERY
+  REST
+}
+
+enum AuditOutcome {
+  FAILURE
+  SUCCESS
+}
+
+type AuditPage {
+  events: PagedAuditEvents!
+  facets: AuditFacets!
+}
+
+type AuditQueries {
+  auditEvent(id: ID!): AuditEvent
+  auditEventsByCorrelationId(correlationId: ID!): [AuditEvent!]!
+  auditPage(filter: AuditEventFilterInput, pagination: PaginationInput): AuditPage!
+  verifyAuditChain(namespace: String): AuditChainVerification!
+}
+
 type AuthResult {
   accountId: ID!
   personId: ID!
@@ -1521,6 +1608,11 @@ type PagedAnswers {
   pageInfo: PageInfo!
 }
 
+type PagedAuditEvents {
+  items: [AuditEvent!]!
+  pageInfo: PageInfo!
+}
+
 type PagedBlogPosts {
   items: [BlogPost!]!
   pageInfo: PageInfo!
@@ -1727,6 +1819,7 @@ type PutKeyResponse {
 
 type Query {
   _service: _Service!
+  auditQueries: AuditQueries!
   blogQueries: BlogQueries!
   checklistQueries: ChecklistQueries!
   fatesQueries: FatesQueries!

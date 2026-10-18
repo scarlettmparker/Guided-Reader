@@ -9,9 +9,8 @@ import { executeDocument } from "./api";
 import {
   LoginDocument,
   LogoutDocument,
-  MeDocument,
-  type MeQuery,
-  ReaderAccountDocument,
+  CurrentUserDocument,
+  type CurrentUserQuery,
   DiscordLoginDocument,
   type DiscordLoginMutation,
 } from "~/generated/graphql";
@@ -167,24 +166,19 @@ export async function getCurrentUser(
   if (!token) {
     return null;
   }
-  const meRes = await executeDocument<MeQuery>(MeDocument, {}, token);
-  if (!meRes.success) {
-    if (isTransientStatus(meRes.statusCode)) {
-      throw new Error(meRes.error || "Transient auth error");
-    }
-    return null;
-  }
-  const me = meRes.data?.gaiaQueries.me;
-  if (!me) {
-    return null;
-  }
-  const res = await executeDocument<{
-    hadesQueries: { readerAccount: ReaderAccount | null };
-  }>(ReaderAccountDocument, {}, token);
+  const res = await executeDocument<CurrentUserQuery>(
+    CurrentUserDocument,
+    {},
+    token,
+  );
   if (!res.success) {
     if (isTransientStatus(res.statusCode)) {
       throw new Error(res.error || "Transient auth error");
     }
+    return null;
+  }
+  const me = res.data?.gaiaQueries.me;
+  if (!me) {
     return null;
   }
   if (res.data?.hadesQueries.readerAccount) {
