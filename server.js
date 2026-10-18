@@ -16,6 +16,7 @@ import {
   allowedOrigins,
 } from "./config.js";
 import { setupRoutes } from "./routes/index.js";
+import { AUTH_COOKIE } from "./src/utils/auth.ts";
 
 // Parse native form POST bodies (login/logout use PRG so the browser stores the
 // httpOnly auth cookie, which it won't for a fetch + JS-redirect).
@@ -38,4 +39,9 @@ await createServer({
   },
   setupRoutes,
   configure,
+  analytics: {
+    app: "guided-reader",
+    authCookie: AUTH_COOKIE,
+    consentCookie: "cookie_consent",
+  },
 });

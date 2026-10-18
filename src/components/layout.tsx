@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { BreadcrumbProvider, CookieBanner } from "@sun/components";
+import { usePageViewTracking } from "@sun/ssr";
 import { getBackgroundHex } from "@sun/utils/background-colour";
 import {
   ThemeSwitcher,
@@ -19,6 +21,8 @@ type LayoutProps = React.PropsWithChildren;
  * App shell wrapping every page.
  */
 const Layout = ({ children }: LayoutProps) => {
+  const { pathname } = useLocation();
+  usePageViewTracking(pathname);
   // Computed after mount (not during render) so the SSR HTML and the client's
   // first render match; getBackgroundHex depends on the wall clock.
   const [backgroundColour, setBackgroundColour] = useState<string | undefined>(
