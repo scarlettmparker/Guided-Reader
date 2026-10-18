@@ -13,6 +13,7 @@ import {
   backendPort,
   clientId,
   clientSecret,
+  allowedOrigins,
 } from "./config.js";
 import { setupRoutes } from "./routes/index.js";
 
@@ -39,6 +40,7 @@ await createServer({
     backendPort,
     clientId,
     clientSecret,
+    allowedOrigins,
   },
   setupRoutes,
   configure,

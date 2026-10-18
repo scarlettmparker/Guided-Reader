@@ -1,8 +1,8 @@
 # cassini
 
 An Incus container that stands in for the Raspberry Pi 1 Model B+ we'll
-eventually own. It runs the built Guided Reader fastify server, talking to the
-Sun GraphQL backend on windcatcher.
+eventually own. It runs the built Guided Reader fastify server behind nginx,
+talking to the Sun GraphQL backend on windcatcher.
 
 Browse to **https://cassini:9178/**. The cert comes from mkcert, so run
 `mkcert -install` once on the machine you browse from.
@@ -33,16 +33,18 @@ URL there and re-run `provision` (hardware/network) and `deploy` (the app).
 
 ## How it fits together
 
-    browser -> cassini:9178 -> Incus proxy -> cassini edge :5178 -> app :5179
+    browser -> cassini:9178 -> Incus proxy -> nginx :5178 -> app :5179
 
 - The Incus proxy device publishes host port 9178 into the container.
-- The edge (`files/cassini-edge.ts`) terminates TLS with an mkcert cert and
-  forwards to the app over plain http. It also sets `x-forwarded-proto: https`
-  so the production hook in `@sun/ssr` doesn't 301 the request, and rewrites the
-  Origin and Referer hostname to `localhost` so POSTs clear the hook's
-  allow-list (`scarlettparker.co.uk`, `localhost`, `127.0.0.1`, `app`).
+- nginx (`files/cassini-nginx.conf`, from `nginx-light`) terminates TLS with an
+  mkcert cert and proxies to the app over plain http. It sets
+  `x-forwarded-proto: https` so the production hook in `@sun/ssr` doesn't 301 the
+  request, and forwards `x-forwarded-for` so the backend sees the browser's IP.
+  It streams bytes like the prod nginx, so the app's gzip passes through intact.
 - The app binds 5179, reads `.env.production`, and calls the backend on
   `192.168.0.106:8083`.
+- The app's origin gate accepts the `cassini` hostname through `ALLOWED_ORIGINS`
+  in `.env.production`, so nothing has to rewrite the Origin header.
 
 Storage is a sparse 8 GiB ext4 image loop-mounted at `/srv/incus-pi`, registered
 as the Incus pool `pi`. The filesystem size is the cap; nothing else enforces it.

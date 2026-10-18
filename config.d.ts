@@ -6,6 +6,7 @@ declare const backendHost: string;
 declare const backendPort: number;
 declare const clientId: string;
 declare const clientSecret: string;
+declare const allowedOrigins: string[];
 declare const manifestPath: string;
 declare const discordClientId: string;
 declare const discordGuildId: string;
@@ -20,6 +21,7 @@ export {
   backendPort,
   clientId,
   clientSecret,
+  allowedOrigins,
   manifestPath,
   discordClientId,
   discordGuildId,

@@ -27,6 +27,16 @@ export const backendPort = parseInt(process.env.BACKEND_PORT || "443", 10);
 export const clientId = process.env.CLIENT_ID || "guided-reader";
 export const clientSecret = process.env.CLIENT_SECRET || "";
 
+/**
+ * Hostname suffixes the SSR origin gate accepts, comma-separated. Empty keeps
+ * the package defaults; setting it replaces them, so list every host you serve
+ * from.
+ */
+export const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+
 export const manifestPath = "./dist/client/.vite/manifest.json";
 
 /**

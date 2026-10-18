@@ -123,14 +123,23 @@ ensure_container() {
   incus config set "$NAME" limits.memory.swap false
 }
 
-# Push bun, the static NIC config, and the eth0 throttle unit into the container.
+# Push bun, the static NIC config, the eth0 throttle unit and nginx into the
+# container.
 configure_guest() {
-  log "guest: hostname, static NIC, throttle unit, bun"
+  log "guest: hostname, static NIC, throttle unit, bun, nginx"
   ic hostnamectl set-hostname "$NAME" >/dev/null 2>&1 || true
 
   # Only install bun when it's missing. Overwriting it while the app is running
   # fails with "text file busy".
   ic test -x "$BUN_BIN" || sudo incus file push -q -p --mode 0755 "$BUN" "$NAME$BUN_BIN"
+
+  # nginx-light terminates TLS inside the box
+  if ! ic dpkg -s nginx-light >/dev/null 2>&1; then
+    log "guest: installing nginx-light"
+    ic env DEBIAN_FRONTEND=noninteractive apt-get update -qq
+    ic env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+      -o Dpkg::Options::=--force-confold nginx-light
+  fi
 
   sudo incus file push -q -p --mode 0644 \
     "$FILES/10-cassini.network" "$NAME/etc/systemd/network/10-cassini.network"
@@ -227,6 +236,7 @@ VITE_SERVER_BASE=/
 ALLOWED_HOSTS=$HOST_ALIAS,localhost
 CLIENT_ID=$CLIENT_ID
 CLIENT_SECRET=$(envval CLIENT_SECRET)
+ALLOWED_ORIGINS=$HOST_ALIAS,localhost
 POSTHOG_API_KEY=$(envval POSTHOG_API_KEY)
 POSTHOG_HOST=$(envval POSTHOG_HOST)
 DISCORD_CLIENT_ID=$(envval DISCORD_CLIENT_ID)
@@ -248,13 +258,13 @@ stage() {
   write_env
 }
 
-# Tar the stage in, unpack over APP_DIR, install the systemd units, and restart
-# the app then the edge.
+# Tar the stage in, unpack over APP_DIR, install the systemd units and the nginx
+# site, then restart the app and nginx.
 push_app() {
   log "push: $STAGE -> $NAME:$APP_DIR"
   local tar="/tmp/opencode/cassini-stage.tgz"
   tar -C "$STAGE" -czf "$tar" .
-  ic mkdir -p "$APP_DIR" /opt/cassini
+  ic mkdir -p "$APP_DIR"
   ic rm -f /tmp/cassini-stage.tgz
   sudo incus file push -q --mode 0600 "$tar" "$NAME/tmp/cassini-stage.tgz"
   ic tar -xzf /tmp/cassini-stage.tgz -C "$APP_DIR"
@@ -264,15 +274,16 @@ push_app() {
   sudo incus file push -q -p --mode 0644 \
     "$FILES/guided-reader.service" "$NAME/etc/systemd/system/guided-reader.service"
   sudo incus file push -q -p --mode 0644 \
-    "$FILES/cassini-edge.service" "$NAME/etc/systemd/system/cassini-edge.service"
-  sudo incus file push -q -p --mode 0644 \
-    "$FILES/cassini-edge.ts" "$NAME/opt/cassini/edge.ts"
+    "$FILES/cassini-nginx.conf" "$NAME/etc/nginx/sites-available/cassini"
+
+  ic ln -sf /etc/nginx/sites-available/cassini /etc/nginx/sites-enabled/cassini
+  ic rm -f /etc/nginx/sites-enabled/default
 
   ic systemctl daemon-reload
-  ic systemctl enable guided-reader.service cassini-edge.service >/dev/null 2>&1 || true
-  # App first so its old port (5178) is free before the edge tries to bind it.
+  ic systemctl enable guided-reader.service nginx.service >/dev/null 2>&1 || true
   ic systemctl restart guided-reader.service
-  ic systemctl restart cassini-edge.service
+  ic nginx -t
+  ic systemctl restart nginx.service
 }
 
 # Build unless told to skip, then stage and push.
@@ -287,8 +298,9 @@ deploy() {
 
 # ── misc ─────────────────────────────────────────────────────────────────────
 
-# Container list, service state, and a timing on the login page. The root always
-# 302s to /login, so /login is the clearer liveness signal.
+# Container list, service state, and a timing on the login page.
+# TODO: will want a health check on guided reader itself, we do this through
+# sun's /status which checks the service directly (we can't do that here)
 status() {
   incus list "$NAME" 2>/dev/null || true
   log "service"
