@@ -103,6 +103,21 @@ function ensure() {
 }
 
 /**
+ * Reads a JSON path from a response, tolerating non-JSON bodies.
+ *
+ * @param res - The response.
+ * @param path - k6 JSON selector.
+ * @returns The value, or undefined.
+ */
+function json(res, path) {
+  try {
+    return res.json(path);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Calls a page-data pattern and returns its merged data.
  *
  * @param pattern - Registered loader pattern.
@@ -111,12 +126,12 @@ function ensure() {
  * @returns The data object, or null.
  */
 function pageData(pattern, params, name) {
-  const res = http.post(`${BASE}/__page-data`, { pattern, params }, {
+  const res = http.post(`${BASE}/__page-data`, JSON.stringify({ pattern, params }), {
     headers: jsonHeaders(),
     tags: { name, kind: "read" },
   });
   check(res, { [`${name} 200`]: (r) => r.status === 200 });
-  return res.json("data");
+  return json(res, "data");
 }
 
 /**
@@ -148,7 +163,7 @@ export function reader() {
       tags: { name: "GET /texts/:id", kind: "read" },
     });
     pageData("texts/:id", { id }, "page-data texts/:id");
-    http.post(`${BASE}/hades/markViewed`, { textId: id }, {
+    http.post(`${BASE}/hades/markViewed`, JSON.stringify({ textId: id }), {
       headers: jsonHeaders(),
       tags: { name: "hades/markViewed", kind: "write" },
     });
@@ -166,17 +181,20 @@ export function writer() {
 
   const created = http.post(
     `${BASE}/hades/createAnnotation`,
-    { input: { textId: id, startOffset: 0, endOffset: 5, body: `load ${Date.now()}` } },
+    JSON.stringify({
+      input: { textId: id, startOffset: 0, endOffset: 5, body: `load ${Date.now()}` },
+    }),
     { headers: jsonHeaders(), tags: { name: "hades/createAnnotation", kind: "write" } },
   );
   check(created, { "createAnnotation 200": (r) => r.status === 200 });
 
-  const annotationId = created.json("annotation.id");
+  const annotationId = json(created, "annotation.id");
   if (annotationId) {
-    const removed = http.post(`${BASE}/hades/deleteAnnotation`, { id: annotationId }, {
-      headers: jsonHeaders(),
-      tags: { name: "hades/deleteAnnotation", kind: "write" },
-    });
+    const removed = http.post(
+      `${BASE}/hades/deleteAnnotation`,
+      JSON.stringify({ id: annotationId }),
+      { headers: jsonHeaders(), tags: { name: "hades/deleteAnnotation", kind: "write" } },
+    );
     check(removed, { "deleteAnnotation 200": (r) => r.status === 200 });
   }
   sleep(WRITE_THINK_MS / 1000);
