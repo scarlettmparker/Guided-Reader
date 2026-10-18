@@ -55,8 +55,8 @@ export async function loadLevelColours(): Promise<LevelColours> {
  * @param user the logged-in reader account, or null
  */
 export async function seedPageData(user: ReaderAccount | null): Promise<void> {
-  seed(makeCacheKey("currentUser:currentUser", {}), { currentUser: user });
-  seed(makeCacheKey("levelColours:levelColours", {}), {
+  seed(makeCacheKey("currentUser", {}), { currentUser: user });
+  seed(makeCacheKey("levelColours", {}), {
     levelColours: await loadLevelColours(),
   });
 }
