@@ -1,0 +1,15 @@
+[Unit]
+Description=Guided Reader (Fastify SSR) on port %i
+After=network.target sun-backend.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/guided-reader
+ExecStart=%h/.bun/bin/bun --preload ./css-plugin.ts server.js
+Environment=NODE_ENV=production
+Environment=SERVER_PORT=%i
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
