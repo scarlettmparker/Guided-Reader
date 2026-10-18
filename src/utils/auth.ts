@@ -146,6 +146,16 @@ export async function loginViaGaia(
 }
 
 /**
+ * Reports whether a status code is worth retrying.
+ *
+ * @param status the HTTP status, or undefined
+ * @returns true for server errors and rate limiting
+ */
+function isTransientStatus(status: number | undefined): boolean {
+  return status !== undefined && (status >= 500 || status === 429 || status === 408);
+}
+
+/**
  * Returns the logged-in reader account for a JWT, or null.
  * Throws on transient backend errors so the caller can keep the cookie.
  * For password-registered HUMAN accounts without a hades row, returns a
@@ -159,7 +169,7 @@ export async function getCurrentUser(
   }
   const meRes = await executeDocument<MeQuery>(MeDocument, {}, token);
   if (!meRes.success) {
-    if (meRes.statusCode && meRes.statusCode >= 500) {
+    if (isTransientStatus(meRes.statusCode)) {
       throw new Error(meRes.error || "Transient auth error");
     }
     return null;
@@ -172,7 +182,7 @@ export async function getCurrentUser(
     hadesQueries: { readerAccount: ReaderAccount | null };
   }>(ReaderAccountDocument, {}, token);
   if (!res.success) {
-    if (res.statusCode && res.statusCode >= 500) {
+    if (isTransientStatus(res.statusCode)) {
       throw new Error(res.error || "Transient auth error");
     }
     return null;
