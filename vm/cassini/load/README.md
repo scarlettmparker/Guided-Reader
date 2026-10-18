@@ -42,21 +42,28 @@ journals. It prints a results table and leaves everything under
 
 ### Knobs
 
-| Variable         | Default      | Meaning                                    |
-| ---------------- | ------------ | ------------------------------------------ |
-| `USERS`          | `25`         | accounts to seed and VUs to run            |
-| `DURATION`       | `30s`        | k6 run length                              |
-| `WRITE_SHARE`    | `0.2`        | fraction of VUs that create/delete notes   |
-| `THINK_MS`       | `300`        | pause between reader iterations            |
-| `WRITE_THINK_MS` | `16000`      | pause between writer iterations            |
-| `VIEWS`          | `10`         | seeded viewed texts per account            |
-| `PREFIX`         | `loadtest`   | account/username prefix                    |
-| `BASE_URL`       | edge URL     | where k6 points                            |
+| Variable         | Default    | Meaning                                  |
+| ---------------- | ---------- | ---------------------------------------- |
+| `USERS`          | `25`       | accounts to seed and VUs to run          |
+| `DURATION`       | `30s`      | k6 run length                            |
+| `ARRIVAL_RATE`   | `0`        | reads/sec for a fixed-rate run. 0 = VUs  |
+| `WRITE_SHARE`    | `0.2`      | fraction of VUs that create/delete notes |
+| `THINK_MS`       | `300`      | pause between reader iterations          |
+| `WRITE_THINK_MS` | `16000`    | pause between writer iterations          |
+| `VIEWS`          | `10`       | seeded viewed texts per account          |
+| `PREFIX`         | `loadtest` | account/username prefix                  |
+| `BASE_URL`       | edge URL   | where k6 points                          |
 
 ## What each VU does
 
-Readers sign in, load the library, list texts, open one, fetch its annotations
-and mark it viewed. Writers sign in, create an annotation on a text and delete it.
+Readers sign in, load the page's static assets once, then browse the library,
+list texts, open one, fetch its annotations and mark it viewed. Writers sign in,
+load the assets, create an annotation on a text and delete it.
+
+Assets come from the build output (passed in by `run.sh`), so the static path is
+exercised the way a browser exercises it. `ARRIVAL_RATE` switches readers to a
+fixed iterations/second executor, which separates latency from how fast the VUs
+happen to loop.
 
 `createAnnotation` is rate limited to about one per 15s per account, which is why
 writers default to a 16s pause. Lowering `WRITE_THINK_MS` trades correctness for
