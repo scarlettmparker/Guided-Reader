@@ -1,4 +1,4 @@
-import { defineLoader } from "@sun/ssr";
+import { defineLoader, makeCacheKey, sharedCall, SHARED_TTL } from "@sun/ssr";
 import { executeDocument } from "~/utils/api";
 import {
   ListTextsDocument,
@@ -59,16 +59,23 @@ defineLoader({
       filters: filters.length > 0 ? filters : undefined,
     };
 
-    try {
-      const result = await executeDocument<
-        ListTextsQuery,
-        ListTextsQueryVariables
-      >(ListTextsDocument, { pagination });
-      const texts = result.success ? result.data?.hadesQueries.texts : null;
-      return { texts: texts ?? EMPTY_PAGE };
-    } catch (error) {
+    const result = await sharedCall(
+      makeCacheKey("texts", pagination),
+      SHARED_TTL.LIST,
+      async () => {
+        const res = await executeDocument<
+          ListTextsQuery,
+          ListTextsQueryVariables
+        >(ListTextsDocument, { pagination });
+        if (!res.success) {
+          throw new Error(res.error ?? "texts unavailable");
+        }
+        return res;
+      },
+    ).catch((error) => {
       console.error("Failed to fetch texts:", error);
-      return { texts: EMPTY_PAGE };
-    }
+      return null;
+    });
+    return { texts: result?.data?.hadesQueries.texts ?? EMPTY_PAGE };
   },
 });

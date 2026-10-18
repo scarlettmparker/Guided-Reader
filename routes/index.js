@@ -3,7 +3,7 @@
  * @module routes
  */
 import { renderApp } from "@sun/ssr/server";
-import { suspenseCache, pageDataRegistry } from "@sun/ssr";
+import { suspenseCache, pageDataRegistry, clearSharedCache } from "@sun/ssr";
 import { base, isProduction, manifestPath } from "../config.js";
 
 /**
@@ -14,6 +14,7 @@ function clearAppCache() {
   for (const key of Object.keys(pageDataRegistry.pageDataCache)) {
     delete pageDataRegistry.pageDataCache[key];
   }
+  clearSharedCache();
 }
 import {
   AUTH_COOKIE,

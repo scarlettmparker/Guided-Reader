@@ -19,8 +19,7 @@ function seed(key: string, result: Record<string, unknown>): void {
 }
 
 /**
- * Loads the configurable level-to-colour map from gaia, shared across requests
- * for five minutes since it only changes with an app deploy.
+ * Loads the configurable level-to-colour map from gaia.
  *
  * @returns the level name to hex colour map, or empty when unreadable
  */
