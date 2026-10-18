@@ -30,6 +30,7 @@
     "@graphql-codegen/schema-ast": "^5.0.2",
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-operations": "^5.0.2",
+    "@sun/build": "^0.1.1",
     "@types/node": "^25.8.0",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react-swc": "^3.11.0",
@@ -46,7 +47,6 @@
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.45.0",
     "vite": "^6.0.0",
-    "vite-plugin-compression2": "^2.5.3",
     "vitest": "^3.2.4"
   },
   "dependencies": {
@@ -62,7 +62,7 @@
     "@sun/events": "^0.1.1",
     "@sun/security": "^0.1.8",
     "@sun/shared": "^0.2.12",
-    "@sun/ssr": "^0.6.0",
+    "@sun/ssr": "^0.6.1",
     "@sun/themes": "^0.2.10",
     "@sun/utils": "^0.1.22",
     "dotenv": "^16.5.0",

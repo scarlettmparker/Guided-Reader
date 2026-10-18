@@ -265,10 +265,12 @@ push_app() {
   local tar="/tmp/opencode/cassini-stage.tgz"
   tar -C "$STAGE" -czf "$tar" .
   ic mkdir -p "$APP_DIR"
+  ic rm -rf "$APP_DIR/dist"
   ic rm -f /tmp/cassini-stage.tgz
   sudo incus file push -q --mode 0600 "$tar" "$NAME/tmp/cassini-stage.tgz"
   ic tar -xzf /tmp/cassini-stage.tgz -C "$APP_DIR"
   ic chown -R root:root "$APP_DIR"
+  ic chmod -R a+rX "$APP_DIR/dist"
   ic rm -f /tmp/cassini-stage.tgz
 
   sudo incus file push -q -p --mode 0644 \
