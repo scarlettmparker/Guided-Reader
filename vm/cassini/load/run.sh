@@ -33,6 +33,9 @@ THINK_MS="${THINK_MS:-300}"
 WRITE_SHARE="${WRITE_SHARE:-0.2}"
 WRITE_THINK_MS="${WRITE_THINK_MS:-16000}"
 VIEWS="${VIEWS:-10}"
+ARRIVAL_RATE="${ARRIVAL_RATE:-0}"
+# Asset paths for k6 to fetch once per VU.
+ASSET_LIST="$(cd "$REPO" && { ls dist/client/assets/* 2>/dev/null || true; ls dist/client/fonts/* 2>/dev/null || true; } | sed 's#^dist/client##' | paste -sd, -)"
 BASE_URL="${BASE_URL:-https://$HOST_ALIAS:$HOST_PORT}"
 K6_IMAGE="${K6_IMAGE:-grafana/k6}"
 BUN="${BUN:-$HOME/.bun/bin/bun}"
@@ -83,7 +86,7 @@ one_run() {
     -v "$LOAD_DIR/load.js:/load.js:ro" \
     -v "$OUT_DIR:/out" \
     -e BASE_URL -e USERS="$users" -e DURATION -e THINK_MS -e WRITE_SHARE -e WRITE_THINK_MS \
-    -e PREFIX -e PASSWORD \
+    -e PREFIX -e PASSWORD -e ARRIVAL_RATE -e ASSETS="$ASSET_LIST" \
     "$K6_IMAGE" run --summary-export=/out/k6-summary.json /load.js 2>&1 \
     | tee "$OUT_DIR/k6.txt" || k6_status=$?
 
@@ -102,6 +105,8 @@ one_run() {
     echo "commit: $(git -C "$REPO" rev-parse --short HEAD)"
     echo "users: $users"
     echo "duration: $DURATION"
+    echo "arrival_rate: $ARRIVAL_RATE"
+    echo "assets: $([ -n "$ASSET_LIST" ] && printf '%s' "$ASSET_LIST" | tr ',' '\n' | wc -l || echo 0)"
     echo "write_share: $WRITE_SHARE"
     echo "base_url: $BASE_URL"
     echo "k6_exit: $k6_status"

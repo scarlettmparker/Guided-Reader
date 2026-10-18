@@ -120,7 +120,7 @@ ensure_container() {
   incus config set "$NAME" limits.cpu.allowance "$CPU_ALLOWANCE"
   incus config set "$NAME" limits.memory "$MEMORY"
   incus config set "$NAME" limits.memory.enforce hard
-  incus config set "$NAME" limits.memory.swap false
+  incus config set "$NAME" limits.memory.swap true
 }
 
 # Push bun, the static NIC config, the eth0 throttle unit and nginx into the
@@ -167,6 +167,21 @@ throttle_io() {
   fi
 }
 
+# Caps the box's swap usage.
+tune_swap() {
+  local cg="/sys/fs/cgroup/lxc.payload.$NAME" bytes
+  case "$SWAP_LIMIT" in
+    *[Gg]) bytes=$(( ${SWAP_LIMIT%[Gg]} * 1024 * 1024 * 1024 )) ;;
+    *[Mm]) bytes=$(( ${SWAP_LIMIT%[Mm]} * 1024 * 1024 )) ;;
+    *)     bytes="$SWAP_LIMIT" ;;
+  esac
+  if echo "$bytes" | sudo tee "$cg/memory.swap.max" >/dev/null 2>&1; then
+    log "memory: swap capped at $SWAP_LIMIT"
+  else
+    warn "memory: no memory.swap.max at $cg, skipping"
+  fi
+}
+
 # Full box setup. Each step checks before it acts, so running it twice is safe.
 provision() {
   ensure_storage
@@ -176,6 +191,7 @@ provision() {
   ensure_hosts
   configure_guest
   throttle_io
+  tune_swap
   push_tls
   log "provisioned. browser: https://$HOST_ALIAS:$HOST_PORT/"
 }

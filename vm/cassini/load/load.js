@@ -25,20 +25,42 @@ const THINK_MS = Number(__ENV.THINK_MS || 300);
 const WRITE_THINK_MS = Number(__ENV.WRITE_THINK_MS || 16000);
 const WRITE_SHARE = Number(__ENV.WRITE_SHARE ?? 0.2);
 
+// Optional fixed arrival rate for readers. 0 keeps constant-VU behaviour.
+const ARRIVAL_RATE = Number(__ENV.ARRIVAL_RATE || 0);
+// Comma-separated asset paths, supplied by run.sh from the build output.
+const ASSETS = (__ENV.ASSETS || "")
+  .split(",")
+  .map((path) => path.trim())
+  .filter(Boolean);
+
 const WRITERS = Math.max(1, Math.round(USERS * WRITE_SHARE));
 const READERS = Math.max(1, USERS - WRITERS);
+
+const readScenario =
+  ARRIVAL_RATE > 0
+    ? {
+        executor: "constant-arrival-rate",
+        exec: "reader",
+        rate: ARRIVAL_RATE,
+        timeUnit: "1s",
+        duration: DURATION,
+        preAllocatedVUs: READERS,
+        maxVUs: Math.max(READERS * 3, READERS + 10),
+        gracefulStop: "10s",
+      }
+    : {
+        executor: "constant-vus",
+        exec: "reader",
+        vus: READERS,
+        duration: DURATION,
+        gracefulStop: "10s",
+      };
 
 export const options = {
   insecureSkipTLSVerify: true,
   summaryTrendStats: ["avg", "min", "med", "max", "p(90)", "p(95)", "p(99)"],
   scenarios: {
-    readers: {
-      executor: "constant-vus",
-      exec: "reader",
-      vus: READERS,
-      duration: DURATION,
-      gracefulStop: "10s",
-    },
+    readers: readScenario,
     writers: {
       executor: "constant-vus",
       exec: "writer",
@@ -53,6 +75,7 @@ export const options = {
     checks: ["rate>0.99"],
     "http_req_duration{kind:read}": ["p(95)<500", "p(99)<1000"],
     "http_req_duration{kind:write}": ["p(95)<500", "p(99)<1000"],
+    "http_req_duration{kind:asset}": ["p(95)<200"],
   },
 };
 
@@ -165,10 +188,42 @@ function pickText() {
 }
 
 /**
+ * Resolves the assets a session should load: from ASSETS when run.sh supplies
+ * them, otherwise from the login page's references.
+ *
+ * @returns The setup data shared with every VU.
+ */
+export function setup() {
+  if (ASSETS.length) return { assets: ASSETS };
+  const res = http.get(`${BASE}/login`, { tags: { name: "setup html" } });
+  const found = new Set();
+  const re = /\/(?:assets|fonts)\/[A-Za-z0-9._-]+\.(?:js|css|woff2)/g;
+  let match;
+  while ((match = re.exec(res.body || "")) !== null) found.add(match[0]);
+  return { assets: Array.from(found) };
+}
+
+let assetsLoaded = false;
+
+/**
+ * Loads the page's static assets once per VU.
+ *
+ * @param assets - Asset paths from setup.
+ */
+function loadAssets(assets) {
+  if (assetsLoaded || !assets || !assets.length) return;
+  assetsLoaded = true;
+  for (const path of assets) {
+    http.get(`${BASE}${path}`, { tags: { name: "GET asset", kind: "asset" } });
+  }
+}
+
+/**
  * Reader journey: browse the library, list texts, open one, mark it viewed.
  */
-export function reader() {
+export function reader(data) {
   ensure();
+  loadAssets(data && data.assets);
   http.get(`${BASE}/library`, {
     headers: { cookie: cookieHeader },
     tags: { name: "GET /library", kind: "read" },
@@ -193,8 +248,9 @@ export function reader() {
 /**
  * Writer journey: create an annotation on a text, then delete it.
  */
-export function writer() {
+export function writer(data) {
   ensure();
+  loadAssets(data && data.assets);
   const id = pickText();
   if (!id) return;
 
