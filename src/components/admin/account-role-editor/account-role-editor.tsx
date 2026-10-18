@@ -1,5 +1,5 @@
 import { useEffect, useState, useTransition } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@sun/i18n";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
 import { patchPageData } from "@sun/ssr";

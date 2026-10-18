@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@sun/i18n";
 import { Button, Input, cn } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
 import type { AllPermissionsQuery } from "~/generated/graphql";

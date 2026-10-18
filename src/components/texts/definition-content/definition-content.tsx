@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@sun/i18n";
 import { usePageData } from "@sun/ssr/react";
 import type { Word } from "~/generated/graphql";
 import DefinitionEntry from "../definition-entry";

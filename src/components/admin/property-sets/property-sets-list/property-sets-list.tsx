@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@sun/i18n";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@sun/components";
 import PropertySetsListItems from "~/components/admin/property-sets/property-sets-list-items";
 import { PropertySetsListSkeleton } from "./skeletons";

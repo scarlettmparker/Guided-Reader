@@ -1,5 +1,5 @@
 import { ThumbsDown, ThumbsUp } from "lucide-preact";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@sun/i18n";
 import { Button, cn } from "@sun/components";
 import { VoteValue } from "~/generated/graphql";
 import styles from "./vote-control.module.css";

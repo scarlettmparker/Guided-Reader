@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@sun/i18n";
 import { CardFooter, Button, cn } from "@sun/components";
 import { BookOpenOutline } from "preact-heroicons";
 import styles from "./definition-toolbar.module.css";
