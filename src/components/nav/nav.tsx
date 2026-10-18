@@ -58,7 +58,9 @@ const Nav = () => {
           </Link>
         </RoleCheck>
       </Suspense>
-      <UserMenu />
+      <Suspense fallback={null}>
+        <UserMenu />
+      </Suspense>
     </nav>
   );
 };
