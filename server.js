@@ -4,6 +4,7 @@
  */
 
 import { createServer } from "@sun/ssr/server";
+import { configureApi } from "@sun/api";
 import {
   port,
   host,
@@ -17,6 +18,13 @@ import {
 } from "./config.js";
 import { setupRoutes } from "./routes/index.js";
 import { AUTH_COOKIE } from "./src/utils/auth.ts";
+
+configureApi({
+  authCookie: AUTH_COOKIE,
+  clientId,
+  clientSecret,
+  appBaseUrl: base,
+});
 
 // Parse native form POST bodies (login/logout use PRG so the browser stores the
 // httpOnly auth cookie, which it won't for a fetch + JS-redirect).
