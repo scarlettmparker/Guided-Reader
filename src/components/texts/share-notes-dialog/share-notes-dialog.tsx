@@ -10,7 +10,7 @@ import {
   DialogTitle,
   TaggedInput,
 } from "@sun/components";
-import { X } from "lucide-react";
+import { X } from "lucide-preact";
 import { patchPageData } from "@sun/ssr";
 import { shareNotes } from "~/server/actions/private-note";
 import {

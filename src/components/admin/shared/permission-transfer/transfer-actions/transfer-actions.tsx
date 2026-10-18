@@ -1,11 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Button, cn } from "@sun/components";
-import {
-  ChevronRightIcon,
-  ChevronLeftIcon,
-  ChevronDoubleRightIcon,
-  ChevronDoubleLeftIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronRightOutline, ChevronLeftOutline, ChevronDoubleRightOutline, ChevronDoubleLeftOutline } from "preact-heroicons";
 import styles from "./transfer-actions.module.css";
 
 type TransferActionsProps = {
@@ -49,7 +44,7 @@ const TransferActions = (props: TransferActionsProps) => {
         onClick={left.onMoveSelected}
         disabled={!left.hasSelected}
       >
-        <ChevronRightIcon width={16} height={16} />
+        <ChevronRightOutline width={16} height={16} />
       </Button>
       <Button
         variant="secondary"
@@ -58,7 +53,7 @@ const TransferActions = (props: TransferActionsProps) => {
         onClick={right.onMoveSelected}
         disabled={!right.hasSelected}
       >
-        <ChevronLeftIcon width={16} height={16} />
+        <ChevronLeftOutline width={16} height={16} />
       </Button>
       <Button
         variant="secondary"
@@ -67,7 +62,7 @@ const TransferActions = (props: TransferActionsProps) => {
         onClick={left.onMoveAll}
         disabled={!left.hasItems}
       >
-        <ChevronDoubleRightIcon width={16} height={16} />
+        <ChevronDoubleRightOutline width={16} height={16} />
       </Button>
       <Button
         variant="secondary"
@@ -76,7 +71,7 @@ const TransferActions = (props: TransferActionsProps) => {
         onClick={right.onMoveAll}
         disabled={!right.hasItems}
       >
-        <ChevronDoubleLeftIcon width={16} height={16} />
+        <ChevronDoubleLeftOutline width={16} height={16} />
       </Button>
     </section>
   );

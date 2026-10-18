@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { EllipsisVerticalIcon } from "lucide-react";
+import { EllipsisVerticalIcon } from "lucide-preact";
 import {
   Badge,
   Button,
@@ -32,7 +32,7 @@ import {
   type VoteReaderResponse,
 } from "~/generated/graphql";
 import styles from "./annotation-list-dialog.module.css";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashOutline } from "preact-heroicons";
 
 type Annotation =
   ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
@@ -243,7 +243,7 @@ const AnnotationListDialog = ({
                             asChild
                           >
                             <span className={styles.delete_action}>
-                              <TrashIcon width={16} height={16} />
+                              <TrashOutline width={16} height={16} />
                               {t("delete")}
                             </span>
                           </DropdownMenuItem>

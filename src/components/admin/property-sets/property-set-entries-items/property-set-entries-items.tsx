@@ -7,11 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@sun/components";
-import {
-  EllipsisVerticalIcon,
-  PencilSquareIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { EllipsisVerticalOutline, PencilSquareOutline, TrashOutline } from "preact-heroicons";
 import { usePageData } from "@sun/ssr/react";
 import { patchPageData } from "@sun/ssr";
 import type { PropertySetEntry } from "~/generated/graphql";
@@ -96,7 +92,7 @@ const PropertySetEntriesItems = (props: PropertySetEntriesItemsProps) => {
           >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <EllipsisVerticalIcon
+                <EllipsisVerticalOutline
                   width={16}
                   height={16}
                   title={t("entry-actions")}
@@ -105,14 +101,14 @@ const PropertySetEntriesItems = (props: PropertySetEntriesItemsProps) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => setSelected(entry)}>
-                  <PencilSquareIcon width={16} height={16} />
+                  <PencilSquareOutline width={16} height={16} />
                   {t("edit-entry")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => setDeleteTarget(entry)}
                 >
-                  <TrashIcon width={16} height={16} />
+                  <TrashOutline width={16} height={16} />
                   {t("delete-entry")}
                 </DropdownMenuItem>
               </DropdownMenuContent>

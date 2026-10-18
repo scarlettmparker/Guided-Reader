@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
   cn,
 } from "@sun/components";
-import { DocumentTextIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { DocumentTextOutline, ShareOutline } from "preact-heroicons";
 import type { LocateTextQuery } from "~/generated/graphql";
 import styles from "./text-header.module.css";
 
@@ -66,7 +66,7 @@ const TextHeader = (props: TextHeaderProps) => {
                     onToggleAuthors();
                   }}
                 >
-                  <DocumentTextIcon width={20} height={20} />
+                  <DocumentTextOutline width={20} height={20} />
                 </a>
               </TooltipTrigger>
               <TooltipContent>
@@ -84,7 +84,7 @@ const TextHeader = (props: TextHeaderProps) => {
               onShare();
             }}
           >
-            <ShareIcon width={20} height={20} />
+            <ShareOutline width={20} height={20} />
           </a>
         </span>
       </CardTitle>

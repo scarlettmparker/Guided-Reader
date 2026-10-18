@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
   SearchBar,
 } from "@sun/components";
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
+import { AdjustmentsHorizontalOutline } from "preact-heroicons";
 import TextListItems from "~/components/texts/text-list-items";
 import TextListPagination from "~/components/texts/text-list-pagination";
 import styles from "./text-list.module.css";
@@ -105,7 +105,7 @@ const TextList = () => {
                   title={t("filter-levels")}
                   aria-label={t("filter-levels")}
                 >
-                  <AdjustmentsHorizontalIcon width={16} height={16} />
+                  <AdjustmentsHorizontalOutline width={16} height={16} />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>

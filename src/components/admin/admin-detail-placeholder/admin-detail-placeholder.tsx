@@ -1,5 +1,5 @@
 import { Card, CardBody } from "@sun/components";
-import { WrenchIcon } from "@heroicons/react/24/outline";
+import { WrenchOutline } from "preact-heroicons";
 import { useTranslation } from "react-i18next";
 import styles from "./admin-detail-placeholder.module.css";
 
@@ -12,7 +12,7 @@ const AdminDetailPlaceholder = () => {
   return (
     <Card>
       <CardBody className={styles.placeholder_body}>
-        <WrenchIcon width={48} height={48} />
+        <WrenchOutline width={48} height={48} />
         <p>{t("select-user")}</p>
       </CardBody>
     </Card>

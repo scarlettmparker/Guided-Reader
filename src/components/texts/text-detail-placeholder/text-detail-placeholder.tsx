@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardBody } from "@sun/components";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { BookOpenOutline } from "preact-heroicons";
 import styles from "./text-detail-placeholder.module.css";
 
 /**
@@ -12,7 +12,7 @@ const TextDetailPlaceholder = () => {
   return (
     <Card>
       <CardBody className={styles.placeholder_body}>
-        <BookOpenIcon width={48} height={48} />
+        <BookOpenOutline width={48} height={48} />
         <p className={styles.text}>{t("select-text")}</p>
       </CardBody>
     </Card>

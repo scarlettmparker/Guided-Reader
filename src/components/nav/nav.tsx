@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@sun/components";
 import { RoleCheck } from "@sun/ssr/react";
-import { Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothOutline } from "preact-heroicons";
 import UserMenu from "~/components/user-menu";
 import styles from "./nav.module.css";
 
@@ -53,7 +53,7 @@ const Nav = () => {
               className={styles.admin_button}
               title={t("admin")}
             >
-              <Cog6ToothIcon width={20} height={20} />
+              <Cog6ToothOutline width={20} height={20} />
             </Button>
           </Link>
         </RoleCheck>

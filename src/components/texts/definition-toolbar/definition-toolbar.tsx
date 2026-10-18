@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { CardFooter, Button, cn } from "@sun/components";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { BookOpenOutline } from "preact-heroicons";
 import styles from "./definition-toolbar.module.css";
 
 type DefinitionToolbarProps = {
@@ -25,7 +25,7 @@ const DefinitionToolbar = (props: DefinitionToolbarProps) => {
         title={t("definition.open-title")}
         aria-label={t("definition.open-title")}
       >
-        <BookOpenIcon width={20} height={20} />
+        <BookOpenOutline width={20} height={20} />
       </Button>
     </CardFooter>
   );

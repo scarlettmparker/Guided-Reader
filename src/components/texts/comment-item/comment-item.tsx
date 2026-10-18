@@ -1,6 +1,6 @@
 import { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { EllipsisVerticalIcon } from "lucide-react";
+import { EllipsisVerticalIcon } from "lucide-preact";
 import {
   Badge,
   Button,
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
   MarkdownViewer,
 } from "@sun/components";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashOutline } from "preact-heroicons";
 import { usePageData, useMutation } from "@sun/ssr/react";
 import { patchPageData } from "@sun/ssr";
 import DiscordAvatar from "~/components/discord-avatar";
@@ -178,7 +178,7 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setConfirmOpen(true)} asChild>
                 <span className={styles.delete_action}>
-                  <TrashIcon width={16} height={16} />
+                  <TrashOutline width={16} height={16} />
                   {t("delete")}
                 </span>
               </DropdownMenuItem>

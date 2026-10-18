@@ -1,6 +1,6 @@
 import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { EllipsisVerticalIcon } from "lucide-react";
+import { EllipsisVerticalIcon } from "lucide-preact";
 import {
   Badge,
   Button,
@@ -22,7 +22,7 @@ import { CEFR_TO_KEY } from "~/utils/cefr";
 import { deletePrivateNote } from "~/server/actions/private-note";
 import type { PrivateNotesQuery, ReaderAccount } from "~/generated/graphql";
 import styles from "./private-note-list-dialog.module.css";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashOutline } from "preact-heroicons";
 
 type PrivateNote =
   PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
@@ -219,7 +219,7 @@ const PrivateNoteListDialog = ({
                               asChild
                             >
                               <span className={styles.delete_action}>
-                                <TrashIcon width={16} height={16} />
+                                <TrashOutline width={16} height={16} />
                                 {t("delete")}
                               </span>
                             </DropdownMenuItem>

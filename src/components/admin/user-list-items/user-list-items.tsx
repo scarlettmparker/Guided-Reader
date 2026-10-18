@@ -8,11 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
-import {
-  EllipsisVerticalIcon,
-  LockClosedIcon,
-  LockOpenIcon,
-} from "@heroicons/react/24/outline";
+import { EllipsisVerticalOutline, LockClosedOutline, LockOpenOutline } from "preact-heroicons";
 import type { PagedAccounts } from "~/generated/graphql";
 import styles from "./user-list-items.module.css";
 
@@ -61,7 +57,7 @@ const AdminUserListItems = (props: AdminUserListItemsProps) => {
                 <span className={styles.list_actions}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <EllipsisVerticalIcon
+                      <EllipsisVerticalOutline
                         width={16}
                         height={16}
                         onClick={(e: React.MouseEvent) => {
@@ -80,7 +76,7 @@ const AdminUserListItems = (props: AdminUserListItemsProps) => {
                             })
                           }
                         >
-                          <LockOpenIcon width={16} height={16} />
+                          <LockOpenOutline width={16} height={16} />
                           {t("unsuspend-account")}
                         </DropdownMenuItem>
                       ) : (
@@ -93,7 +89,7 @@ const AdminUserListItems = (props: AdminUserListItemsProps) => {
                             })
                           }
                         >
-                          <LockClosedIcon width={16} height={16} />
+                          <LockClosedOutline width={16} height={16} />
                           {t("suspend-account")}
                         </DropdownMenuItem>
                       )}

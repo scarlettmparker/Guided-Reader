@@ -1,4 +1,4 @@
-import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { ThumbsDown, ThumbsUp } from "lucide-preact";
 import { useTranslation } from "react-i18next";
 import { Button, cn } from "@sun/components";
 import { VoteValue } from "~/generated/graphql";
