@@ -125,7 +125,7 @@ fi
 printf '# users\tp95_ms\tp99_ms\terror%%\tchecks%%\n'
 for u in $USERS_LIST; do
   one_run "$u"
-  printf '%s\t%s\n' "$u" "$(cut -f2- "$OUT_DIR/result.tsv")"
+  printf '%s\t%s\n' "$u" "$(cat "$OUT_DIR/result.tsv")"
 done
 
 log "artefacts under runs/ (latest: $(ls -1dt "$RUNS"/* | head -1))"

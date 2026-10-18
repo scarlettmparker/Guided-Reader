@@ -28,6 +28,14 @@ So cassini copies the *resources*, not the silicon: one CPU core, 512 MB RAM,
     ./cassini.sh stop | start
     ./cassini.sh destroy          # delete the container, keep the pool image
 
+Load testing lives in `load/` — it seeds throwaway users, drives k6 against the
+box and samples its cgroup:
+
+    ./load/run.sh 50              # 50 users for 30s
+    SWEEP="10 25 50 100" ./load/run.sh
+
+See `load/README.md` for the knobs and where the artefacts land.
+
 Every knob is in `cassini.conf`. Change the CPU share, memory, ports or backend
 URL there and re-run `provision` (hardware/network) and `deploy` (the app).
 
