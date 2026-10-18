@@ -5,6 +5,7 @@ import {
   discordRedirectUri,
   discordScopes,
 } from "../../config.js";
+import { sharedCall } from "@sun/ssr";
 import { executeDocument } from "./api";
 import {
   LoginDocument,
@@ -16,6 +17,11 @@ import {
 } from "~/generated/graphql";
 
 const TOKEN_KEY = "hades_auth_token";
+
+/**
+ * Freshness window for the cached current-user lookup, in ms.
+ */
+const CURRENT_USER_TTL_MS = 5000;
 
 /**
  * Reads the stored JWT, or null when not in a browser.
@@ -155,10 +161,11 @@ function isTransientStatus(status: number | undefined): boolean {
 }
 
 /**
- * Returns the logged-in reader account for a JWT, or null.
- * Throws on transient backend errors so the caller can keep the cookie.
- * For password-registered HUMAN accounts without a hades row, returns a
- * synthetic ReaderAccount so the session stays alive with limited UI.
+ * Returns the logged-in reader account for a JWT, or null. Cached briefly by
+ * token so concurrent requests share one backend lookup.
+ *
+ * @param token The JWT from the auth cookie.
+ * @returns The reader account, or null.
  */
 export async function getCurrentUser(
   token: string | undefined,
@@ -166,6 +173,21 @@ export async function getCurrentUser(
   if (!token) {
     return null;
   }
+  return sharedCall(`user:${token}`, CURRENT_USER_TTL_MS, () =>
+    loadCurrentUser(token),
+  );
+}
+
+/**
+ * Fetches the reader account for a JWT.
+ * Throws on transient backend errors so the caller can keep the cookie.
+ * For password-registered HUMAN accounts without a hades row, returns a
+ * synthetic ReaderAccount so the session stays alive with limited UI.
+ *
+ * @param token The JWT.
+ * @returns The reader account, or null.
+ */
+async function loadCurrentUser(token: string): Promise<ReaderAccount | null> {
   const res = await executeDocument<CurrentUserQuery>(
     CurrentUserDocument,
     {},

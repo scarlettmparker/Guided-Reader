@@ -29,8 +29,9 @@ autoDiscoverRegistrations(
   import.meta.glob("./**/*-mutations.ts", { eager: true }),
 );
 
-function matchMeta(url: string): RouteMeta | undefined {
-  const matches = matchRoutes(routes, url);
+function matchMeta(
+  matches: ReturnType<typeof matchRoutes>,
+): RouteMeta | undefined {
   if (!matches) return undefined;
   const composed = matches
     .map((m) => m.route.path ?? "")
@@ -114,21 +115,25 @@ export async function render(options: {
   const matches = matchRoutes(routes, options.url);
   const didMatch = Boolean(matches);
   const App = (
-    <React.StrictMode>
-      <StaticRouter location={options.url}>
-        <Layout>
-          <Suspense fallback={null}>
-            <Router />
-          </Suspense>
-        </Layout>
-      </StaticRouter>
-    </React.StrictMode>
+    <StaticRouter location={options.url}>
+      <Layout>
+        <Suspense fallback={null}>
+          <Router />
+        </Suspense>
+      </Layout>
+    </StaticRouter>
+  );
+
+  const tree = options.isProduction ? (
+    App
+  ) : (
+    <React.StrictMode>{App}</React.StrictMode>
   );
 
   return renderer.render({
-    app: didMatch ? App : <NotFound />,
+    app: didMatch ? tree : <NotFound />,
     didMatch,
-    meta: matchMeta(options.url),
+    meta: matchMeta(matches),
     url: options.url,
     locale: options.locale,
     pageName: options.pageName,
