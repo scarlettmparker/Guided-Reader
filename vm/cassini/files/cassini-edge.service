@@ -1,0 +1,17 @@
+[Unit]
+Description=cassini edge proxy (https scheme + origin rewrite for the prod security hook)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=EDGE_PORT=5178
+Environment=APP_PORT=5179
+Environment=CERT_FILE=/opt/cassini/tls/cassini.pem
+Environment=KEY_FILE=/opt/cassini/tls/cassini-key.pem
+ExecStart=/usr/local/bin/bun /opt/cassini/edge.ts
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

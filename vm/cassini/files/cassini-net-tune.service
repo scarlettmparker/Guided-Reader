@@ -1,0 +1,13 @@
+[Unit]
+Description=cassini NIC throttle (100 Mbit, Raspberry Pi 1 Model B+)
+After=network-online.target
+Wants=network-online.target
+Before=guided-reader.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c '/usr/sbin/tc qdisc replace dev eth0 root tbf rate 100mbit burst 32kbit latency 400ms'
+
+[Install]
+WantedBy=multi-user.target

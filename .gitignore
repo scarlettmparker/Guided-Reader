@@ -27,5 +27,7 @@ scripts/
 vm/*
 !vm/systemd/
 !vm/systemd/*
+!vm/cassini/
+vm/cassini/tls/
 deploy.sh
 !deploy.sh

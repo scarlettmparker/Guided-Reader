@@ -1,0 +1,15 @@
+[Unit]
+Description=Guided Reader (Fastify SSR) on simulated Raspberry Pi
+After=network-online.target cassini-net-tune.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/guided-reader
+Environment=NODE_ENV=production
+ExecStart=/usr/local/bin/bun --preload ./css-plugin.ts server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
