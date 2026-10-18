@@ -51,15 +51,12 @@ summarize() {
 const fs = require("fs");
 const s = JSON.parse(fs.readFileSync(process.env.SUMMARY, "utf8"));
 const m = s.metrics || {};
-const v = (name) => (m[name] ? m[name].values : {}) || {};
-const dur = v("http_req_duration");
-const failed = v("http_req_failed");
-const checks = v("checks");
+const value = (name, key) => (m[name] && m[name][key] != null ? m[name][key] : 0);
 console.log([
-  (dur["p(95)"] ?? 0).toFixed(0),
-  (dur["p(99)"] ?? 0).toFixed(0),
-  ((failed.rate ?? 0) * 100).toFixed(2),
-  ((checks.rate ?? 0) * 100).toFixed(2),
+  value("http_req_duration", "p(95)").toFixed(0),
+  value("http_req_duration", "p(99)").toFixed(0),
+  (value("http_req_failed", "value") * 100).toFixed(2),
+  (value("checks", "value") * 100).toFixed(2),
 ].join("\t"));
 '
 }

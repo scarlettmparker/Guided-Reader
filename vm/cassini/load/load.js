@@ -30,6 +30,7 @@ const READERS = Math.max(1, USERS - WRITERS);
 
 export const options = {
   insecureSkipTLSVerify: true,
+  summaryTrendStats: ["avg", "min", "med", "max", "p(90)", "p(95)", "p(99)"],
   scenarios: {
     readers: {
       executor: "constant-vus",
@@ -55,18 +56,22 @@ export const options = {
   },
 };
 
-let csrf = null;
+// The app returns both cookies in one Set-Cookie header, which k6's jar drops
+// past the first iteration, so carry them ourselves.
+let cookieHeader = "";
+let csrf = "";
 let texts = null;
 
 /**
- * Reads the csrf_token cookie the app issued for this VU.
+ * Reads a cookie value out of a combined Set-Cookie header.
  *
- * @returns The token, or an empty string before login.
+ * @param header - The raw Set-Cookie header.
+ * @param name - Cookie name.
+ * @returns The value, or null.
  */
-function csrfToken() {
-  const cookies = http.cookieJar().cookiesForURL(BASE);
-  const token = cookies["csrf_token"];
-  return token && token.length ? token[0] : "";
+function cookieValue(header, name) {
+  const match = new RegExp(`${name}=([^;,\\s]+)`).exec(header || "");
+  return match ? match[1] : null;
 }
 
 /**
@@ -74,19 +79,21 @@ function csrfToken() {
  *
  * @returns Header map.
  */
-function jsonHeaders() {
+function headers() {
   return {
     "content-type": "application/json",
     "x-csrf-token": csrf,
+    cookie: cookieHeader,
     Origin: BASE,
   };
 }
 
 /**
- * Signs this VU in as its own account, once per VU lifetime.
+ * Signs this VU in as its own account, once per VU lifetime, and keeps the
+ * session cookies for the rest of the run.
  */
 function ensure() {
-  if (csrf !== null) return;
+  if (cookieHeader) return;
   const index = ((exec.vu.idInTest - 1) % USERS) + 1;
   const username = `${PREFIX}-${index}`;
   const res = http.post(
@@ -95,11 +102,19 @@ function ensure() {
     {
       headers: { Origin: BASE },
       redirects: 0,
+      responseCallback: http.expectedStatuses(302),
       tags: { name: "POST /__login", kind: "auth" },
     },
   );
   check(res, { "login 302": (r) => r.status === 302 });
-  csrf = csrfToken();
+
+  const setCookie = res.headers["Set-Cookie"] || "";
+  const auth = cookieValue(setCookie, "reader_auth");
+  const token = cookieValue(setCookie, "csrf_token");
+  if (!auth || !token) throw new Error(`login for ${username} returned no session`);
+  csrf = token;
+  cookieHeader = `reader_auth=${auth}; csrf_token=${token}`;
+  http.cookieJar().clear(BASE);
 }
 
 /**
@@ -127,7 +142,7 @@ function json(res, path) {
  */
 function pageData(pattern, params, name) {
   const res = http.post(`${BASE}/__page-data`, JSON.stringify({ pattern, params }), {
-    headers: jsonHeaders(),
+    headers: headers(),
     tags: { name, kind: "read" },
   });
   check(res, { [`${name} 200`]: (r) => r.status === 200 });
@@ -154,17 +169,21 @@ function pickText() {
  */
 export function reader() {
   ensure();
-  http.get(`${BASE}/library`, { tags: { name: "GET /library", kind: "read" } });
+  http.get(`${BASE}/library`, {
+    headers: { cookie: cookieHeader },
+    tags: { name: "GET /library", kind: "read" },
+  });
   pageData("library", { pagination: { page: 0, size: 5 } }, "page-data library");
 
   const id = pickText();
   if (id) {
     http.get(`${BASE}/texts/${id}`, {
+      headers: { cookie: cookieHeader },
       tags: { name: "GET /texts/:id", kind: "read" },
     });
     pageData("texts/:id", { id }, "page-data texts/:id");
     http.post(`${BASE}/hades/markViewed`, JSON.stringify({ textId: id }), {
-      headers: jsonHeaders(),
+      headers: headers(),
       tags: { name: "hades/markViewed", kind: "write" },
     });
   }
@@ -184,7 +203,7 @@ export function writer() {
     JSON.stringify({
       input: { textId: id, startOffset: 0, endOffset: 5, body: `load ${Date.now()}` },
     }),
-    { headers: jsonHeaders(), tags: { name: "hades/createAnnotation", kind: "write" } },
+    { headers: headers(), tags: { name: "hades/createAnnotation", kind: "write" } },
   );
   check(created, { "createAnnotation 200": (r) => r.status === 200 });
 
@@ -193,7 +212,7 @@ export function writer() {
     const removed = http.post(
       `${BASE}/hades/deleteAnnotation`,
       JSON.stringify({ id: annotationId }),
-      { headers: jsonHeaders(), tags: { name: "hades/deleteAnnotation", kind: "write" } },
+      { headers: headers(), tags: { name: "hades/deleteAnnotation", kind: "write" } },
     );
     check(removed, { "deleteAnnotation 200": (r) => r.status === 200 });
   }
