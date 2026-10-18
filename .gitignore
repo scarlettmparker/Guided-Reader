@@ -1,6 +1,7 @@
 node_modules/
 dist/
 public/*
+!public/fonts
 !public/.well-known/
 !public/.well-known/security.txt
 .env*
