@@ -13,7 +13,7 @@
         "@heroicons/react": "^2.2.0",
         "@sun/analytics": "^0.1.2",
         "@sun/api": "^0.2.8",
-        "@sun/components": "^0.12.1",
+        "@sun/components": "^0.12.13",
         "@sun/events": "^0.1.1",
         "@sun/security": "^0.1.9",
         "@sun/shared": "^0.2.12",
@@ -38,7 +38,7 @@
         "@graphql-codegen/typescript": "^5.0.2",
         "@graphql-codegen/typescript-operations": "^5.0.2",
         "@preact/preset-vite": "^2.10.6",
-        "@sun/build": "^0.1.1",
+        "@sun/build": "^0.2.0",
         "@types/node": "^25.8.0",
         "@types/react-dom": "^19.1.2",
         "@vitest/coverage-v8": "^3.2.4",
@@ -459,9 +459,9 @@
 
     "@sun/api": ["@sun/api@0.2.8", "https://registry.int.scarlettparker.co.uk/@sun/api/-/api-0.2.8.tgz", { "peerDependencies": { "@sun/ssr": "*", "graphql": "*" } }, "sha512-gDC4sNQD4EHt/PIJ7VlTkzOMdGwSW2Ql7LqX/La7Q3K09bSOnnzAmagZhgF94IEUEpCJwqE7kufpZMNKNVypKw=="],
 
-    "@sun/build": ["@sun/build@0.1.1", "https://registry.int.scarlettparker.co.uk/@sun/build/-/build-0.1.1.tgz", { "peerDependencies": { "vite": ">=5" } }, "sha512-A8WxkZ8tVS0yKAhwt5RAUJiCLb+F/s70uw3GX+vYQDINuF6QCw682TZRGkhMJJHK2fPjdDrXKAmDZt/WyArYcQ=="],
+    "@sun/build": ["@sun/build@0.2.0", "https://registry.int.scarlettparker.co.uk/@sun/build/-/build-0.2.0.tgz", { "peerDependencies": { "vite": ">=5" } }, "sha512-7ev5gXfAw+soA1LEJCAwfA0CSwB5Bgb+roQ3+hcfpmKyZVAHC8addzr7LH+PDe23VcOM13bq6JlHw0LCzzPPnA=="],
 
-    "@sun/components": ["@sun/components@0.12.7", "https://registry.int.scarlettparker.co.uk/@sun/components/-/components-0.12.7.tgz", { "dependencies": { "@sun/shared": "^0.2.0", "@sun/utils": "^0.1.21" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-supeNROFnflgZLGscSkZR+veQUpOHsDZHPgKBbhEaI9TjJmUUzUC1anHNYqUhbekVgseJra5FuiRyZr9L8vtIg=="],
+    "@sun/components": ["@sun/components@0.12.13", "https://registry.int.scarlettparker.co.uk/@sun/components/-/components-0.12.13.tgz", { "dependencies": { "@sun/shared": "^0.2.0", "@sun/utils": "^0.2.0", "lucide-preact": "^1.59.0" }, "peerDependencies": { "preact": "^11.0.0" } }, "sha512-AThRwUrABCSk6erBTam6L5B3Z2o6QZbe3pJfTpgePKblzOvoRvN/LRaTBN1K3oDWLer/S2lpDMlPjK/26u344w=="],
 
     "@sun/events": ["@sun/events@0.1.1", "https://registry.int.scarlettparker.co.uk/@sun/events/-/events-0.1.1.tgz", {}, "sha512-uGZw35hDbl1Fh3Se88dsmKQRXSwNzyXxkFiKW3Xhc5RBwBKj4qBCYEvikl7xCcxhMlmMfL/7qnl91dzy3fQK3g=="],
 
@@ -1107,6 +1107,8 @@
 
     "lru-cache": ["lru-cache@11.5.3", "", {}, "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg=="],
 
+    "lucide-preact": ["lucide-preact@1.59.0", "", { "peerDependencies": { "preact": "^10.27.2 || ^11.0.0-0" } }, "sha512-KlYEGOU6tfoZt0B2I/V1/YzVEPDLqMrEfZWIjHA9Up5pKqq42n3tS5udS0mHA1/7smN6/o+3W1QCx4CYeRIr3g=="],
+
     "lucide-react": ["lucide-react@0.554.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-St+z29uthEJVx0Is7ellNkgTEhaeSoA42I7JjOCBCrc5X6LYMGSv0P/2uS5HDLTExP5tpiqRD2PyUEOS6s9UXA=="],
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
@@ -1660,8 +1662,6 @@
     "@isaacs/cliui/wrap-ansi": ["wrap-ansi@8.1.0", "", { "dependencies": { "ansi-styles": "^6.1.0", "string-width": "^5.0.1", "strip-ansi": "^7.0.1" } }, "sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ=="],
 
     "@prefresh/vite/@rollup/pluginutils": ["@rollup/pluginutils@4.2.1", "", { "dependencies": { "estree-walker": "^2.0.1", "picomatch": "^2.2.2" } }, "sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ=="],
-
-    "@sun/components/@sun/utils": ["@sun/utils@0.1.28", "https://registry.int.scarlettparker.co.uk/@sun/utils/-/utils-0.1.28.tgz", { "peerDependencies": { "@posthog/react": "*", "posthog-js": "*", "react": "^19.0.0" }, "optionalPeers": ["@posthog/react", "posthog-js"] }, "sha512-WPzondS0bfXMI5R3vBIGO3DoNR2H/jIYaWg+LhLUGPQoKs00G2PGDw97nBklxozCHiwwxEvTVEQ57Xzy4W0L3Q=="],
 
     "@sun/ssr/@sun/utils": ["@sun/utils@0.1.28", "https://registry.int.scarlettparker.co.uk/@sun/utils/-/utils-0.1.28.tgz", { "peerDependencies": { "@posthog/react": "*", "posthog-js": "*", "react": "^19.0.0" }, "optionalPeers": ["@posthog/react", "posthog-js"] }, "sha512-WPzondS0bfXMI5R3vBIGO3DoNR2H/jIYaWg+LhLUGPQoKs00G2PGDw97nBklxozCHiwwxEvTVEQ57Xzy4W0L3Q=="],
 
