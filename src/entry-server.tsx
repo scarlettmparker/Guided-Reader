@@ -4,6 +4,7 @@ import { matchRoutes } from "react-router-dom";
 import { Router, routes, routeMeta } from "./router";
 import Layout from "./components/layout";
 import NotFound from "./routes/not-found";
+import type { Resource } from "i18next";
 import { createRenderer, type RouteMeta } from "@sun/ssr/renderer";
 import { autoDiscoverRegistrations } from "@sun/ssr/server";
 import { sharedCall, SHARED_TTL } from "@sun/ssr";
@@ -38,19 +39,44 @@ function matchMeta(url: string): RouteMeta | undefined {
   return routeMeta[composed === "" ? "/" : composed];
 }
 
+const i18nByLocale = new Map<
+  string,
+  Promise<ReturnType<typeof createI18nInstance>>
+>();
+
 const renderer = createRenderer({
   title: "Guided Reader | Scarlet Sun",
+  /**
+   * Initialises the i18n instance for the render's locale, reusing one per locale.
+   *
+   * @param locale The resolved locale code.
+   * @param translations The parsed messages for the locale.
+   * @returns A promise that resolves once the instance is ready.
+   */
   initI18n(locale, translations) {
-    const instance = createI18nInstance();
-    setI18n(instance);
-    return instance.init({
-      lng: locale,
-      fallbackLng: "en",
-      resources: { [locale]: translations } as never,
-      interpolation: { escapeValue: false },
-      react: { useSuspense: true },
+    let pending = i18nByLocale.get(locale);
+    if (!pending) {
+      const instance = createI18nInstance();
+      pending = Promise.resolve(
+        instance.init({
+          lng: locale,
+          fallbackLng: "en",
+          resources: { [locale]: translations } as Resource,
+          interpolation: { escapeValue: false },
+          react: { useSuspense: true },
+        }),
+      ).then(() => instance);
+      i18nByLocale.set(locale, pending);
+    }
+    return pending.then((instance) => {
+      setI18n(instance);
     });
   },
+  /**
+   * Loads the cached theme set from gaia.
+   *
+   * @returns The current theme and all themes.
+   */
   async resolveTheme() {
     return sharedCall("shared:themes", SHARED_TTL.CONFIG, async () => {
       const result = await fetchPropertySet("ReactApp", "themes");
