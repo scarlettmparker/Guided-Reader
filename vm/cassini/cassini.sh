@@ -4,7 +4,7 @@
 # Tunables live in cassini.conf.
 #   ./cassini.sh provision              box: storage, network, limits, bun
 #   ./cassini.sh deploy [--skip-build]  build, push, restart the app
-#   ./cassini.sh status | shell | stop | start | destroy
+#   ./cassini.sh status | shell | stop | start | autostart | destroy
 
 set -euo pipefail
 
@@ -115,7 +115,7 @@ ensure_container() {
     || incus config device add "$NAME" web proxy \
          listen=tcp:0.0.0.0:"$HOST_PORT" connect=tcp:127.0.0.1:"$CONTAINER_PORT"
 
-  incus config set "$NAME" boot.autostart true
+  incus config set "$NAME" boot.autostart "$AUTOSTART"
   incus config set "$NAME" limits.cpu "$LIMITS_CPU"
   incus config set "$NAME" limits.cpu.allowance "$CPU_ALLOWANCE"
   incus config set "$NAME" limits.memory "$MEMORY"
@@ -335,6 +335,10 @@ case "${1:-}" in
   shell) shift; sudo incus exec "$NAME" -- bash -l ;;
   stop) incus stop "$NAME" ;;
   start) incus start "$NAME" ;;
+  autostart)
+    incus config set "$NAME" boot.autostart "$AUTOSTART"
+    log "boot.autostart=$AUTOSTART"
+    ;;
   destroy)
     incus delete --force "$NAME" 2>/dev/null || true
     log "deleted $NAME (pool + loop image left in place)"
