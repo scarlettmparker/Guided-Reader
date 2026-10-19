@@ -14,9 +14,7 @@ import type {
 /**
  * Creates an annotation on a text range.
  */
-export async function createAnnotation(
-  input: AnnotationInput,
-): Promise<CreateAnnotationResponse> {
+export async function createAnnotation(input: AnnotationInput): Promise<CreateAnnotationResponse> {
   return executeMutation<CreateAnnotationResponse>("hades/createAnnotation", {
     input,
   });
@@ -25,18 +23,14 @@ export async function createAnnotation(
 /**
  * Adds a comment (or reply) to an annotation.
  */
-export async function addComment(
-  input: CommentInput,
-): Promise<AddCommentResponse> {
+export async function addComment(input: CommentInput): Promise<AddCommentResponse> {
   return executeMutation<AddCommentResponse>("hades/addComment", { input });
 }
 
 /**
  * Deletes an annotation (owner only).
  */
-export async function deleteAnnotation(
-  id: string,
-): Promise<DeleteAnnotationResponse> {
+export async function deleteAnnotation(id: string): Promise<DeleteAnnotationResponse> {
   return executeMutation<DeleteAnnotationResponse>("hades/deleteAnnotation", {
     id,
   });
@@ -45,9 +39,7 @@ export async function deleteAnnotation(
 /**
  * Deletes a comment on an annotation (owner only).
  */
-export async function deleteComment(
-  id: string,
-): Promise<DeleteCommentResponse> {
+export async function deleteComment(id: string): Promise<DeleteCommentResponse> {
   return executeMutation<DeleteCommentResponse>("hades/deleteComment", { id });
 }
 

@@ -19,11 +19,7 @@ const PropertySetsList = (_props: PropertySetsListProps) => {
       <CardHeader className={styles.header}>
         <CardTitle>{t("property-sets-title")}</CardTitle>
         <Link to="/admin" className={styles.header_link}>
-          <Button
-            variant="secondary"
-            title={t("title")}
-            aria-label={t("title")}
-          >
+          <Button variant="secondary" title={t("title")} aria-label={t("title")}>
             {t("title")}
           </Button>
         </Link>

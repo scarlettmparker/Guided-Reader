@@ -106,10 +106,7 @@ const PermissionColumn = (props: PermissionColumnProps) => {
                 key={value}
                 role="option"
                 aria-selected={selected.has(value)}
-                className={cn(
-                  styles.row,
-                  selected.has(value) && styles.row_selected,
-                )}
+                className={cn(styles.row, selected.has(value) && styles.row_selected)}
                 draggable
                 onDragStart={onDragStart(value)}
                 onMouseDown={onMouseDown(value)}

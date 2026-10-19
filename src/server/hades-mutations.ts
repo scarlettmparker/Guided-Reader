@@ -37,21 +37,14 @@ import {
   type MarkViewedMutationVariables,
 } from "~/generated/graphql";
 
-type CreateAnnotationResponse =
-  CreateAnnotationMutation["hadesMutations"]["createAnnotation"];
-type EditAnnotationResponse =
-  EditAnnotationMutation["hadesMutations"]["editAnnotation"];
-type DeleteAnnotationResponse =
-  DeleteAnnotationMutation["hadesMutations"]["deleteAnnotation"];
-type AddCommentResponse =
-  AddCommentMutation["hadesMutations"]["addComment"];
-type DeleteCommentResponse =
-  DeleteCommentMutation["hadesMutations"]["deleteComment"];
+type CreateAnnotationResponse = CreateAnnotationMutation["hadesMutations"]["createAnnotation"];
+type EditAnnotationResponse = EditAnnotationMutation["hadesMutations"]["editAnnotation"];
+type DeleteAnnotationResponse = DeleteAnnotationMutation["hadesMutations"]["deleteAnnotation"];
+type AddCommentResponse = AddCommentMutation["hadesMutations"]["addComment"];
+type DeleteCommentResponse = DeleteCommentMutation["hadesMutations"]["deleteComment"];
 type VoteReaderResponse = HadesVoteMutation["hadesMutations"]["vote"];
-type CreatePrivateNoteResponse =
-  CreatePrivateNoteMutation["hadesMutations"]["createPrivateNote"];
-type DeletePrivateNoteResponse =
-  DeletePrivateNoteMutation["hadesMutations"]["deletePrivateNote"];
+type CreatePrivateNoteResponse = CreatePrivateNoteMutation["hadesMutations"]["createPrivateNote"];
+type DeletePrivateNoteResponse = DeletePrivateNoteMutation["hadesMutations"]["deletePrivateNote"];
 type ShareNotesResponse = ShareNotesMutation["hadesMutations"]["shareNotes"];
 type MarkViewedResponse = MarkViewedMutation["hadesMutations"]["markViewed"];
 
@@ -70,10 +63,7 @@ defineMutation<CreateAnnotationMutationVariables, CreateAnnotationResponse>({
     }
     const data = result.data?.hadesMutations.createAnnotation;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to create annotation.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to create annotation.", result.statusCode);
     }
     return data;
   },
@@ -85,16 +75,14 @@ defineMutation<CreateAnnotationMutationVariables, CreateAnnotationResponse>({
 defineMutation<EditAnnotationMutationVariables, EditAnnotationResponse>({
   path: "hades/editAnnotation",
   async handler(body, context) {
-    const result = await executeDocument<
-      EditAnnotationMutation,
-      EditAnnotationMutationVariables
-    >(EditAnnotationDocument, body, tokenFrom(context));
+    const result = await executeDocument<EditAnnotationMutation, EditAnnotationMutationVariables>(
+      EditAnnotationDocument,
+      body,
+      tokenFrom(context),
+    );
     const data = result.data?.hadesMutations.editAnnotation;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to edit annotation.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to edit annotation.", result.statusCode);
     }
     return data;
   },
@@ -112,10 +100,7 @@ defineMutation<DeleteAnnotationMutationVariables, DeleteAnnotationResponse>({
     >(DeleteAnnotationDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.deleteAnnotation;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to delete annotation.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to delete annotation.", result.statusCode);
     }
     return data;
   },
@@ -127,16 +112,14 @@ defineMutation<DeleteAnnotationMutationVariables, DeleteAnnotationResponse>({
 defineMutation<AddCommentMutationVariables, AddCommentResponse>({
   path: "hades/addComment",
   async handler(body, context) {
-    const result = await executeDocument<
-      AddCommentMutation,
-      AddCommentMutationVariables
-    >(AddCommentDocument, body, tokenFrom(context));
+    const result = await executeDocument<AddCommentMutation, AddCommentMutationVariables>(
+      AddCommentDocument,
+      body,
+      tokenFrom(context),
+    );
     const data = result.data?.hadesMutations.addComment;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to add comment.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to add comment.", result.statusCode);
     }
     return data;
   },
@@ -148,16 +131,14 @@ defineMutation<AddCommentMutationVariables, AddCommentResponse>({
 defineMutation<DeleteCommentMutationVariables, DeleteCommentResponse>({
   path: "hades/deleteComment",
   async handler(body, context) {
-    const result = await executeDocument<
-      DeleteCommentMutation,
-      DeleteCommentMutationVariables
-    >(DeleteCommentDocument, body, tokenFrom(context));
+    const result = await executeDocument<DeleteCommentMutation, DeleteCommentMutationVariables>(
+      DeleteCommentDocument,
+      body,
+      tokenFrom(context),
+    );
     const data = result.data?.hadesMutations.deleteComment;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to delete comment.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to delete comment.", result.statusCode);
     }
     return data;
   },
@@ -169,16 +150,14 @@ defineMutation<DeleteCommentMutationVariables, DeleteCommentResponse>({
 defineMutation<HadesVoteMutationVariables, VoteReaderResponse>({
   path: "hades/vote",
   async handler(body, context) {
-    const result = await executeDocument<
-      HadesVoteMutation,
-      HadesVoteMutationVariables
-    >(HadesVoteDocument, body, tokenFrom(context));
+    const result = await executeDocument<HadesVoteMutation, HadesVoteMutationVariables>(
+      HadesVoteDocument,
+      body,
+      tokenFrom(context),
+    );
     const data = result.data?.hadesMutations.vote;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to vote.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to vote.", result.statusCode);
     }
     return data;
   },
@@ -190,16 +169,14 @@ defineMutation<HadesVoteMutationVariables, VoteReaderResponse>({
 defineMutation<RemoveVoteMutationVariables, VoteReaderResponse>({
   path: "hades/removeVote",
   async handler(body, context) {
-    const result = await executeDocument<
-      RemoveVoteMutation,
-      RemoveVoteMutationVariables
-    >(RemoveVoteDocument, body, tokenFrom(context));
+    const result = await executeDocument<RemoveVoteMutation, RemoveVoteMutationVariables>(
+      RemoveVoteDocument,
+      body,
+      tokenFrom(context),
+    );
     const data = result.data?.hadesMutations.removeVote;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to remove vote.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to remove vote.", result.statusCode);
     }
     return data;
   },
@@ -217,10 +194,7 @@ defineMutation<CreatePrivateNoteMutationVariables, CreatePrivateNoteResponse>({
     >(CreatePrivateNoteDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.createPrivateNote;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to create private note.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to create private note.", result.statusCode);
     }
     return data;
   },
@@ -238,10 +212,7 @@ defineMutation<DeletePrivateNoteMutationVariables, DeletePrivateNoteResponse>({
     >(DeletePrivateNoteDocument, body, tokenFrom(context));
     const data = result.data?.hadesMutations.deletePrivateNote;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to delete private note.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to delete private note.", result.statusCode);
     }
     return data;
   },
@@ -253,16 +224,14 @@ defineMutation<DeletePrivateNoteMutationVariables, DeletePrivateNoteResponse>({
 defineMutation<ShareNotesMutationVariables, ShareNotesResponse>({
   path: "hades/shareNotes",
   async handler(body, context) {
-    const result = await executeDocument<
-      ShareNotesMutation,
-      ShareNotesMutationVariables
-    >(ShareNotesDocument, body, tokenFrom(context));
+    const result = await executeDocument<ShareNotesMutation, ShareNotesMutationVariables>(
+      ShareNotesDocument,
+      body,
+      tokenFrom(context),
+    );
     const data = result.data?.hadesMutations.shareNotes;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to share notes.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to share notes.", result.statusCode);
     }
     return data;
   },
@@ -274,16 +243,14 @@ defineMutation<ShareNotesMutationVariables, ShareNotesResponse>({
 defineMutation<MarkViewedMutationVariables, MarkViewedResponse>({
   path: "hades/markViewed",
   async handler(body, context) {
-    const result = await executeDocument<
-      MarkViewedMutation,
-      MarkViewedMutationVariables
-    >(MarkViewedDocument, body, tokenFrom(context));
+    const result = await executeDocument<MarkViewedMutation, MarkViewedMutationVariables>(
+      MarkViewedDocument,
+      body,
+      tokenFrom(context),
+    );
     const data = result.data?.hadesMutations.markViewed;
     if (data == null) {
-      throw new MutationError(
-        result.error || "Failed to mark viewed.",
-        result.statusCode,
-      );
+      throw new MutationError(result.error || "Failed to mark viewed.", result.statusCode);
     }
     return data;
   },

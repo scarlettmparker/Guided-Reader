@@ -30,11 +30,7 @@ function isWithin(node: Node, container: HTMLElement): boolean {
  * the point. Handles element-node boundaries (e.g. a paragraph edge) that a
  * text-node walk would miss.
  */
-function pointOffset(
-  container: HTMLElement,
-  node: Node,
-  offset: number,
-): number {
+function pointOffset(container: HTMLElement, node: Node, offset: number): number {
   const range = document.createRange();
   range.selectNodeContents(container);
   range.setEnd(node, offset);
@@ -48,19 +44,14 @@ function pointOffset(
  * @param container the element whose text content the offsets are relative to
  * @returns the trimmed offsets and text, or null if there is no valid selection
  */
-export function getSelectionOffsets(
-  container: HTMLElement,
-): SelectionOffsets | null {
+export function getSelectionOffsets(container: HTMLElement): SelectionOffsets | null {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
     return null;
   }
 
   const range = selection.getRangeAt(0);
-  if (
-    !isWithin(range.startContainer, container) ||
-    !isWithin(range.endContainer, container)
-  ) {
+  if (!isWithin(range.startContainer, container) || !isWithin(range.endContainer, container)) {
     return null;
   }
 

@@ -44,10 +44,7 @@ const DefinitionDialog = (props: DefinitionDialogProps) => {
   const position =
     typeof window === "undefined"
       ? { top: 100, left: 100 }
-      : centeredDialogPosition(
-          { top: window.innerHeight / 2, left: window.innerWidth / 2 },
-          48,
-        );
+      : centeredDialogPosition({ top: window.innerHeight / 2, left: window.innerWidth / 2 }, 48);
 
   return (
     <Dialog

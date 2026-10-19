@@ -4,8 +4,7 @@ import DiscordAvatar from "~/components/discord-avatar";
 import type { SearchReaderAccountsQuery } from "~/generated/graphql";
 import styles from "./search-suggestions.module.css";
 
-type SearchAccount =
-  SearchReaderAccountsQuery["hadesQueries"]["searchReaderAccounts"][number];
+type SearchAccount = SearchReaderAccountsQuery["hadesQueries"]["searchReaderAccounts"][number];
 
 type ShareTag = {
   /**
@@ -45,16 +44,10 @@ const SearchSuggestions = (props: SearchSuggestionsProps) => {
   const trimmed = query.trim();
   const { data: accounts } = usePageData<
     SearchReaderAccountsQuery["hadesQueries"]["searchReaderAccounts"]
-  >(
-    "accounts",
-    "searchReaderAccounts/:query",
-    trimmed ? { query: trimmed } : { query: "" },
-  );
+  >("accounts", "searchReaderAccounts/:query", trimmed ? { query: trimmed } : { query: "" });
 
   const suggestions = trimmed
-    ? (accounts ?? [])
-        .filter((a) => !tags.some((tag) => tag.id === a.gaiaAccountId))
-        .slice(0, 10)
+    ? (accounts ?? []).filter((a) => !tags.some((tag) => tag.id === a.gaiaAccountId)).slice(0, 10)
     : [];
 
   if (suggestions.length === 0) return null;
@@ -70,11 +63,7 @@ const SearchSuggestions = (props: SearchSuggestionsProps) => {
           aria-label={account.globalName || account.discordUsername || ""}
           onClick={() => onAdd(account)}
         >
-          <DiscordAvatar
-            discordId={account.discordId}
-            avatar={account.avatar}
-            size={24}
-          />
+          <DiscordAvatar discordId={account.discordId} avatar={account.avatar} size={24} />
           <span className={styles.suggestion_label}>
             {account.globalName || account.discordUsername}
           </span>

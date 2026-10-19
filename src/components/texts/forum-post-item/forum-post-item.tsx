@@ -67,14 +67,8 @@ type ForumPostItemProps = {
  */
 const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
   const { t } = useTranslation("texts");
-  const { data: currentUser } = usePageData<ReaderAccount | null>(
-    "currentUser",
-    "currentUser",
-  );
-  const { data: colours } = usePageData<LevelColours | null>(
-    "levelColours",
-    "levelColours",
-  );
+  const { data: currentUser } = usePageData<ReaderAccount | null>("currentUser", "currentUser");
+  const { data: colours } = usePageData<LevelColours | null>("levelColours", "levelColours");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletePending, startDelete] = useTransition();
 
@@ -87,8 +81,7 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
     reducer: (current, payload) => ({
       ...current,
       myVote: payload.next,
-      netScore:
-        current.netScore + voteScoreDelta(current.myVote, payload.next),
+      netScore: current.netScore + voteScoreDelta(current.myVote, payload.next),
     }),
     action: (payload) =>
       payload.next === null
@@ -96,34 +89,21 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
         : votePost(payload.targetId, payload.next),
     onSuccess: (response) => {
       const entity = response.post;
-      patchPageData<Post[]>(
-        "posts",
-        "threads/:threadId",
-        { threadId },
-        (current) =>
-          (current ?? []).map((item) =>
-            item.id === entity.id ? { ...item, ...entity } : item,
-          ),
+      patchPageData<Post[]>("posts", "threads/:threadId", { threadId }, (current) =>
+        (current ?? []).map((item) => (item.id === entity.id ? { ...item, ...entity } : item)),
       );
     },
   });
 
-  const colour = profile?.cefrLevel
-    ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
-    : undefined;
-  const isOwner =
-    !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
+  const colour = profile?.cefrLevel ? colours?.[CEFR_TO_KEY[profile.cefrLevel]] : undefined;
+  const isOwner = !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
 
   const confirmDelete = () => {
     startDelete(async () => {
       try {
         const response = await deletePost(optimisticPost.id);
-        patchPageData<Post[]>(
-          "posts",
-          "threads/:threadId",
-          { threadId },
-          (current) =>
-            (current ?? []).filter((item) => item.id !== response.id),
+        patchPageData<Post[]>("posts", "threads/:threadId", { threadId }, (current) =>
+          (current ?? []).filter((item) => item.id !== response.id),
         );
       } finally {
         setConfirmOpen(false);
@@ -140,9 +120,7 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
           size={24}
           alt={profile?.globalName ?? profile?.discordUsername ?? ""}
         />
-        <span className={styles.author}>
-          {profile?.globalName ?? profile?.discordUsername}
-        </span>
+        <span className={styles.author}>{profile?.globalName ?? profile?.discordUsername}</span>
         {profile?.cefrLevel && (
           <Badge style={colour ? { backgroundColor: colour } : undefined}>
             {profile.cefrLevel}
@@ -151,11 +129,7 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
         {isOwner && (
           <DropdownMenu className={styles.menu_trigger}>
             <DropdownMenuTrigger asChild>
-              <EllipsisVerticalIcon
-                width={16}
-                height={16}
-                aria-label={t("comment-actions")}
-              />
+              <EllipsisVerticalIcon width={16} height={16} aria-label={t("comment-actions")} />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setConfirmOpen(true)} asChild>
@@ -168,9 +142,7 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
           </DropdownMenu>
         )}
       </div>
-      <MarkdownViewer className={styles.body}>
-        {optimisticPost.body}
-      </MarkdownViewer>
+      <MarkdownViewer className={styles.body}>{optimisticPost.body}</MarkdownViewer>
       <VoteControl
         myVote={optimisticPost.myVote ?? null}
         netScore={optimisticPost.netScore}
@@ -185,11 +157,7 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
           <p>{t("delete-comment-body")}</p>
         </DialogBody>
         <DialogFooter>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setConfirmOpen(false)}
-          >
+          <Button type="button" variant="secondary" onClick={() => setConfirmOpen(false)}>
             {t("cancel")}
           </Button>
           <Button

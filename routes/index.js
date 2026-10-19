@@ -38,9 +38,7 @@ const PUBLIC_PAGES = new Set(["/login", "/register", "/reactivate"]);
 
 /** Strips a trailing slash (except for the root). */
 function normalizePath(pathname) {
-  return pathname.length > 1 && pathname.endsWith("/")
-    ? pathname.replace(/\/+$/, "")
-    : pathname;
+  return pathname.length > 1 && pathname.endsWith("/") ? pathname.replace(/\/+$/, "") : pathname;
 }
 
 /**
@@ -103,10 +101,7 @@ export function setupRoutes(app, vite) {
   app.get("/auth/discord/callback", async (request, reply) => {
     const { code, state } = request.query ?? {};
     const expected = getCookieValue(request.headers.cookie, OAUTH_STATE_COOKIE);
-    reply.header(
-      "Set-Cookie",
-      `${OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`,
-    );
+    reply.header("Set-Cookie", `${OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`);
 
     if (!code || !state || !expected || state !== expected) {
       return reply.redirect("/login?error=discord");
@@ -166,8 +161,7 @@ export function setupRoutes(app, vite) {
     const locale = langHeader.split(",")[0] || "en";
 
     const pathOnly = url.split("?")[0];
-    const pageName =
-      pathOnly === "/" ? "library" : pathOnly.split("/")[1] || "library";
+    const pageName = pathOnly === "/" ? "library" : pathOnly.split("/")[1] || "library";
     const frontendMode = "reader";
 
     trackPageView({

@@ -1,8 +1,4 @@
-import {
-  executeDocument as runDocument,
-  type ApiResponse,
-  type ExecuteOptions,
-} from "@sun/api";
+import { executeDocument as runDocument, type ApiResponse, type ExecuteOptions } from "@sun/api";
 import type { DocumentNode } from "graphql";
 import { PropertySetDocument } from "~/generated/graphql";
 
@@ -56,11 +52,7 @@ export async function executeDocument<T, V = Record<string, unknown>>(
 /**
  * Fetches a property set entry's values, or every entry when entry is omitted.
  */
-export async function fetchPropertySet(
-  ownerKey: string,
-  name: string,
-  entry?: string,
-) {
+export async function fetchPropertySet(ownerKey: string, name: string, entry?: string) {
   return executeDocument(PropertySetDocument, {
     ownerKey,
     name,

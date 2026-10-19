@@ -69,12 +69,7 @@ const PropertySetEntryDialog = (props: PropertySetEntryDialogProps) => {
     startTransition(async () => {
       setError(null);
       try {
-        const response = await upsertPropertyEntry(
-          owner,
-          name,
-          entry.entryName,
-          parsed,
-        );
+        const response = await upsertPropertyEntry(owner, name, entry.entryName, parsed);
         patchPageData<PropertySetEntry[]>(
           "propertySetEntries",
           "admin/property-sets/:owner/:name",
@@ -82,9 +77,7 @@ const PropertySetEntryDialog = (props: PropertySetEntryDialogProps) => {
           (current) => {
             const list = current ?? [];
             return list.some((item) => item.id === response.entry.id)
-              ? list.map((item) =>
-                  item.id === response.entry.id ? response.entry : item,
-                )
+              ? list.map((item) => (item.id === response.entry.id ? response.entry : item))
               : [...list, response.entry];
           },
         );
@@ -105,12 +98,8 @@ const PropertySetEntryDialog = (props: PropertySetEntryDialogProps) => {
           <JsonTextArea
             value={draft}
             onChange={setDraft}
-            onError={(
-              error: string | null | React.SyntheticEvent<HTMLTextAreaElement>,
-            ) =>
-              setJsonError(
-                typeof error === "string" || error === null ? error : null,
-              )
+            onError={(error: string | null | React.SyntheticEvent<HTMLTextAreaElement>) =>
+              setJsonError(typeof error === "string" || error === null ? error : null)
             }
             rows={8}
             aria-label={t("values")}

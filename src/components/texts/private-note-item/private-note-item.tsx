@@ -13,8 +13,7 @@ import { deletePrivateNote } from "~/server/actions/private-note";
 import type { PrivateNotesQuery } from "~/generated/graphql";
 import styles from "./private-note-item.module.css";
 
-type PrivateNote =
-  PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
+type PrivateNote = PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 
 type PrivateNoteItemProps = {
   /**
@@ -52,8 +51,7 @@ const PrivateNoteItem = (props: PrivateNoteItemProps) => {
           "privateNotes",
           "privateNotes/:textId",
           { textId },
-          (current) =>
-            (current ?? []).filter((item) => item.id !== response.id),
+          (current) => (current ?? []).filter((item) => item.id !== response.id),
         );
       } finally {
         setConfirmOpen(false);

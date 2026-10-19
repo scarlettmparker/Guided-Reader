@@ -33,8 +33,7 @@ const AccountRoleTransferList = (props: AccountRoleTransferListProps) => {
   const { roles, assignedRoleNames, onChange, className, ...rest } = props;
   const { t } = useTranslation("admin");
   const catalog = useMemo(
-    () =>
-      (roles ?? []).map((role) => role.name).sort((a, b) => a.localeCompare(b)),
+    () => (roles ?? []).map((role) => role.name).sort((a, b) => a.localeCompare(b)),
     [roles],
   );
 

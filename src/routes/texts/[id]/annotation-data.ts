@@ -17,18 +17,14 @@ defineLoader({
   async loader(params, context) {
     const id = params.id as string;
     if (!id) return null;
-    const token = getCookieValue(
-      (context as PageDataContext | undefined)?.cookie,
-      AUTH_COOKIE,
-    );
+    const token = getCookieValue((context as PageDataContext | undefined)?.cookie, AUTH_COOKIE);
     try {
-      const result = await executeDocument<
-        ListAnnotationsQuery,
-        ListAnnotationsQueryVariables
-      >(ListAnnotationsDocument, { textId: id, includeHidden: false }, token);
-      const annotations = result.success
-        ? (result.data?.hadesQueries.annotations.items ?? [])
-        : [];
+      const result = await executeDocument<ListAnnotationsQuery, ListAnnotationsQueryVariables>(
+        ListAnnotationsDocument,
+        { textId: id, includeHidden: false },
+        token,
+      );
+      const annotations = result.success ? (result.data?.hadesQueries.annotations.items ?? []) : [];
       return { annotations };
     } catch (error) {
       console.error("Failed to fetch annotations:", error);

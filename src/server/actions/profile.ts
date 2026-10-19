@@ -9,10 +9,7 @@ import type {
  * Deactivates the calling account, revoking its sessions.
  */
 export async function deactivateAccount(): Promise<DeactivateAccountResponse> {
-  return executeMutation<DeactivateAccountResponse>(
-    "gaia/deactivateAccount",
-    {},
-  );
+  return executeMutation<DeactivateAccountResponse>("gaia/deactivateAccount", {});
 }
 
 /**
@@ -21,10 +18,10 @@ export async function deactivateAccount(): Promise<DeactivateAccountResponse> {
 export async function requestAccountReactivation(
   email: string,
 ): Promise<RequestAccountReactivationResponse> {
-  return executeMutation<RequestAccountReactivationResponse>(
-    "gaia/requestAccountReactivation",
-    { email, provider: "discord" },
-  );
+  return executeMutation<RequestAccountReactivationResponse>("gaia/requestAccountReactivation", {
+    email,
+    provider: "discord",
+  });
 }
 
 /**
@@ -33,8 +30,7 @@ export async function requestAccountReactivation(
 export async function confirmAccountReactivation(
   token: string,
 ): Promise<ConfirmAccountReactivationResponse> {
-  return executeMutation<ConfirmAccountReactivationResponse>(
-    "gaia/confirmAccountReactivation",
-    { token },
-  );
+  return executeMutation<ConfirmAccountReactivationResponse>("gaia/confirmAccountReactivation", {
+    token,
+  });
 }

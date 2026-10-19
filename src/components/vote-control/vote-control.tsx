@@ -36,10 +36,8 @@ const VoteControl = ({
   const { t } = useTranslation("texts");
   const vote = myVote ?? null;
 
-  const handleUp = () =>
-    onVoteChange(vote === VoteValue.Up ? null : VoteValue.Up);
-  const handleDown = () =>
-    onVoteChange(vote === VoteValue.Down ? null : VoteValue.Down);
+  const handleUp = () => onVoteChange(vote === VoteValue.Up ? null : VoteValue.Up);
+  const handleDown = () => onVoteChange(vote === VoteValue.Down ? null : VoteValue.Down);
 
   return (
     <div className={cn(styles.vote_control, className)}>

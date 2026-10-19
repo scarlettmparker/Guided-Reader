@@ -19,15 +19,9 @@ export function useAccountPermissionTransfer(
   const [availableQuery, setAvailableQuery] = useState("");
   const [assignedQuery, setAssignedQuery] = useState("");
   const [input, setInput] = useState("");
-  const [selectedAvailable, setSelectedAvailable] = useState<Set<string>>(
-    new Set(),
-  );
-  const [selectedAssigned, setSelectedAssigned] = useState<Set<string>>(
-    new Set(),
-  );
-  const [drag, setDrag] = useState<{ active: boolean; target: boolean } | null>(
-    null,
-  );
+  const [selectedAvailable, setSelectedAvailable] = useState<Set<string>>(new Set());
+  const [selectedAssigned, setSelectedAssigned] = useState<Set<string>>(new Set());
+  const [drag, setDrag] = useState<{ active: boolean; target: boolean } | null>(null);
 
   useEffect(() => {
     const end = () => setDrag(null);
@@ -42,9 +36,7 @@ export function useAccountPermissionTransfer(
 
   const availableFilteredBase = useMemo(() => {
     const catalog = (allPermissions ?? []) as string[];
-    return catalog
-      .filter((p) => !assigned.includes(p))
-      .sort((a, b) => a.localeCompare(b));
+    return catalog.filter((p) => !assigned.includes(p)).sort((a, b) => a.localeCompare(b));
   }, [assigned, allPermissions]);
 
   const filteredAvailable = useMemo(() => {
@@ -135,12 +127,8 @@ export function useAccountPermissionTransfer(
    */
   const moveSelectedToAssigned = () => {
     if (selectedAvailable.size === 0) return;
-    const toMove = [...selectedAvailable].filter((v) =>
-      availableFilteredBase.includes(v),
-    );
-    onChange(
-      [...new Set([...assigned, ...toMove])].sort((a, b) => a.localeCompare(b)),
-    );
+    const toMove = [...selectedAvailable].filter((v) => availableFilteredBase.includes(v));
+    onChange([...new Set([...assigned, ...toMove])].sort((a, b) => a.localeCompare(b)));
     setSelectedAvailable(new Set());
   };
 
@@ -158,11 +146,7 @@ export function useAccountPermissionTransfer(
    */
   const moveAllToAssigned = () => {
     if (filteredAvailable.length === 0) return;
-    onChange(
-      [...new Set([...assigned, ...filteredAvailable])].sort((a, b) =>
-        a.localeCompare(b),
-      ),
-    );
+    onChange([...new Set([...assigned, ...filteredAvailable])].sort((a, b) => a.localeCompare(b)));
     setSelectedAvailable(new Set());
   };
 
@@ -180,9 +164,7 @@ export function useAccountPermissionTransfer(
    * Handles drag start for available.
    */
   const handleDragStartAvailable = (value: string) => (e: React.DragEvent) => {
-    const toDrag = selectedAvailable.has(value)
-      ? [...selectedAvailable]
-      : [value];
+    const toDrag = selectedAvailable.has(value) ? [...selectedAvailable] : [value];
     e.dataTransfer.setData("application/json", JSON.stringify(toDrag));
   };
 
@@ -190,9 +172,7 @@ export function useAccountPermissionTransfer(
    * Handles drag start for assigned.
    */
   const handleDragStartAssigned = (value: string) => (e: React.DragEvent) => {
-    const toDrag = selectedAssigned.has(value)
-      ? [...selectedAssigned]
-      : [value];
+    const toDrag = selectedAssigned.has(value) ? [...selectedAssigned] : [value];
     e.dataTransfer.setData("application/json", JSON.stringify(toDrag));
   };
 
@@ -203,18 +183,11 @@ export function useAccountPermissionTransfer(
     e.preventDefault();
     try {
       const raw =
-        e.dataTransfer.getData("application/json") ||
-        e.dataTransfer.getData("text/plain");
+        e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");
       const values: string[] = raw.startsWith("[") ? JSON.parse(raw) : [raw];
-      const valid = values.filter(
-        (v) => v && availableFilteredBase.includes(v),
-      );
+      const valid = values.filter((v) => v && availableFilteredBase.includes(v));
       if (valid.length === 0) return;
-      onChange(
-        [...new Set([...assigned, ...valid])].sort((a, b) =>
-          a.localeCompare(b),
-        ),
-      );
+      onChange([...new Set([...assigned, ...valid])].sort((a, b) => a.localeCompare(b)));
       setSelectedAvailable(new Set());
     } catch {
       // ignore
@@ -228,8 +201,7 @@ export function useAccountPermissionTransfer(
     e.preventDefault();
     try {
       const raw =
-        e.dataTransfer.getData("application/json") ||
-        e.dataTransfer.getData("text/plain");
+        e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");
       const values: string[] = raw.startsWith("[") ? JSON.parse(raw) : [raw];
       const valid = values.filter((v) => v && assigned.includes(v));
       if (valid.length === 0) return;

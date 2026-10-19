@@ -24,8 +24,7 @@ import type { PrivateNotesQuery, ReaderAccount } from "~/generated/graphql";
 import styles from "./private-note-list-dialog.module.css";
 import { TrashOutline } from "preact-heroicons";
 
-type PrivateNote =
-  PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
+type PrivateNote = PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 
 type LevelColours = Record<string, string>;
 
@@ -92,23 +91,15 @@ const PrivateNoteListDialog = ({
   onSuggestNote,
 }: PrivateNoteListDialogProps) => {
   const { t } = useTranslation("texts");
-  const { data: colours } = usePageData<LevelColours | null>(
-    "levelColours",
-    "levelColours",
-  );
-  const { data: currentUser } = usePageData<ReaderAccount | null>(
-    "currentUser",
-    "currentUser",
-  );
+  const { data: colours } = usePageData<LevelColours | null>("levelColours", "levelColours");
+  const { data: currentUser } = usePageData<ReaderAccount | null>("currentUser", "currentUser");
   const { open, position, textId, snippet } = list;
   const [items, setItems] = useState<PrivateNote[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<PrivateNote | null>(null);
   const [pending, startTransition] = useTransition();
 
   const titleSnippet =
-    snippet.length > TITLE_SNIPPET_LIMIT
-      ? `${snippet.slice(0, TITLE_SNIPPET_LIMIT)}…`
-      : snippet;
+    snippet.length > TITLE_SNIPPET_LIMIT ? `${snippet.slice(0, TITLE_SNIPPET_LIMIT)}…` : snippet;
 
   /**
    * Keeps the local list in sync when a different position is opened.
@@ -116,12 +107,8 @@ const PrivateNoteListDialog = ({
   useEffect(() => {
     setItems(
       [...notes].sort((a, b) => {
-        const aTime = a.createdAt
-          ? new Date(a.createdAt as string).getTime()
-          : 0;
-        const bTime = b.createdAt
-          ? new Date(b.createdAt as string).getTime()
-          : 0;
+        const aTime = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
         return bTime - aTime;
       }),
     );
@@ -137,8 +124,7 @@ const PrivateNoteListDialog = ({
           "privateNotes",
           "privateNotes/:textId",
           { textId },
-          (current) =>
-            (current ?? []).filter((item) => item.id !== response.id),
+          (current) => (current ?? []).filter((item) => item.id !== response.id),
         );
       } finally {
         setDeleteTarget(null);
@@ -148,12 +134,7 @@ const PrivateNoteListDialog = ({
 
   return (
     <>
-      <Dialog
-        open={open}
-        onOpenChange={onOpenChange}
-        draggable
-        position={position}
-      >
+      <Dialog open={open} onOpenChange={onOpenChange} draggable position={position}>
         <DialogHeader>
           <DialogTitle>{t("notes-for", { snippet: titleSnippet })}</DialogTitle>
         </DialogHeader>
@@ -167,10 +148,7 @@ const PrivateNoteListDialog = ({
                 const colour = profile?.cefrLevel
                   ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
                   : undefined;
-                const isOwner =
-                  !!profile?.id &&
-                  !!currentUser?.id &&
-                  profile.id === currentUser.id;
+                const isOwner = !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
                 return (
                   <li key={note.id} className={styles.annotation}>
                     <div
@@ -185,21 +163,15 @@ const PrivateNoteListDialog = ({
                         discordId={profile?.discordId ?? note.author?.id ?? ""}
                         avatar={profile?.avatar}
                         size={28}
-                        alt={
-                          profile?.globalName ?? profile?.discordUsername ?? ""
-                        }
+                        alt={profile?.globalName ?? profile?.discordUsername ?? ""}
                       />
                       <span className={styles.author}>
-                        {profile?.globalName ??
-                          profile?.discordUsername ??
-                          t("unknown")}
+                        {profile?.globalName ?? profile?.discordUsername ?? t("unknown")}
                       </span>
                       {profile?.cefrLevel && (
                         <Badge
                           className={styles.level}
-                          style={
-                            colour ? { backgroundColor: colour } : undefined
-                          }
+                          style={colour ? { backgroundColor: colour } : undefined}
                         >
                           {profile.cefrLevel}
                         </Badge>
@@ -214,10 +186,7 @@ const PrivateNoteListDialog = ({
                             />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
-                            <DropdownMenuItem
-                              onClick={() => setDeleteTarget(note)}
-                              asChild
-                            >
+                            <DropdownMenuItem onClick={() => setDeleteTarget(note)} asChild>
                               <span className={styles.delete_action}>
                                 <TrashOutline width={16} height={16} />
                                 {t("delete")}
@@ -227,9 +196,7 @@ const PrivateNoteListDialog = ({
                         </DropdownMenu>
                       )}
                     </div>
-                    <MarkdownViewer className={styles.body}>
-                      {note.body}
-                    </MarkdownViewer>
+                    <MarkdownViewer className={styles.body}>{note.body}</MarkdownViewer>
                   </li>
                 );
               })}
@@ -245,10 +212,7 @@ const PrivateNoteListDialog = ({
         )}
       </Dialog>
 
-      <Dialog
-        open={!!deleteTarget}
-        onOpenChange={(o: boolean) => !o && setDeleteTarget(null)}
-      >
+      <Dialog open={!!deleteTarget} onOpenChange={(o: boolean) => !o && setDeleteTarget(null)}>
         <DialogHeader>
           <DialogTitle>{t("delete-private-note-title")}</DialogTitle>
         </DialogHeader>

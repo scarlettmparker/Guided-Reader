@@ -39,11 +39,9 @@ type TextDiscussionCardProps = {
  */
 const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
   const { t } = useTranslation("texts");
-  const { data: threads } = usePageData<Thread[]>(
-    "threads",
-    "texts/:id/discussion",
-    { id: textId },
-  );
+  const { data: threads } = usePageData<Thread[]>("threads", "texts/:id/discussion", {
+    id: textId,
+  });
   const [body, setBody] = useState("");
   const [resetKey, setResetKey] = useState(0);
   const [pending, startTransition] = useTransition();
@@ -61,12 +59,10 @@ const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
             title: THREAD_TITLE,
             remoteObject: `hades:text:${textId}`,
           });
-          patchPageData<Thread[]>(
-            "threads",
-            "texts/:id/discussion",
-            { id: textId },
-            (current) => [...(current ?? []), created.thread],
-          );
+          patchPageData<Thread[]>("threads", "texts/:id/discussion", { id: textId }, (current) => [
+            ...(current ?? []),
+            created.thread,
+          ]);
           id = created.thread.id;
         } catch {
           return;
@@ -79,12 +75,10 @@ const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
           parentId: null,
           body: trimmed,
         });
-        patchPageData<Post[]>(
-          "posts",
-          "threads/:threadId",
-          { threadId: id },
-          (current) => [...(current ?? []), response.post],
-        );
+        patchPageData<Post[]>("posts", "threads/:threadId", { threadId: id }, (current) => [
+          ...(current ?? []),
+          response.post,
+        ]);
       } catch {
         return;
       }
@@ -99,15 +93,11 @@ const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
         <CardTitle>{t("text-discussion")}</CardTitle>
       </CardHeader>
       <CardBody>
-        <Suspense fallback={null}>
-          {threadId && <ThreadPosts threadId={threadId} />}
-        </Suspense>
+        <Suspense fallback={null}>{threadId && <ThreadPosts threadId={threadId} />}</Suspense>
         <Form onSubmit={submit} className={styles.composer}>
           <MarkdownEditor
             key={resetKey}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setBody(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.target.value)}
             placeholder={t("comment-placeholder")}
             aria-label={t("comment-placeholder")}
             rows={3}

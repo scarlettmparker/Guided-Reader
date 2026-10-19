@@ -12,8 +12,7 @@ import { patchPageData } from "@sun/ssr";
 import { deleteAnnotation } from "~/server/actions/annotation";
 import type { ListAnnotationsQuery } from "~/generated/graphql";
 
-type Annotation =
-  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 type AnnotationConfirmDeleteDialogProps = {
   /**
@@ -45,12 +44,8 @@ const AnnotationConfirmDeleteDialog = ({
     startTransition(async () => {
       try {
         const response = await deleteAnnotation(target.id);
-        patchPageData<Annotation[]>(
-          "annotations",
-          "texts/:id",
-          { id: textId },
-          (current) =>
-            (current ?? []).filter((item) => item.id !== response.id),
+        patchPageData<Annotation[]>("annotations", "texts/:id", { id: textId }, (current) =>
+          (current ?? []).filter((item) => item.id !== response.id),
         );
       } finally {
         onOpenChange(false);
@@ -67,19 +62,10 @@ const AnnotationConfirmDeleteDialog = ({
         <p>{t("delete-annotation-body", { snippet: target.body })}</p>
       </DialogBody>
       <DialogFooter>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => onOpenChange(false)}
-        >
+        <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
           {t("cancel")}
         </Button>
-        <Button
-          type="button"
-          variant="destructive"
-          disabled={pending}
-          onClick={handleConfirm}
-        >
+        <Button type="button" variant="destructive" disabled={pending} onClick={handleConfirm}>
           {t("delete")}
         </Button>
       </DialogFooter>

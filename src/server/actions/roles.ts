@@ -16,10 +16,7 @@ import type {
  * @param description the optional description
  * @return the mutation result
  */
-export async function createRole(
-  name: string,
-  description?: string,
-): Promise<CreateRoleResponse> {
+export async function createRole(name: string, description?: string): Promise<CreateRoleResponse> {
   return executeMutation<CreateRoleResponse>("gaia/createRole", {
     name,
     description: description ?? null,
@@ -64,10 +61,10 @@ export async function setAccountPermissions(
   accountId: string,
   permissions: string[],
 ): Promise<SetAccountPermissionsResponse> {
-  return executeMutation<SetAccountPermissionsResponse>(
-    "gaia/setAccountPermissions",
-    { accountId, permissions },
-  );
+  return executeMutation<SetAccountPermissionsResponse>("gaia/setAccountPermissions", {
+    accountId,
+    permissions,
+  });
 }
 
 /**
@@ -81,10 +78,10 @@ export async function setRolePermissions(
   roleId: string,
   permissions: string[],
 ): Promise<SetRolePermissionsResponse> {
-  return executeMutation<SetRolePermissionsResponse>(
-    "gaia/setRolePermissions",
-    { roleId, permissions },
-  );
+  return executeMutation<SetRolePermissionsResponse>("gaia/setRolePermissions", {
+    roleId,
+    permissions,
+  });
 }
 
 /**
@@ -93,9 +90,7 @@ export async function setRolePermissions(
  * @param id the account id
  * @return the mutation result
  */
-export async function suspendAccount(
-  id: string,
-): Promise<SuspendAccountResponse> {
+export async function suspendAccount(id: string): Promise<SuspendAccountResponse> {
   return executeMutation<SuspendAccountResponse>("gaia/suspendAccount", { id });
 }
 
@@ -105,9 +100,7 @@ export async function suspendAccount(
  * @param id the account id
  * @return the mutation result
  */
-export async function unsuspendAccount(
-  id: string,
-): Promise<UnsuspendAccountResponse> {
+export async function unsuspendAccount(id: string): Promise<UnsuspendAccountResponse> {
   return executeMutation<UnsuspendAccountResponse>("gaia/unsuspendAccount", {
     id,
   });

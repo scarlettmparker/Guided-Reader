@@ -17,13 +17,11 @@ defineLoader({
     if (!id) return null;
     const remoteObject = `hades:text:${id}`;
     try {
-      const result = await executeDocument<
-        ThreadsForQuery,
-        ThreadsForQueryVariables
-      >(ThreadsForDocument, { remoteObject });
-      const threads = result.success
-        ? (result.data?.icarusQueries.threadsFor.items ?? [])
-        : [];
+      const result = await executeDocument<ThreadsForQuery, ThreadsForQueryVariables>(
+        ThreadsForDocument,
+        { remoteObject },
+      );
+      const threads = result.success ? (result.data?.icarusQueries.threadsFor.items ?? []) : [];
       return { threads };
     } catch (error) {
       console.error("Failed to fetch discussion threads:", error);

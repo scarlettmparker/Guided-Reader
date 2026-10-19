@@ -16,8 +16,7 @@ import { centeredDialogPosition } from "~/utils/dialog-position";
 import type { ListAnnotationsQuery } from "~/generated/graphql";
 import styles from "./annotation-create-dialog.module.css";
 
-type Annotation =
-  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 const TITLE_SNIPPET_LIMIT = 60;
 
@@ -127,12 +126,10 @@ const AnnotationCreateDialog = ({
           endOffset,
           body: trimmed,
         });
-        patchPageData<Annotation[]>(
-          "annotations",
-          "texts/:id",
-          { id: textId },
-          (current) => [...(current ?? []), response.annotation],
-        );
+        patchPageData<Annotation[]>("annotations", "texts/:id", { id: textId }, (current) => [
+          ...(current ?? []),
+          response.annotation,
+        ]);
         setBody("");
         onOpenChange(false);
         onCreated?.(response.annotation.id);
@@ -153,10 +150,7 @@ const AnnotationCreateDialog = ({
       open={create.open}
       onOpenChange={onOpenChange}
       draggable
-      position={centeredDialogPosition(
-        { top: selection.bottom + 8, left: selection.left },
-        24,
-      )}
+      position={centeredDialogPosition({ top: selection.bottom + 8, left: selection.left }, 24)}
       className={styles.dialog}
     >
       <DialogHeader>
@@ -167,9 +161,7 @@ const AnnotationCreateDialog = ({
       <DialogBody>
         <Form id="create-annotation-form" onSubmit={handleSubmit}>
           <MarkdownEditor
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setBody(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.target.value)}
             placeholder={t("annotation-placeholder")}
             aria-label={t("annotation-placeholder")}
             rows={5}
@@ -185,11 +177,7 @@ const AnnotationCreateDialog = ({
         >
           {t("cancel")}
         </Button>
-        <Button
-          type="submit"
-          form="create-annotation-form"
-          disabled={pending || !body.trim()}
-        >
+        <Button type="submit" form="create-annotation-form" disabled={pending || !body.trim()}>
           {t("annotate")}
         </Button>
       </DialogFooter>

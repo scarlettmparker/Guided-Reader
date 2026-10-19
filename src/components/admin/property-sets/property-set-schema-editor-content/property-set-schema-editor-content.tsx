@@ -1,13 +1,6 @@
 import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "@sun/i18n";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  CardTitle,
-  JsonTextArea,
-} from "@sun/components";
+import { Button, Card, CardBody, CardHeader, CardTitle, JsonTextArea } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
 import { patchPageData } from "@sun/ssr";
 import type { PropertySetSchema } from "~/generated/graphql";
@@ -29,9 +22,7 @@ type PropertySetSchemaEditorContentProps = {
 /**
  * Editable JSON for a property-set schema.
  */
-const PropertySetSchemaEditorContent = (
-  props: PropertySetSchemaEditorContentProps,
-) => {
+const PropertySetSchemaEditorContent = (props: PropertySetSchemaEditorContentProps) => {
   const { owner, name } = props;
   const { t } = useTranslation("admin");
   const { data } = usePageData<PropertySetSchema>(
@@ -40,9 +31,7 @@ const PropertySetSchemaEditorContent = (
     { owner, name },
   );
   const schema = data as PropertySetSchema | null | undefined;
-  const initial = schema?.properties
-    ? JSON.stringify(schema.properties, null, 2)
-    : "{}";
+  const initial = schema?.properties ? JSON.stringify(schema.properties, null, 2) : "{}";
   const [draft, setDraft] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const [jsonError, setJsonError] = useState<string | null>(null);
@@ -86,9 +75,7 @@ const PropertySetSchemaEditorContent = (
           (current) => {
             const list = current ?? [];
             return list.some((item) => item.id === response.schema.id)
-              ? list.map((item) =>
-                  item.id === response.schema.id ? response.schema : item,
-                )
+              ? list.map((item) => (item.id === response.schema.id ? response.schema : item))
               : [...list, response.schema];
           },
         );
@@ -108,12 +95,8 @@ const PropertySetSchemaEditorContent = (
           <JsonTextArea
             value={draft}
             onChange={setDraft}
-            onError={(
-              error: string | null | React.SyntheticEvent<HTMLTextAreaElement>,
-            ) =>
-              setJsonError(
-                typeof error === "string" || error === null ? error : null,
-              )
+            onError={(error: string | null | React.SyntheticEvent<HTMLTextAreaElement>) =>
+              setJsonError(typeof error === "string" || error === null ? error : null)
             }
             rows={8}
             aria-label={t("schema")}

@@ -92,10 +92,7 @@ export { getCookieValue } from "@sun/api";
 /**
  * Builds the Set-Cookie value that stores the JWT.
  */
-export function buildAuthCookie(
-  token: string,
-  maxAgeSeconds = 60 * 60 * 24,
-): string {
+export function buildAuthCookie(token: string, maxAgeSeconds = 60 * 60 * 24): string {
   return `${AUTH_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${maxAgeSeconds}`;
 }
 
@@ -137,10 +134,7 @@ export function buildDiscordAuthUrl(state: string): string {
 /**
  * Logs in via gaia and returns the JWT, or null if rejected.
  */
-export async function loginViaGaia(
-  username: string,
-  password: string,
-): Promise<string | null> {
+export async function loginViaGaia(username: string, password: string): Promise<string | null> {
   const res = await executeDocument<{
     gaiaMutations: { login: { token: string } | null };
   }>(LoginDocument, { input: { username, password } });
@@ -167,15 +161,11 @@ function isTransientStatus(status: number | undefined): boolean {
  * @param token The JWT from the auth cookie.
  * @returns The reader account, or null.
  */
-export async function getCurrentUser(
-  token: string | undefined,
-): Promise<ReaderAccount | null> {
+export async function getCurrentUser(token: string | undefined): Promise<ReaderAccount | null> {
   if (!token) {
     return null;
   }
-  return sharedCall(`user:${token}`, CURRENT_USER_TTL_MS, () =>
-    loadCurrentUser(token),
-  );
+  return sharedCall(`user:${token}`, CURRENT_USER_TTL_MS, () => loadCurrentUser(token));
 }
 
 /**
@@ -188,11 +178,7 @@ export async function getCurrentUser(
  * @returns The reader account, or null.
  */
 async function loadCurrentUser(token: string): Promise<ReaderAccount | null> {
-  const res = await executeDocument<CurrentUserQuery>(
-    CurrentUserDocument,
-    {},
-    token,
-  );
+  const res = await executeDocument<CurrentUserQuery>(CurrentUserDocument, {}, token);
   if (!res.success) {
     if (isTransientStatus(res.statusCode)) {
       throw new Error(res.error || "Transient auth error");
@@ -223,9 +209,7 @@ async function loadCurrentUser(token: string): Promise<ReaderAccount | null> {
 /**
  * Revokes the current JWT server-side (best-effort).
  */
-export async function logoutViaBackend(
-  token: string | undefined,
-): Promise<void> {
+export async function logoutViaBackend(token: string | undefined): Promise<void> {
   if (!token) return;
   try {
     await executeDocument(LogoutDocument, {}, token);
@@ -259,10 +243,7 @@ export async function discordLoginViaCode(
   code: string,
   state: string,
 ): Promise<DiscordLoginResult | null> {
-  const res = await executeDocument<DiscordLoginMutation>(
-    DiscordLoginDocument,
-    { code, state },
-  );
+  const res = await executeDocument<DiscordLoginMutation>(DiscordLoginDocument, { code, state });
   if (!res.success || !res.data) {
     return null;
   }

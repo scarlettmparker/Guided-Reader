@@ -19,9 +19,6 @@ export function centeredDialogPosition(
   const margin = 8;
   return {
     top: Math.max(margin, Math.min(center.top, window.innerHeight - margin)),
-    left: Math.max(
-      margin,
-      Math.min(center.left - width / 2, window.innerWidth - width - margin),
-    ),
+    left: Math.max(margin, Math.min(center.left - width / 2, window.innerWidth - width - margin)),
   };
 }

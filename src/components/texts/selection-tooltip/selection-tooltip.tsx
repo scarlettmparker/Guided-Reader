@@ -20,13 +20,7 @@ type SelectionTooltipProps = {
 /**
  * Tooltip anchored above a text selection.
  */
-const SelectionTooltip = ({
-  open,
-  top,
-  left,
-  children,
-  className,
-}: SelectionTooltipProps) => {
+const SelectionTooltip = ({ open, top, left, children, className }: SelectionTooltipProps) => {
   if (typeof document === "undefined") return null;
 
   /**
@@ -49,12 +43,7 @@ const SelectionTooltip = ({
           }
         />
       </TooltipTrigger>
-      <TooltipContent
-        side="top"
-        onMouseUp={stop}
-        onMouseDown={stop}
-        className={className}
-      >
+      <TooltipContent side="top" onMouseUp={stop} onMouseDown={stop} className={className}>
         {children}
       </TooltipContent>
     </Tooltip>,

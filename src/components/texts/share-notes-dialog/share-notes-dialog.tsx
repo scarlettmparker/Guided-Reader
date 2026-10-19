@@ -19,8 +19,7 @@ import {
   type SearchReaderAccountsQuery,
 } from "~/generated/graphql";
 
-type PrivateNote =
-  PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
+type PrivateNote = PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 import SearchSuggestions from "./search-suggestions";
 import styles from "./share-notes-dialog.module.css";
 
@@ -74,16 +73,13 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
   const handleAddSuggestion = (
     account: SearchReaderAccountsQuery["hadesQueries"]["searchReaderAccounts"][number],
   ) => {
-    const label =
-      account.globalName || account.discordUsername || account.gaiaAccountId;
+    const label = account.globalName || account.discordUsername || account.gaiaAccountId;
     setTags([...tags, { id: account.gaiaAccountId, label, isEmail: false }]);
     setQuery("");
   };
 
   const handleAddEmail = (value: string) => {
-    const exists = tags.some(
-      (tag) => tag.id.toLowerCase() === value.toLowerCase(),
-    );
+    const exists = tags.some((tag) => tag.id.toLowerCase() === value.toLowerCase());
     if (exists) return;
     setTags([...tags, { id: value, label: value, isEmail: true }]);
     setQuery("");
@@ -103,9 +99,7 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
 
   const handleShare = () => {
     const subjectIds = tags.filter((tag) => !tag.isEmail).map((tag) => tag.id);
-    const subjectEmails = tags
-      .filter((tag) => tag.isEmail)
-      .map((tag) => tag.id);
+    const subjectEmails = tags.filter((tag) => tag.isEmail).map((tag) => tag.id);
     if (subjectIds.length === 0 && subjectEmails.length === 0) return;
     startTransition(async () => {
       try {
@@ -161,11 +155,7 @@ const ShareNotesDialog = (props: ShareNotesDialogProps) => {
             ))}
           </TaggedInput>
           <Suspense fallback={null}>
-            <SearchSuggestions
-              query={debouncedQuery}
-              tags={tags}
-              onAdd={handleAddSuggestion}
-            />
+            <SearchSuggestions query={debouncedQuery} tags={tags} onAdd={handleAddSuggestion} />
           </Suspense>
         </div>
       </DialogBody>

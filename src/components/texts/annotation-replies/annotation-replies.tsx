@@ -20,15 +20,10 @@ type AnnotationRepliesProps = {
  * Reply list for an annotation. Reads page data on mount, so it is rendered
  * inside a Suspense boundary by its parent.
  */
-const AnnotationReplies = ({
-  annotationId,
-  textId,
-}: AnnotationRepliesProps) => {
-  const { data: comments } = usePageData<Comment[]>(
-    "comments",
-    "annotations/:annotationId",
-    { annotationId },
-  );
+const AnnotationReplies = ({ annotationId, textId }: AnnotationRepliesProps) => {
+  const { data: comments } = usePageData<Comment[]>("comments", "annotations/:annotationId", {
+    annotationId,
+  });
   const items = comments ?? [];
   if (items.length === 0) {
     return null;

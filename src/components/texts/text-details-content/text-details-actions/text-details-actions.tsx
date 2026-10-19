@@ -31,15 +31,8 @@ const TextDetailsActions = (props: TextDetailsActionsProps) => {
   return (
     <>
       <DefinitionToolbar onDefine={() => setDefinitionOpen(true)} />
-      <DefinitionDialog
-        open={definitionOpen}
-        onOpenChange={setDefinitionOpen}
-      />
-      <ShareNotesDialog
-        textId={textId}
-        open={shareOpen}
-        onOpenChange={setShareOpen}
-      />
+      <DefinitionDialog open={definitionOpen} onOpenChange={setDefinitionOpen} />
+      <ShareNotesDialog textId={textId} open={shareOpen} onOpenChange={setShareOpen} />
       <NotesAuthorToggleDialog
         textId={textId}
         open={toggleOpen}

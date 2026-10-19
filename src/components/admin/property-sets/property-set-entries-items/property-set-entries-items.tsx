@@ -40,9 +40,7 @@ const PropertySetEntriesItems = (props: PropertySetEntriesItemsProps) => {
   );
   const entries = (data as PropertySetEntry[] | undefined) ?? [];
   const [selected, setSelected] = useState<PropertySetEntry | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<PropertySetEntry | null>(
-    null,
-  );
+  const [deleteTarget, setDeleteTarget] = useState<PropertySetEntry | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = () => {
@@ -55,8 +53,7 @@ const PropertySetEntriesItems = (props: PropertySetEntriesItemsProps) => {
           "propertySetEntries",
           "admin/property-sets/:owner/:name",
           { owner, name },
-          (current) =>
-            (current ?? []).filter((item) => item.id !== response.id),
+          (current) => (current ?? []).filter((item) => item.id !== response.id),
         );
       } finally {
         setDeleteTarget(null);
@@ -104,10 +101,7 @@ const PropertySetEntriesItems = (props: PropertySetEntriesItemsProps) => {
                   <PencilSquareOutline width={16} height={16} />
                   {t("edit-entry")}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setDeleteTarget(entry)}
-                >
+                <DropdownMenuItem variant="destructive" onClick={() => setDeleteTarget(entry)}>
                   <TrashOutline width={16} height={16} />
                   {t("delete-entry")}
                 </DropdownMenuItem>

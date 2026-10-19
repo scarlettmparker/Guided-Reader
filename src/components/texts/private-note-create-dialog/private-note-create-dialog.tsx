@@ -18,8 +18,7 @@ import styles from "./private-note-create-dialog.module.css";
 
 import type { AnnotationSelection } from "../annotation-create-dialog";
 
-type PrivateNote =
-  PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
+type PrivateNote = PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 
 export type PrivateNoteCreateState = {
   /**
@@ -109,10 +108,7 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
       open={create.open}
       onOpenChange={onOpenChange}
       draggable
-      position={centeredDialogPosition(
-        { top: selection.bottom + 8, left: selection.left },
-        24,
-      )}
+      position={centeredDialogPosition({ top: selection.bottom + 8, left: selection.left }, 24)}
       className={styles.dialog}
     >
       <DialogHeader>

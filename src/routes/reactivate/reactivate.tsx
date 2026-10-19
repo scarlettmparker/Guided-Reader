@@ -14,10 +14,7 @@ import {
   FormItem,
   Input,
 } from "@sun/components";
-import {
-  confirmAccountReactivation,
-  requestAccountReactivation,
-} from "~/server/actions/profile";
+import { confirmAccountReactivation, requestAccountReactivation } from "~/server/actions/profile";
 import styles from "./reactivate.module.css";
 
 type ConfirmState = "idle" | "success" | "error";
@@ -112,9 +109,7 @@ const Reactivate = () => {
                     type="email"
                     placeholder={t("email-placeholder")}
                     value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setEmail(e.target.value)
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                     required
                     autoFocus
                   />

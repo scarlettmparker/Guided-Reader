@@ -37,14 +37,7 @@ type TextHeaderProps = {
  * Header for the text details card with title, meta and action icons.
  */
 const TextHeader = (props: TextHeaderProps) => {
-  const {
-    text,
-    privateNotesCount,
-    onShare,
-    onToggleAuthors,
-    className,
-    ...rest
-  } = props;
+  const { text, privateNotesCount, onShare, onToggleAuthors, className, ...rest } = props;
   const { title, level, language } = text;
   const { t } = useTranslation("texts");
 

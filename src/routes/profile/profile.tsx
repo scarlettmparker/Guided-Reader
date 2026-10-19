@@ -24,14 +24,8 @@ type LevelColours = Record<string, string>;
  */
 const Profile = () => {
   const { t } = useTranslation("profile");
-  const { data: user } = usePageData<ReaderAccount | null>(
-    "currentUser",
-    "currentUser",
-  );
-  const { data: colours } = usePageData<LevelColours | null>(
-    "levelColours",
-    "levelColours",
-  );
+  const { data: user } = usePageData<ReaderAccount | null>("currentUser", "currentUser");
+  const { data: colours } = usePageData<LevelColours | null>("levelColours", "levelColours");
   const [confirming, setConfirming] = useState(false);
 
   if (!user) {
@@ -60,20 +54,14 @@ const Profile = () => {
           />
           <div className={styles.header_text}>
             <CardTitle>{user.globalName ?? user.discordUsername}</CardTitle>
-            {user.discordUsername && (
-              <CardDescription>@{user.discordUsername}</CardDescription>
-            )}
+            {user.discordUsername && <CardDescription>@{user.discordUsername}</CardDescription>}
           </div>
         </CardHeader>
         <CardBody>
           {user.roles?.length ? (
             <ul className={styles.roles}>
               {user.roles.map((role) => (
-                <ReaderRoleItem
-                  key={role.key}
-                  role={role}
-                  colour={colours?.[role.key]}
-                />
+                <ReaderRoleItem key={role.key} role={role} colour={colours?.[role.key]} />
               ))}
             </ul>
           ) : (
@@ -89,11 +77,7 @@ const Profile = () => {
           <p>{t("danger-zone-body")}</p>
         </CardBody>
         <CardFooter className={styles.danger_footer}>
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => setConfirming(true)}
-          >
+          <Button type="button" variant="destructive" onClick={() => setConfirming(true)}>
             {t("deactivate-account")}
           </Button>
         </CardFooter>

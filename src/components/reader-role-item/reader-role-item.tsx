@@ -22,9 +22,7 @@ type ReaderRoleItemProps = {
 const ReaderRoleItem = ({ role, colour }: ReaderRoleItemProps) => {
   const { t } = useTranslation("nav");
   const levelLabel = t(`level.${role.key}`);
-  const cefrLabel = role.cefrLevel
-    ? t(`cefr.${role.cefrLevel.toLowerCase()}`)
-    : null;
+  const cefrLabel = role.cefrLevel ? t(`cefr.${role.cefrLevel.toLowerCase()}`) : null;
 
   return (
     <li
@@ -37,9 +35,7 @@ const ReaderRoleItem = ({ role, colour }: ReaderRoleItemProps) => {
           : undefined
       }
     >
-      {colour && (
-        <span className={styles.role_dot} style={{ backgroundColor: colour }} />
-      )}
+      {colour && <span className={styles.role_dot} style={{ backgroundColor: colour }} />}
       {cefrLabel ? `${cefrLabel} (${levelLabel})` : levelLabel}
     </li>
   );

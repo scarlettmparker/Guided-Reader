@@ -8,8 +8,7 @@ import { setRolePermissions } from "~/server/actions/roles";
 import RolePermissionList from "./role-permission-list";
 import styles from "./role-permission-editor.module.css";
 
-type RolePermissionsData =
-  RolePermissionsQuery["gaiaQueries"]["rolePermissions"];
+type RolePermissionsData = RolePermissionsQuery["gaiaQueries"]["rolePermissions"];
 
 type RolePermissionEditorProps = {
   /**
@@ -33,9 +32,7 @@ const RolePermissionEditor = (props: RolePermissionEditorProps) => {
     { id: roleId },
   );
 
-  const assigned = [...(rolePermissions ?? [])].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const assigned = [...(rolePermissions ?? [])].sort((a, b) => a.localeCompare(b));
   const [draft, setDraft] = useState<string[]>(assigned);
 
   useEffect(() => {
@@ -54,15 +51,12 @@ const RolePermissionEditor = (props: RolePermissionEditorProps) => {
           () => response.permissions,
         );
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to save permissions.",
-        );
+        setError(err instanceof Error ? err.message : "Failed to save permissions.");
       }
     });
   };
 
-  const hasChanges =
-    draft.length !== assigned.length || draft.some((v, i) => v !== assigned[i]);
+  const hasChanges = draft.length !== assigned.length || draft.some((v, i) => v !== assigned[i]);
 
   return (
     <Card className={className} {...rest}>

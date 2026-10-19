@@ -35,10 +35,10 @@ defineLoader({
       makeCacheKey("recent", pagination),
       SHARED_TTL.LIST,
       async () => {
-        const res = await executeDocument<
-          ListTextsQuery,
-          ListTextsQueryVariables
-        >(ListTextsDocument, { pagination });
+        const res = await executeDocument<ListTextsQuery, ListTextsQueryVariables>(
+          ListTextsDocument,
+          { pagination },
+        );
         if (!res.success) {
           throw new Error(res.error ?? "recent texts unavailable");
         }

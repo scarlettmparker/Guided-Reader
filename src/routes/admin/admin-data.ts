@@ -39,10 +39,7 @@ defineLoader({
       : undefined;
 
     try {
-      const result = await executeDocument<
-        AccountsQuery,
-        AccountsQueryVariables
-      >(
+      const result = await executeDocument<AccountsQuery, AccountsQueryVariables>(
         AccountsDocument,
         {
           pagination: {

@@ -79,15 +79,8 @@ const TextDetailsContent = (props: TextDetailsContentProps) => {
         </CardBody>
         <DefinitionToolbar onDefine={() => setDefinitionOpen(true)} />
       </Card>
-      <DefinitionDialog
-        open={definitionOpen}
-        onOpenChange={setDefinitionOpen}
-      />
-      <ShareNotesDialog
-        textId={textId}
-        open={shareOpen}
-        onOpenChange={setShareOpen}
-      />
+      <DefinitionDialog open={definitionOpen} onOpenChange={setDefinitionOpen} />
+      <ShareNotesDialog textId={textId} open={shareOpen} onOpenChange={setShareOpen} />
       <NotesAuthorToggleDialog
         textId={textId}
         open={toggleOpen}

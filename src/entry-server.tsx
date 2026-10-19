@@ -25,13 +25,9 @@ configureApi({
 
 // Colocated loaders and mutation handlers self-register at boot.
 autoDiscoverRegistrations(import.meta.glob("./**/*-data.ts", { eager: true }));
-autoDiscoverRegistrations(
-  import.meta.glob("./**/*-mutations.ts", { eager: true }),
-);
+autoDiscoverRegistrations(import.meta.glob("./**/*-mutations.ts", { eager: true }));
 
-function matchMeta(
-  matches: ReturnType<typeof matchRoutes>,
-): RouteMeta | undefined {
+function matchMeta(matches: ReturnType<typeof matchRoutes>): RouteMeta | undefined {
   if (!matches) return undefined;
   const composed = matches
     .map((m) => m.route.path ?? "")
@@ -40,10 +36,7 @@ function matchMeta(
   return routeMeta[composed === "" ? "/" : composed];
 }
 
-const i18nByLocale = new Map<
-  string,
-  Promise<ReturnType<typeof createI18nInstance>>
->();
+const i18nByLocale = new Map<string, Promise<ReturnType<typeof createI18nInstance>>>();
 
 const renderer = createRenderer({
   title: "Guided Reader | Scarlet Sun",
@@ -84,8 +77,8 @@ const renderer = createRenderer({
       if (!result?.success) {
         throw new Error("themes unavailable");
       }
-      const map = (result.data as { gaiaQueries?: { propertySet?: unknown } })
-        ?.gaiaQueries?.propertySet;
+      const map = (result.data as { gaiaQueries?: { propertySet?: unknown } })?.gaiaQueries
+        ?.propertySet;
       if (map && typeof map === "object") {
         const themeMap = map as Record<string, Record<string, string>>;
         const entries = Object.entries(themeMap);
@@ -124,11 +117,7 @@ export async function render(options: {
     </StaticRouter>
   );
 
-  const tree = options.isProduction ? (
-    App
-  ) : (
-    <React.StrictMode>{App}</React.StrictMode>
-  );
+  const tree = options.isProduction ? App : <React.StrictMode>{App}</React.StrictMode>;
 
   return renderer.render({
     app: didMatch ? tree : <NotFound />,

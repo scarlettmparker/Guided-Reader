@@ -16,18 +16,14 @@ defineLoader({
   async loader(params, context) {
     const annotationId = params.annotationId as string;
     if (!annotationId) return null;
-    const token = getCookieValue(
-      (context as PageDataContext | undefined)?.cookie,
-      AUTH_COOKIE,
-    );
+    const token = getCookieValue((context as PageDataContext | undefined)?.cookie, AUTH_COOKIE);
     try {
-      const result = await executeDocument<
-        ListCommentsQuery,
-        ListCommentsQueryVariables
-      >(ListCommentsDocument, { annotationId, includeHidden: false }, token);
-      const comments = result.success
-        ? (result.data?.hadesQueries.comments.items ?? [])
-        : [];
+      const result = await executeDocument<ListCommentsQuery, ListCommentsQueryVariables>(
+        ListCommentsDocument,
+        { annotationId, includeHidden: false },
+        token,
+      );
+      const comments = result.success ? (result.data?.hadesQueries.comments.items ?? []) : [];
       return { comments };
     } catch (error) {
       console.error("Failed to fetch comments:", error);

@@ -20,11 +20,7 @@ import { usePageData, useMutation } from "@sun/ssr/react";
 import { patchPageData } from "@sun/ssr";
 import DiscordAvatar from "~/components/discord-avatar";
 import VoteControl from "~/components/vote-control";
-import {
-  deleteComment,
-  removeVote,
-  vote as castVote,
-} from "~/server/actions/annotation";
+import { deleteComment, removeVote, vote as castVote } from "~/server/actions/annotation";
 import { CEFR_TO_KEY } from "~/utils/cefr";
 import { voteScoreDelta } from "~/utils/vote-score";
 import {
@@ -72,14 +68,8 @@ type CommentItemProps = {
  */
 const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
   const { t } = useTranslation("texts");
-  const { data: currentUser } = usePageData<ReaderAccount | null>(
-    "currentUser",
-    "currentUser",
-  );
-  const { data: colours } = usePageData<LevelColours | null>(
-    "levelColours",
-    "levelColours",
-  );
+  const { data: currentUser } = usePageData<ReaderAccount | null>("currentUser", "currentUser");
+  const { data: colours } = usePageData<LevelColours | null>("levelColours", "levelColours");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletePending, startDelete] = useTransition();
 
@@ -92,8 +82,7 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
     reducer: (current, payload) => ({
       ...current,
       myVote: payload.next,
-      netScore:
-        current.netScore + voteScoreDelta(current.myVote, payload.next),
+      netScore: current.netScore + voteScoreDelta(current.myVote, payload.next),
     }),
     action: (payload) =>
       payload.next === null
@@ -107,19 +96,14 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
         "annotations/:annotationId",
         { annotationId },
         (current) =>
-          (current ?? []).map((item) =>
-            item.id === entity.id ? { ...item, ...entity } : item,
-          ),
+          (current ?? []).map((item) => (item.id === entity.id ? { ...item, ...entity } : item)),
       );
     },
   });
 
   const profile = optimisticComment.authorProfile;
-  const colour = profile?.cefrLevel
-    ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
-    : undefined;
-  const isOwner =
-    !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
+  const colour = profile?.cefrLevel ? colours?.[CEFR_TO_KEY[profile.cefrLevel]] : undefined;
+  const isOwner = !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
 
   const confirmDelete = () => {
     startDelete(async () => {
@@ -129,19 +113,14 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
           "comments",
           "annotations/:annotationId",
           { annotationId },
-          (current) =>
-            (current ?? []).filter((item) => item.id !== response.id),
+          (current) => (current ?? []).filter((item) => item.id !== response.id),
         );
-        patchPageData<Annotation[]>(
-          "annotations",
-          "texts/:id",
-          { id: textId },
-          (current) =>
-            (current ?? []).map((item) =>
-              item.id === annotationId
-                ? { ...item, replyCount: Math.max(0, item.replyCount - 1) }
-                : item,
-            ),
+        patchPageData<Annotation[]>("annotations", "texts/:id", { id: textId }, (current) =>
+          (current ?? []).map((item) =>
+            item.id === annotationId
+              ? { ...item, replyCount: Math.max(0, item.replyCount - 1) }
+              : item,
+          ),
         );
       } finally {
         setConfirmOpen(false);
@@ -158,9 +137,7 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
           size={24}
           alt={profile?.globalName ?? profile?.discordUsername ?? ""}
         />
-        <span className={styles.author}>
-          {profile?.globalName ?? profile?.discordUsername}
-        </span>
+        <span className={styles.author}>{profile?.globalName ?? profile?.discordUsername}</span>
         {profile?.cefrLevel && (
           <Badge style={colour ? { backgroundColor: colour } : undefined}>
             {profile.cefrLevel}
@@ -169,11 +146,7 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
         {isOwner && (
           <DropdownMenu className={styles.menu_trigger}>
             <DropdownMenuTrigger asChild>
-              <EllipsisVerticalIcon
-                width={16}
-                height={16}
-                aria-label={t("comment-actions")}
-              />
+              <EllipsisVerticalIcon width={16} height={16} aria-label={t("comment-actions")} />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setConfirmOpen(true)} asChild>
@@ -186,16 +159,12 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
           </DropdownMenu>
         )}
       </div>
-      <MarkdownViewer className={styles.body}>
-        {optimisticComment.body}
-      </MarkdownViewer>
+      <MarkdownViewer className={styles.body}>{optimisticComment.body}</MarkdownViewer>
       <VoteControl
         myVote={optimisticComment.myVote ?? null}
         netScore={optimisticComment.netScore}
         pending={votePending}
-        onVoteChange={(next) =>
-          runVote({ targetId: optimisticComment.id, next })
-        }
+        onVoteChange={(next) => runVote({ targetId: optimisticComment.id, next })}
       />
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogHeader>
@@ -205,11 +174,7 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
           <p>{t("delete-comment-body")}</p>
         </DialogBody>
         <DialogFooter>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setConfirmOpen(false)}
-          >
+          <Button type="button" variant="secondary" onClick={() => setConfirmOpen(false)}>
             {t("cancel")}
           </Button>
           <Button

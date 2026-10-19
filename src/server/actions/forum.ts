@@ -13,9 +13,7 @@ import type {
 /**
  * Creates a text-level discussion thread.
  */
-export async function createThread(
-  input: CreateThreadInput,
-): Promise<CreateThreadResponse> {
+export async function createThread(input: CreateThreadInput): Promise<CreateThreadResponse> {
   return executeMutation<CreateThreadResponse>("icarus/createThread", {
     input,
   });
@@ -24,19 +22,14 @@ export async function createThread(
 /**
  * Creates a post (or reply) in a discussion thread.
  */
-export async function createPost(
-  input: CreatePostInput,
-): Promise<CreatePostResponse> {
+export async function createPost(input: CreatePostInput): Promise<CreatePostResponse> {
   return executeMutation<CreatePostResponse>("icarus/createPost", { input });
 }
 
 /**
  * Casts a vote on a forum post.
  */
-export async function votePost(
-  postId: string,
-  value: VoteValue,
-): Promise<VoteForumResponse> {
+export async function votePost(postId: string, value: VoteValue): Promise<VoteForumResponse> {
   return executeMutation<VoteForumResponse>("icarus/vote", {
     input: { postId, value },
   });
@@ -45,9 +38,7 @@ export async function votePost(
 /**
  * Removes the caller's vote on a forum post.
  */
-export async function removePostVote(
-  postId: string,
-): Promise<RemoveVoteResponse> {
+export async function removePostVote(postId: string): Promise<RemoveVoteResponse> {
   return executeMutation<RemoveVoteResponse>("icarus/removeVote", { postId });
 }
 

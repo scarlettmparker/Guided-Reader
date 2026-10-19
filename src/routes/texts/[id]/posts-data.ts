@@ -16,18 +16,14 @@ defineLoader({
   async loader(params, context) {
     const threadId = params.threadId as string;
     if (!threadId) return null;
-    const token = getCookieValue(
-      (context as PageDataContext | undefined)?.cookie,
-      AUTH_COOKIE,
-    );
+    const token = getCookieValue((context as PageDataContext | undefined)?.cookie, AUTH_COOKIE);
     try {
-      const result = await executeDocument<
-        ListPostsQuery,
-        ListPostsQueryVariables
-      >(ListPostsDocument, { threadId, includeHidden: false }, token);
-      const posts = result.success
-        ? (result.data?.icarusQueries.posts.items ?? [])
-        : [];
+      const result = await executeDocument<ListPostsQuery, ListPostsQueryVariables>(
+        ListPostsDocument,
+        { threadId, includeHidden: false },
+        token,
+      );
+      const posts = result.success ? (result.data?.icarusQueries.posts.items ?? []) : [];
       return { posts };
     } catch (error) {
       console.error("Failed to fetch posts:", error);

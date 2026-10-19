@@ -8,8 +8,7 @@ import { setAccountPermissions } from "~/server/actions/roles";
 import AccountPermissionList from "./account-permission-list";
 import styles from "./account-permission-editor.module.css";
 
-type AccountPermissionsData =
-  AccountPermissionsQuery["gaiaQueries"]["accountPermissions"];
+type AccountPermissionsData = AccountPermissionsQuery["gaiaQueries"]["accountPermissions"];
 
 type AccountPermissionEditorProps = {
   /**
@@ -33,9 +32,7 @@ const AccountPermissionEditor = (props: AccountPermissionEditorProps) => {
     { id: accountId },
   );
 
-  const assigned = [...(accountPermissions ?? [])].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const assigned = [...(accountPermissions ?? [])].sort((a, b) => a.localeCompare(b));
   const [draft, setDraft] = useState<string[]>(assigned);
 
   useEffect(() => {
@@ -54,15 +51,12 @@ const AccountPermissionEditor = (props: AccountPermissionEditorProps) => {
           () => response.permissions,
         );
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to save permissions.",
-        );
+        setError(err instanceof Error ? err.message : "Failed to save permissions.");
       }
     });
   };
 
-  const hasChanges =
-    draft.length !== assigned.length || draft.some((v, i) => v !== assigned[i]);
+  const hasChanges = draft.length !== assigned.length || draft.some((v, i) => v !== assigned[i]);
 
   return (
     <Card className={className} {...rest}>
@@ -71,10 +65,7 @@ const AccountPermissionEditor = (props: AccountPermissionEditorProps) => {
       </CardHeader>
       <CardBody>
         <section className={styles.editor_body}>
-          <AccountPermissionList
-            assignedPermissions={draft}
-            onChange={setDraft}
-          />
+          <AccountPermissionList assignedPermissions={draft} onChange={setDraft} />
           {error && <p className={styles.error}>{error}</p>}
           <section className={styles.footer}>
             <Button

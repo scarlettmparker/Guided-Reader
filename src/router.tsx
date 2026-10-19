@@ -11,9 +11,7 @@ const Library = lazy(() => import("./routes/library"));
 const TextsPage = lazy(() => import("./routes/texts"));
 const TextDetailsPage = lazy(() => import("./routes/texts/[id]"));
 const Admin = lazy(() => import("./routes/admin"));
-const AccountDetailPage = lazy(
-  () => import("./routes/admin/account-detail-page"),
-);
+const AccountDetailPage = lazy(() => import("./routes/admin/account-detail-page"));
 const PropertySetsPage = lazy(() => import("./routes/admin/property-sets"));
 const PropertySetEntriesPage = lazy(
   () => import("./routes/admin/property-sets/property-set-entries-page"),

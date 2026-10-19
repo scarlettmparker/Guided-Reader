@@ -41,11 +41,7 @@ function bucket(size: number): number {
  * @param size the requested pixel diameter
  * @returns the avatar CDN URL
  */
-function avatarUrl(
-  discordId: string,
-  avatar: string | null | undefined,
-  size: number,
-): string {
+function avatarUrl(discordId: string, avatar: string | null | undefined, size: number): string {
   if (avatar) {
     const ext = avatar.startsWith("a_") ? "gif" : "png";
     return `https://cdn.discordapp.com/avatars/${discordId}/${avatar}.${ext}?size=${bucket(size)}`;

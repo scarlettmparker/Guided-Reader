@@ -28,11 +28,9 @@ const AccountRoleEditor = (props: AccountRoleEditorProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const { data: roles } = usePageData<RolesData>("roles", "admin/roles", {});
-  const { data: accountRoles } = usePageData<AccountRolesData>(
-    "accountRoles",
-    "admin/:id/roles",
-    { id: accountId },
-  );
+  const { data: accountRoles } = usePageData<AccountRolesData>("accountRoles", "admin/:id/roles", {
+    id: accountId,
+  });
 
   const assigned = [...(accountRoles ?? [])].sort((a, b) => a.localeCompare(b));
   const [draft, setDraft] = useState<string[]>(assigned);
@@ -58,8 +56,7 @@ const AccountRoleEditor = (props: AccountRoleEditorProps) => {
     });
   };
 
-  const hasChanges =
-    draft.length !== assigned.length || draft.some((v, i) => v !== assigned[i]);
+  const hasChanges = draft.length !== assigned.length || draft.some((v, i) => v !== assigned[i]);
 
   return (
     <Card className={className} {...rest}>

@@ -3,39 +3,25 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "@sun/i18n";
 import { MarkdownViewer, ScrollArea } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
-import {
-  equalsExisting,
-  getSelectionOffsets,
-  overlapsExisting,
-} from "~/utils/selection-to-offset";
+import { equalsExisting, getSelectionOffsets, overlapsExisting } from "~/utils/selection-to-offset";
 import { unwrapCharacterRange, wrapCharacterRange } from "~/utils/wrap-range";
 import { centeredDialogPosition } from "~/utils/dialog-position";
-import type {
-  ListAnnotationsQuery,
-  PrivateNotesQuery,
-  ReaderAccount,
-} from "~/generated/graphql";
+import type { ListAnnotationsQuery, PrivateNotesQuery, ReaderAccount } from "~/generated/graphql";
 import AnnotationCreateDialog, {
   type AnnotationCreateState,
   type AnnotationSelection,
 } from "../annotation-create-dialog";
-import AnnotationListDialog, {
-  type AnnotationListState,
-} from "../annotation-list-dialog";
+import AnnotationListDialog, { type AnnotationListState } from "../annotation-list-dialog";
 import PrivateNoteCreateDialog, {
   type PrivateNoteCreateState,
 } from "../private-note-create-dialog";
-import PrivateNoteListDialog, {
-  type PrivateNoteListState,
-} from "../private-note-list-dialog";
+import PrivateNoteListDialog, { type PrivateNoteListState } from "../private-note-list-dialog";
 import SelectionTooltip from "../selection-tooltip";
 import styles from "./annotation-layer.module.css";
 
-type Annotation =
-  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
-type PrivateNote =
-  PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
+type PrivateNote = PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 
 type AnnotationLayerProps = {
   /**
@@ -78,10 +64,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
   const { data } = usePageData<Annotation[]>("annotations", "texts/:id", {
     id: textId,
   });
-  const { data: currentUser } = usePageData<ReaderAccount | null>(
-    "currentUser",
-    "currentUser",
-  );
+  const { data: currentUser } = usePageData<ReaderAccount | null>("currentUser", "currentUser");
 
   const annotations = data ?? NO_ANNOTATIONS;
 
@@ -143,10 +126,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
       );
       const rect = mark?.getBoundingClientRect();
       const snippet =
-        containerRef.current?.textContent?.slice(
-          target.startOffset,
-          target.endOffset,
-        ) ?? "";
+        containerRef.current?.textContent?.slice(target.startOffset, target.endOffset) ?? "";
       const top = rect ? rect.bottom + 8 : 0;
       const left = rect ? rect.left + rect.width / 2 : 0;
       setPrivateList({
@@ -191,10 +171,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
    * Unique private note positions and the notes grouped under each.
    */
   const { privatePositions, byPrivatePosition } = useMemo(() => {
-    const posMap = new Map<
-      string,
-      { startOffset: number; endOffset: number }
-    >();
+    const posMap = new Map<string, { startOffset: number; endOffset: number }>();
     const groupMap = new Map<string, PrivateNote[]>();
     for (const note of privateNotes) {
       const key = `${note.startOffset}-${note.endOffset}`;
@@ -250,9 +227,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     : NO_ANNOTATIONS;
 
   const privateNotesForPosition = privateList.open
-    ? (byPrivatePosition.get(
-        `${privateList.startOffset}-${privateList.endOffset}`,
-      ) ?? [])
+    ? (byPrivatePosition.get(`${privateList.startOffset}-${privateList.endOffset}`) ?? [])
     : [];
 
   /**
@@ -285,10 +260,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     );
     const rect = mark?.getBoundingClientRect();
     const snippet =
-      containerRef.current?.textContent?.slice(
-        position.startOffset,
-        position.endOffset,
-      ) ?? "";
+      containerRef.current?.textContent?.slice(position.startOffset, position.endOffset) ?? "";
     setList((prev) => ({ ...prev, open: false }));
     setCreateFromList(true);
     setCreate({
@@ -309,10 +281,8 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
    */
   const suggestPrivateNote = () => {
     const snippet =
-      containerRef.current?.textContent?.slice(
-        privateList.startOffset,
-        privateList.endOffset,
-      ) ?? privateList.snippet;
+      containerRef.current?.textContent?.slice(privateList.startOffset, privateList.endOffset) ??
+      privateList.snippet;
     const key = `${privateList.startOffset}-${privateList.endOffset}`;
     const mark = containerRef.current?.querySelector<HTMLElement>(
       `[${PRIVATE_HIGHLIGHT_ATTR}="${key}"]`,
@@ -372,24 +342,17 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     unwrapCharacterRange(container, HIGHLIGHT_ATTR);
 
     for (const { positionId, startOffset, endOffset } of positions) {
-      const marks = wrapCharacterRange(
-        container,
-        startOffset,
-        endOffset,
-        () => {
-          const mark = document.createElement("mark");
-          mark.className = styles.highlight;
-          mark.setAttribute(HIGHLIGHT_ATTR, positionId);
-          mark.setAttribute("title", t("view-annotation"));
-          return mark;
-        },
-      );
+      const marks = wrapCharacterRange(container, startOffset, endOffset, () => {
+        const mark = document.createElement("mark");
+        mark.className = styles.highlight;
+        mark.setAttribute(HIGHLIGHT_ATTR, positionId);
+        mark.setAttribute("title", t("view-annotation"));
+        return mark;
+      });
       for (const mark of marks) {
         mark.addEventListener("click", () => {
           const rect = mark.getBoundingClientRect();
-          const snippet =
-            containerRef.current?.textContent?.slice(startOffset, endOffset) ??
-            "";
+          const snippet = containerRef.current?.textContent?.slice(startOffset, endOffset) ?? "";
           setList({
             open: true,
             position: centeredDialogPosition(
@@ -419,24 +382,17 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
 
     for (const { startOffset, endOffset } of privatePositions) {
       const key = `${startOffset}-${endOffset}`;
-      const marks = wrapCharacterRange(
-        container,
-        startOffset,
-        endOffset,
-        () => {
-          const mark = document.createElement("mark");
-          mark.className = styles.private_highlight;
-          mark.setAttribute(PRIVATE_HIGHLIGHT_ATTR, key);
-          mark.setAttribute("title", t("view-note"));
-          return mark;
-        },
-      );
+      const marks = wrapCharacterRange(container, startOffset, endOffset, () => {
+        const mark = document.createElement("mark");
+        mark.className = styles.private_highlight;
+        mark.setAttribute(PRIVATE_HIGHLIGHT_ATTR, key);
+        mark.setAttribute("title", t("view-note"));
+        return mark;
+      });
       for (const mark of marks) {
         mark.addEventListener("click", () => {
           const rect = mark.getBoundingClientRect();
-          const snippet =
-            containerRef.current?.textContent?.slice(startOffset, endOffset) ??
-            "";
+          const snippet = containerRef.current?.textContent?.slice(startOffset, endOffset) ?? "";
           setPrivateList({
             open: true,
             position: centeredDialogPosition(

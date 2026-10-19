@@ -34,8 +34,7 @@ import {
 import styles from "./annotation-list-dialog.module.css";
 import { TrashOutline } from "preact-heroicons";
 
-type Annotation =
-  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 type LevelColours = Record<string, string>;
 
@@ -107,33 +106,21 @@ const AnnotationListDialog = ({
   onSuggestAnnotation,
 }: AnnotationListDialogProps) => {
   const { t } = useTranslation("texts");
-  const { data: colours } = usePageData<LevelColours | null>(
-    "levelColours",
-    "levelColours",
-  );
-  const { data: currentUser } = usePageData<ReaderAccount | null>(
-    "currentUser",
-    "currentUser",
-  );
+  const { data: colours } = usePageData<LevelColours | null>("levelColours", "levelColours");
+  const { data: currentUser } = usePageData<ReaderAccount | null>("currentUser", "currentUser");
   const { open, position, textId, snippet } = list;
   const [deleteTarget, setDeleteTarget] = useState<Annotation | null>(null);
   const [replyOpenId, setReplyOpenId] = useState<string | null>(null);
 
   const titleSnippet =
-    snippet.length > TITLE_SNIPPET_LIMIT
-      ? `${snippet.slice(0, TITLE_SNIPPET_LIMIT)}…`
-      : snippet;
+    snippet.length > TITLE_SNIPPET_LIMIT ? `${snippet.slice(0, TITLE_SNIPPET_LIMIT)}…` : snippet;
 
   const sorted = useMemo(
     () => [...annotations].sort((a, b) => b.netScore - a.netScore),
     [annotations],
   );
 
-  const [items, runVote, votePending] = useMutation<
-    VotePayload,
-    VoteReaderResponse,
-    Annotation[]
-  >({
+  const [items, runVote, votePending] = useMutation<VotePayload, VoteReaderResponse, Annotation[]>({
     base: sorted,
     reducer: (current, payload) =>
       current
@@ -142,8 +129,7 @@ const AnnotationListDialog = ({
             ? {
                 ...item,
                 myVote: payload.next,
-                netScore:
-                  item.netScore + voteScoreDelta(item.myVote, payload.next),
+                netScore: item.netScore + voteScoreDelta(item.myVote, payload.next),
               }
             : item,
         )
@@ -155,29 +141,16 @@ const AnnotationListDialog = ({
     onSuccess: (response) => {
       const entity = response.annotation;
       if (entity == null) return;
-      patchPageData<Annotation[]>(
-        "annotations",
-        "texts/:id",
-        { id: textId },
-        (current) =>
-          (current ?? []).map((item) =>
-            item.id === entity.id ? { ...item, ...entity } : item,
-          ),
+      patchPageData<Annotation[]>("annotations", "texts/:id", { id: textId }, (current) =>
+        (current ?? []).map((item) => (item.id === entity.id ? { ...item, ...entity } : item)),
       );
     },
   });
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-      draggable
-      position={position}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange} draggable position={position}>
       <DialogHeader>
-        <DialogTitle>
-          {t("annotations-for", { snippet: titleSnippet })}
-        </DialogTitle>
+        <DialogTitle>{t("annotations-for", { snippet: titleSnippet })}</DialogTitle>
       </DialogHeader>
       <DialogBody>
         {items.length === 0 ? (
@@ -189,23 +162,16 @@ const AnnotationListDialog = ({
               const colour = profile?.cefrLevel
                 ? colours?.[CEFR_TO_KEY[profile.cefrLevel]]
                 : undefined;
-              const isOwner =
-                !!profile?.id &&
-                !!currentUser?.id &&
-                profile.id === currentUser.id;
+              const isOwner = !!profile?.id && !!currentUser?.id && profile.id === currentUser.id;
               const toggleReply = () =>
-                setReplyOpenId((current) =>
-                  current === annotation.id ? null : annotation.id,
-                );
+                setReplyOpenId((current) => (current === annotation.id ? null : annotation.id));
               return (
                 <li key={annotation.id} className={styles.annotation}>
                   <div
                     className={styles.header}
                     title={
                       annotation.createdAt
-                        ? new Date(
-                            annotation.createdAt as string,
-                          ).toLocaleString()
+                        ? new Date(annotation.createdAt as string).toLocaleString()
                         : undefined
                     }
                   >
@@ -213,9 +179,7 @@ const AnnotationListDialog = ({
                       discordId={profile?.discordId ?? ""}
                       avatar={profile?.avatar}
                       size={28}
-                      alt={
-                        profile?.globalName ?? profile?.discordUsername ?? ""
-                      }
+                      alt={profile?.globalName ?? profile?.discordUsername ?? ""}
                     />
                     <span className={styles.author}>
                       {profile?.globalName ?? profile?.discordUsername}
@@ -238,10 +202,7 @@ const AnnotationListDialog = ({
                           />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          <DropdownMenuItem
-                            onClick={() => setDeleteTarget(annotation)}
-                            asChild
-                          >
+                          <DropdownMenuItem onClick={() => setDeleteTarget(annotation)} asChild>
                             <span className={styles.delete_action}>
                               <TrashOutline width={16} height={16} />
                               {t("delete")}
@@ -251,17 +212,13 @@ const AnnotationListDialog = ({
                       </DropdownMenu>
                     )}
                   </div>
-                  <MarkdownViewer className={styles.body}>
-                    {annotation.body}
-                  </MarkdownViewer>
+                  <MarkdownViewer className={styles.body}>{annotation.body}</MarkdownViewer>
                   <div className={styles.actions_row}>
                     <VoteControl
                       myVote={annotation.myVote ?? null}
                       netScore={annotation.netScore}
                       pending={votePending}
-                      onVoteChange={(next) =>
-                        runVote({ targetId: annotation.id, next })
-                      }
+                      onVoteChange={(next) => runVote({ targetId: annotation.id, next })}
                     />
                     <a onClick={toggleReply}>{t("reply-action")}</a>
                   </div>
@@ -270,9 +227,7 @@ const AnnotationListDialog = ({
                     replyCount={annotation.replyCount}
                     textId={textId}
                     composerOpen={replyOpenId === annotation.id}
-                    onComposerOpenChange={(open) =>
-                      setReplyOpenId(open ? annotation.id : null)
-                    }
+                    onComposerOpenChange={(open) => setReplyOpenId(open ? annotation.id : null)}
                   />
                 </li>
               );
@@ -282,11 +237,7 @@ const AnnotationListDialog = ({
       </DialogBody>
       {onSuggestAnnotation && (
         <DialogFooter className={styles.footer}>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onSuggestAnnotation}
-          >
+          <Button type="button" variant="secondary" onClick={onSuggestAnnotation}>
             {t("suggest-own-annotation")}
           </Button>
         </DialogFooter>

@@ -25,10 +25,7 @@ const EMPTY_PAGE = {
 defineLoader({
   pattern: "library",
   async loader(_params, context) {
-    const token = getCookieValue(
-      (context as PageDataContext | undefined)?.cookie,
-      AUTH_COOKIE,
-    );
+    const token = getCookieValue((context as PageDataContext | undefined)?.cookie, AUTH_COOKIE);
     if (!token) return { viewedTexts: EMPTY_PAGE };
     const pagination = (_params.pagination as {
       page: number;
@@ -38,13 +35,12 @@ defineLoader({
       size: 5,
     };
     try {
-      const result = await executeDocument<
-        ViewedReaderTextsQuery,
-        ViewedReaderTextsQueryVariables
-      >(ViewedReaderTextsDocument, { pagination }, token);
-      const viewedTexts = result.success
-        ? result.data?.hadesQueries.viewedReaderTexts
-        : null;
+      const result = await executeDocument<ViewedReaderTextsQuery, ViewedReaderTextsQueryVariables>(
+        ViewedReaderTextsDocument,
+        { pagination },
+        token,
+      );
+      const viewedTexts = result.success ? result.data?.hadesQueries.viewedReaderTexts : null;
       return { viewedTexts: viewedTexts ?? EMPTY_PAGE };
     } catch (error) {
       console.error("Failed to fetch viewed texts:", error);

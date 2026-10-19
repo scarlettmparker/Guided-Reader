@@ -43,9 +43,11 @@ type NotesAuthorToggleDialogProps = {
 const NotesAuthorToggleDialog = (props: NotesAuthorToggleDialogProps) => {
   const { textId, open, onOpenChange, hiddenAuthors, onToggle } = props;
   const { t } = useTranslation("texts");
-  const { data: notes } = usePageData<
-    PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"]
-  >("privateNotes", "privateNotes/:textId", { textId });
+  const { data: notes } = usePageData<PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"]>(
+    "privateNotes",
+    "privateNotes/:textId",
+    { textId },
+  );
 
   const map = new Map<
     string,
@@ -75,10 +77,7 @@ const NotesAuthorToggleDialog = (props: NotesAuthorToggleDialogProps) => {
       <DialogBody>
         <div className={styles.list}>
           {groups.map(([authorId, group]) => {
-            const label =
-              group.profile?.globalName ||
-              group.profile?.discordUsername ||
-              authorId;
+            const label = group.profile?.globalName || group.profile?.discordUsername || authorId;
             const checked = !hiddenAuthors.has(authorId);
             return (
               <label key={authorId} className={styles.item}>

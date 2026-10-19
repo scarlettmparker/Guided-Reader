@@ -51,10 +51,11 @@ defineLoader({
     const token = getCookieValue(context?.cookie, AUTH_COOKIE);
     if (!token) return { accountRoles: [] };
     try {
-      const result = await executeDocument<
-        AccountRolesQuery,
-        AccountRolesQueryVariables
-      >(AccountRolesDocument, { accountId }, token);
+      const result = await executeDocument<AccountRolesQuery, AccountRolesQueryVariables>(
+        AccountRolesDocument,
+        { accountId },
+        token,
+      );
       return { accountRoles: result.data?.gaiaQueries?.accountRoles ?? [] };
     } catch {
       return { accountRoles: [] };
@@ -97,10 +98,11 @@ defineLoader({
     const token = getCookieValue(context?.cookie, AUTH_COOKIE);
     if (!token) return { rolePermissions: [] };
     try {
-      const result = await executeDocument<
-        RolePermissionsQuery,
-        RolePermissionsQueryVariables
-      >(RolePermissionsDocument, { roleId }, token);
+      const result = await executeDocument<RolePermissionsQuery, RolePermissionsQueryVariables>(
+        RolePermissionsDocument,
+        { roleId },
+        token,
+      );
       return {
         rolePermissions: result.data?.gaiaQueries?.rolePermissions ?? [],
       };
@@ -119,10 +121,11 @@ defineLoader({
     const token = getCookieValue(context?.cookie, AUTH_COOKIE);
     if (!token) return { allPermissions: [] };
     try {
-      const result = await executeDocument<
-        AllPermissionsQuery,
-        AllPermissionsQueryVariables
-      >(AllPermissionsDocument, {}, token);
+      const result = await executeDocument<AllPermissionsQuery, AllPermissionsQueryVariables>(
+        AllPermissionsDocument,
+        {},
+        token,
+      );
       return { allPermissions: result.data?.gaiaQueries?.allPermissions ?? [] };
     } catch {
       return { allPermissions: [] };

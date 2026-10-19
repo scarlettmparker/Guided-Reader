@@ -21,10 +21,12 @@ export async function upsertPropertyEntry(
   entry: string,
   values: Record<string, unknown>,
 ): Promise<UpsertPropertyEntryResponse> {
-  return executeMutation<UpsertPropertyEntryResponse>(
-    "gaia/upsertPropertyEntry",
-    { ownerKey, name, entry, input: { values } },
-  );
+  return executeMutation<UpsertPropertyEntryResponse>("gaia/upsertPropertyEntry", {
+    ownerKey,
+    name,
+    entry,
+    input: { values },
+  });
 }
 
 /**
@@ -64,10 +66,9 @@ export async function registerPropertySetSchema(input: {
   configurable?: boolean | null;
   properties: Record<string, unknown>;
 }): Promise<RegisterPropertySetSchemaResponse> {
-  return executeMutation<RegisterPropertySetSchemaResponse>(
-    "gaia/registerPropertySetSchema",
-    { input },
-  );
+  return executeMutation<RegisterPropertySetSchemaResponse>("gaia/registerPropertySetSchema", {
+    input,
+  });
 }
 
 /**
@@ -83,8 +84,9 @@ export async function deletePropertyEntry(
   name: string,
   entry: string,
 ): Promise<DeletePropertyEntryResponse> {
-  return executeMutation<DeletePropertyEntryResponse>(
-    "gaia/deletePropertyEntry",
-    { ownerKey, name, entry },
-  );
+  return executeMutation<DeletePropertyEntryResponse>("gaia/deletePropertyEntry", {
+    ownerKey,
+    name,
+    entry,
+  });
 }

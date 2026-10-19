@@ -3,10 +3,7 @@ import { useOutlet, useParams } from "react-router-dom";
 import TextList from "~/components/texts/text-list";
 import TextDetailPlaceholder from "~/components/texts/text-detail-placeholder";
 import TextDiscussionCard from "~/components/texts/text-discussion-card";
-import {
-  TextDetailsPageSkeleton,
-  TextsPageSkeleton,
-} from "~/components/texts/skeletons";
+import { TextDetailsPageSkeleton, TextsPageSkeleton } from "~/components/texts/skeletons";
 import styles from "./texts-page.module.css";
 
 /**

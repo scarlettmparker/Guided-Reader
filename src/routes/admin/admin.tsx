@@ -26,9 +26,7 @@ type AccountRef = {
 const Admin = () => {
   const outlet = useOutlet();
   const [suspendTarget, setSuspendTarget] = useState<AccountRef | null>(null);
-  const [unsuspendTarget, setUnsuspendTarget] = useState<AccountRef | null>(
-    null,
-  );
+  const [unsuspendTarget, setUnsuspendTarget] = useState<AccountRef | null>(null);
 
   const handleSuspend = useCallback(async () => {
     if (!suspendTarget) return;
@@ -36,12 +34,7 @@ const Admin = () => {
     setSuspendTarget(null);
     try {
       const response = await suspendAccount(id);
-      patchPageData<AccountData>(
-        "account",
-        "admin/:id",
-        { id },
-        () => response.account,
-      );
+      patchPageData<AccountData>("account", "admin/:id", { id }, () => response.account);
       revalidatePageData();
     } catch {
       return;
@@ -54,12 +47,7 @@ const Admin = () => {
     setUnsuspendTarget(null);
     try {
       const response = await unsuspendAccount(id);
-      patchPageData<AccountData>(
-        "account",
-        "admin/:id",
-        { id },
-        () => response.account,
-      );
+      patchPageData<AccountData>("account", "admin/:id", { id }, () => response.account);
       revalidatePageData();
     } catch {
       return;
@@ -69,10 +57,7 @@ const Admin = () => {
   return (
     <div className={styles.items_layout}>
       <div className={styles.items_list_panel}>
-        <AdminUserList
-          onSuspend={setSuspendTarget}
-          onUnsuspend={setUnsuspendTarget}
-        />
+        <AdminUserList onSuspend={setSuspendTarget} onUnsuspend={setUnsuspendTarget} />
       </div>
       <div className={styles.items_detail_panel}>
         <Suspense fallback={<AdminDetailSkeleton />}>

@@ -3,17 +3,12 @@ import { useLocation } from "react-router-dom";
 import { BreadcrumbProvider, CookieBanner } from "@sun/components";
 import { usePageViewTracking } from "@sun/ssr";
 import { getBackgroundHex } from "@sun/utils/background-colour";
-import {
-  ThemeSwitcher,
-  THEME_APPLIED_EVENT,
-  type ThemeOption,
-} from "@sun/themes";
+import { ThemeSwitcher, THEME_APPLIED_EVENT, type ThemeOption } from "@sun/themes";
 import CookieBannerPanel from "./cookie-banner-panel";
 import Nav from "./nav";
 import styles from "./layout.module.css";
 
-const useIsomorphicLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 type LayoutProps = React.PropsWithChildren;
 
@@ -25,9 +20,7 @@ const Layout = ({ children }: LayoutProps) => {
   usePageViewTracking(pathname);
   // Computed after mount (not during render) so the SSR HTML and the client's
   // first render match; getBackgroundHex depends on the wall clock.
-  const [backgroundColour, setBackgroundColour] = useState<string | undefined>(
-    undefined,
-  );
+  const [backgroundColour, setBackgroundColour] = useState<string | undefined>(undefined);
   const [themes, setThemes] = useState<ThemeOption[]>([]);
 
   useIsomorphicLayoutEffect(() => {

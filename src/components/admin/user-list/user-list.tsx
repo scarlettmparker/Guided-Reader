@@ -53,11 +53,7 @@ const AdminUserList = (props: AdminUserListProps) => {
         <CardHeader className={styles.header}>
           <CardTitle>{t("title")}</CardTitle>
           <Link to="/admin/property-sets" className={styles.header_link}>
-            <Button
-              variant="secondary"
-              title={t("property-sets")}
-              aria-label={t("property-sets")}
-            >
+            <Button variant="secondary" title={t("property-sets")} aria-label={t("property-sets")}>
               {t("property-sets")}
             </Button>
           </Link>
@@ -78,10 +74,7 @@ const AdminUserList = (props: AdminUserListProps) => {
               </div>
             }
           >
-            <AdminUserListItems
-              onSuspend={onSuspend}
-              onUnsuspend={onUnsuspend}
-            />
+            <AdminUserListItems onSuspend={onSuspend} onUnsuspend={onUnsuspend} />
           </Suspense>
         </CardBody>
         <Suspense fallback={null}>

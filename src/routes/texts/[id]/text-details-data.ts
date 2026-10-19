@@ -18,10 +18,10 @@ defineLoader({
       makeCacheKey("texts/:id", { id }),
       SHARED_TTL.RECORD,
       async () => {
-        const res = await executeDocument<
-          LocateTextQuery,
-          LocateTextQueryVariables
-        >(LocateTextDocument, { id });
+        const res = await executeDocument<LocateTextQuery, LocateTextQueryVariables>(
+          LocateTextDocument,
+          { id },
+        );
         if (!res.success) {
           throw new Error(res.error ?? "text unavailable");
         }

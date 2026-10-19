@@ -10,16 +10,12 @@ import {
 } from "@sun/components";
 import { patchPageData } from "@sun/ssr";
 import { addComment } from "~/server/actions/annotation";
-import type {
-  ListAnnotationsQuery,
-  ListCommentsQuery,
-} from "~/generated/graphql";
+import type { ListAnnotationsQuery, ListCommentsQuery } from "~/generated/graphql";
 import AnnotationReplies from "../annotation-replies";
 import RepliesSkeleton from "./skeletons/replies-skeleton";
 import styles from "./annotation-discussion.module.css";
 
-type Annotation =
-  ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
+type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 type Comment = ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
 
 type AnnotationDiscussionProps = {
@@ -68,9 +64,7 @@ const AnnotationDiscussion = ({
    */
   useEffect(() => {
     if (composerOpen) {
-      composerRef.current
-        ?.querySelector<HTMLElement>('[role="textbox"]')
-        ?.focus();
+      composerRef.current?.querySelector<HTMLElement>('[role="textbox"]')?.focus();
     }
   }, [composerOpen]);
 
@@ -91,16 +85,10 @@ const AnnotationDiscussion = ({
           { annotationId },
           (current) => [...(current ?? []), response.comment],
         );
-        patchPageData<Annotation[]>(
-          "annotations",
-          "texts/:id",
-          { id: textId },
-          (current) =>
-            (current ?? []).map((item) =>
-              item.id === annotationId
-                ? { ...item, replyCount: item.replyCount + 1 }
-                : item,
-            ),
+        patchPageData<Annotation[]>("annotations", "texts/:id", { id: textId }, (current) =>
+          (current ?? []).map((item) =>
+            item.id === annotationId ? { ...item, replyCount: item.replyCount + 1 } : item,
+          ),
         );
         setBody("");
         setResetKey((key) => key + 1);
@@ -122,20 +110,14 @@ const AnnotationDiscussion = ({
           <div ref={composerRef}>
             <MarkdownEditor
               key={resetKey}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setBody(e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.target.value)}
               placeholder={t("comment-placeholder")}
               aria-label={t("comment-placeholder")}
               rows={3}
             />
           </div>
           <div className={styles.actions}>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => onComposerOpenChange(false)}
-            >
+            <Button type="button" variant="secondary" onClick={() => onComposerOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" disabled={pending || !body.trim()}>
@@ -146,9 +128,7 @@ const AnnotationDiscussion = ({
       )}
       {replyCount > 0 && (
         <Accordion defaultOpen={false}>
-          <AccordionTrigger>
-            {t("replies", { count: replyCount })}
-          </AccordionTrigger>
+          <AccordionTrigger>{t("replies", { count: replyCount })}</AccordionTrigger>
           <AccordionContent>
             <Suspense fallback={<RepliesSkeleton count={replyCount} />}>
               <AnnotationReplies annotationId={annotationId} textId={textId} />

@@ -12,22 +12,14 @@ import type {
 export async function createPrivateNote(
   input: PrivateNoteInput,
 ): Promise<CreatePrivateNoteResponse> {
-  return executeMutation<CreatePrivateNoteResponse>(
-    "hades/createPrivateNote",
-    { input },
-  );
+  return executeMutation<CreatePrivateNoteResponse>("hades/createPrivateNote", { input });
 }
 
 /**
  * Deletes a private note (owner only).
  */
-export async function deletePrivateNote(
-  id: string,
-): Promise<DeletePrivateNoteResponse> {
-  return executeMutation<DeletePrivateNoteResponse>(
-    "hades/deletePrivateNote",
-    { id },
-  );
+export async function deletePrivateNote(id: string): Promise<DeletePrivateNoteResponse> {
+  return executeMutation<DeletePrivateNoteResponse>("hades/deletePrivateNote", { id });
 }
 
 /**

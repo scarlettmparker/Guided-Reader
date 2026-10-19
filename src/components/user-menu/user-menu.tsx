@@ -27,14 +27,8 @@ type LevelColours = Record<string, string>;
  */
 const UserMenu = () => {
   const { t } = useTranslation("nav");
-  const { data: user } = usePageData<ReaderAccount | null>(
-    "currentUser",
-    "currentUser",
-  );
-  const { data: colours } = usePageData<LevelColours | null>(
-    "levelColours",
-    "levelColours",
-  );
+  const { data: user } = usePageData<ReaderAccount | null>("currentUser", "currentUser");
+  const { data: colours } = usePageData<LevelColours | null>("levelColours", "levelColours");
   if (!user) {
     return null;
   }
@@ -63,20 +57,14 @@ const UserMenu = () => {
             />
             <div className={styles.header_text}>
               <CardTitle>{user.globalName ?? user.discordUsername}</CardTitle>
-              {user.discordUsername && (
-                <CardDescription>@{user.discordUsername}</CardDescription>
-              )}
+              {user.discordUsername && <CardDescription>@{user.discordUsername}</CardDescription>}
             </div>
           </CardHeader>
           <CardBody className={styles.body}>
             {user.roles?.length ? (
               <ul className={styles.roles}>
                 {user.roles.map((role) => (
-                  <ReaderRoleItem
-                    key={role.key}
-                    role={role}
-                    colour={colours?.[role.key]}
-                  />
+                  <ReaderRoleItem key={role.key} role={role} colour={colours?.[role.key]} />
                 ))}
               </ul>
             ) : (
@@ -89,11 +77,7 @@ const UserMenu = () => {
             </Link>
             <Form action="/__logout" method="post">
               <CsrfField />
-              <Button
-                type="submit"
-                variant="secondary"
-                className={styles.logout}
-              >
+              <Button type="submit" variant="secondary" className={styles.logout}>
                 {t("logout")}
               </Button>
             </Form>

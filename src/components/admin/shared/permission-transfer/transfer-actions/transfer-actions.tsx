@@ -1,6 +1,11 @@
 import { useTranslation } from "@sun/i18n";
 import { Button, cn } from "@sun/components";
-import { ChevronRightOutline, ChevronLeftOutline, ChevronDoubleRightOutline, ChevronDoubleLeftOutline } from "preact-heroicons";
+import {
+  ChevronRightOutline,
+  ChevronLeftOutline,
+  ChevronDoubleRightOutline,
+  ChevronDoubleLeftOutline,
+} from "preact-heroicons";
 import styles from "./transfer-actions.module.css";
 
 type TransferActionsProps = {
@@ -32,11 +37,7 @@ const TransferActions = (props: TransferActionsProps) => {
   const { t } = useTranslation("admin");
 
   return (
-    <section
-      className={cn(styles.actions, className)}
-      aria-label={t("transfer-actions")}
-      {...rest}
-    >
+    <section className={cn(styles.actions, className)} aria-label={t("transfer-actions")} {...rest}>
       <Button
         variant="secondary"
         title={t("move-selected-to-assigned")}

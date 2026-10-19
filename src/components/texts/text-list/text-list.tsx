@@ -74,11 +74,7 @@ const TextList = () => {
         : [...current, level];
 
       // Update query params with new levels.
-      const updated = updateParams(
-        prev,
-        "levels",
-        next.length > 0 ? next.join(",") : null,
-      );
+      const updated = updateParams(prev, "levels", next.length > 0 ? next.join(",") : null);
       updated.delete("page");
       return updated;
     });
