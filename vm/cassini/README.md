@@ -15,7 +15,7 @@ stop a literal copy:
 - LXC shares the host kernel and CPU architecture, so a container here is x86_64.
 - Bun has no 32-bit ARM build. Guided Reader can't run on real Pi 1 silicon at all.
 
-So cassini copies the *resources*, not the silicon: one CPU core, 512 MB RAM,
+So cassini copies the _resources_, not the silicon: one CPU core, 512 MB RAM,
 100 Mbit NIC, microSD-ish disk, 8 GB storage.
 
 ## Commands
@@ -28,7 +28,7 @@ So cassini copies the *resources*, not the silicon: one CPU core, 512 MB RAM,
     ./cassini.sh stop | start
     ./cassini.sh destroy          # delete the container, keep the pool image
 
-Load testing lives in `load/` — it seeds throwaway users, drives k6 against the
+Load testing lives in `load/` - it seeds throwaway users, drives k6 against the
 box and samples its cgroup:
 
     ./load/run.sh 50              # 50 users for 30s
