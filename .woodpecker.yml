@@ -21,4 +21,4 @@ steps:
     commands:
       - apk add --no-cache openssh-client rsync bash
       - printf 'Host *\n  BatchMode yes\n  IdentitiesOnly yes\n' > ~/.ssh/config
-      - ./deploy.sh --skip-build
+      - ./vm/vps/deploy-reader.sh --skip-build

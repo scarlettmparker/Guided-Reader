@@ -31,5 +31,7 @@ vm/*
 !vm/systemd/*
 !vm/cassini/
 vm/cassini/tls/
+!vm/vps/
+!vm/vps/**
 deploy.sh
 !deploy.sh
