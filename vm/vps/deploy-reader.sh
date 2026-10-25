@@ -40,8 +40,17 @@ push_file() {
 
 # Builds the frontend and snapshot dependencies.
 build() {
-  log "build: Guided Reader"
-  (cd "$REPO" && "$BUN" run build >/tmp/opencode/reader-build.log 2>&1)
+  local log
+  if [ "$SKIP_BUILD" = "0" ]; then
+    log "build: Guided Reader"
+    log="$(mktemp "${TMPDIR:-/tmp}/reader-build.XXXXXX.log")"
+    if ! (cd "$REPO" && "$BUN" run build >"$log" 2>&1); then
+      cat "$log" >&2
+      rm -f "$log"
+      return 1
+    fi
+    rm -f "$log"
+  fi
   log "deps: ARM64 node_modules"
   remote "rm -rf /tmp/reader-deps && mkdir -p /tmp/reader-deps"
   rsync -az -e "ssh -i $SSH_KEY" \
