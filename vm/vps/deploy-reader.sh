@@ -38,6 +38,13 @@ push_file() {
   remote "sudo lxc file push -q -p --mode 0644 '$REMOTE_TMP/$(basename "$local_path")' '$CONTAINER$remote_path'"
 }
 
+# Hashes the production dependency inputs.
+#
+# @return The combined digest on stdout.
+deps_hash() {
+  sha256sum "$REPO/package.json" "$REPO/bun.lock" | sha256sum | cut -d' ' -f1
+}
+
 # Builds the frontend and snapshot dependencies.
 build() {
   local log
@@ -51,13 +58,19 @@ build() {
     fi
     rm -f "$log"
   fi
+  local hash dir
+  hash="$(deps_hash)"
+  dir="/home/ubuntu/guided-reader-deps/$hash"
+  if remote "test -d '$dir/node_modules'"; then
+    log "deps: cached ($hash)"
+    return 0
+  fi
   log "deps: ARM64 node_modules"
-  remote "rm -rf /tmp/reader-deps && mkdir -p /tmp/reader-deps"
+  remote "rm -rf '$dir' && mkdir -p '$dir'"
   rsync -az -e "ssh -i $SSH_KEY" \
     "$REPO/package.json" "$REPO/bun.lock" "$REPO/bunfig.toml" \
-    "$VPS:/tmp/reader-deps/"
-  remote "cd /tmp/reader-deps && /home/ubuntu/.bun/bin/bun install --production --frozen-lockfile --no-progress"
-  remote "cd /tmp/reader-deps && tar -czf /tmp/reader-deps.tgz node_modules"
+    "$VPS:$dir/"
+  remote "cd '$dir' && /home/ubuntu/.bun/bin/bun install --production --frozen-lockfile --no-progress"
 }
 
 # Renders the container env.
@@ -94,9 +107,8 @@ deploy() {
   remote "sudo lxc exec '$CONTAINER' -- rm -f /tmp/reader.tgz /tmp/reader-deps.tgz"
   remote "sudo lxc file push -q -p --mode 0644 '$REMOTE_TMP/reader.tgz' '$CONTAINER/tmp/reader.tgz'"
   remote "sudo lxc exec '$CONTAINER' -- tar -xzf /tmp/reader.tgz -C /opt/guided-reader"
-  remote "sudo lxc exec '$CONTAINER' -- bash -c 'rm -rf /opt/guided-reader/node_modules'"
-  remote "sudo lxc file push -q -p --mode 0644 /tmp/reader-deps.tgz '$CONTAINER/tmp/reader-deps.tgz'"
-  remote "sudo lxc exec '$CONTAINER' -- tar -xzf /tmp/reader-deps.tgz -C /opt/guided-reader"
+  remote "sudo mkdir -p /opt/guided-reader/node_modules"
+  remote "sudo rsync -az --delete -e 'ssh -i /opt/woodpecker/keys/ci-deploy -p 2201 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' /home/ubuntu/guided-reader-deps/$(deps_hash)/node_modules/ root@127.0.0.1:/opt/guided-reader/node_modules/"
 
   if [ -f "$ENV_FILE" ]; then
     tmp="$(mktemp)"
