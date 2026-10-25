@@ -161,7 +161,7 @@ const AnnotationCreateDialog = ({
       <DialogBody>
         <Form id="create-annotation-form" onSubmit={handleSubmit}>
           <MarkdownEditor
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.currentTarget.value)}
             placeholder={t("annotation-placeholder")}
             aria-label={t("annotation-placeholder")}
             rows={5}

@@ -19,7 +19,7 @@ type PermissionColumnProps = {
    * Paint handlers.
    */
   paint: {
-    onMouseDown: (value: string) => (event: React.MouseEvent) => void;
+    onMouseDown: (value: string) => (event: React.MouseEvent<HTMLElement>) => void;
     onMouseEnter: (value: string) => () => void;
   };
   /**
@@ -30,7 +30,7 @@ type PermissionColumnProps = {
    * Empty label.
    */
   emptyLabel?: string;
-} & React.HTMLAttributes<HTMLFieldSetElement>;
+} & Omit<React.HTMLAttributes<HTMLFieldSetElement>, "role">;
 
 /**
  * Single column with internal search and paint selection.

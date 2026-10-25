@@ -95,9 +95,7 @@ const PropertySetSchemaEditorContent = (props: PropertySetSchemaEditorContentPro
           <JsonTextArea
             value={draft}
             onChange={setDraft}
-            onError={(error: string | null | React.SyntheticEvent<HTMLTextAreaElement>) =>
-              setJsonError(typeof error === "string" || error === null ? error : null)
-            }
+            onError={setJsonError}
             rows={8}
             aria-label={t("schema")}
             placeholder="{}"

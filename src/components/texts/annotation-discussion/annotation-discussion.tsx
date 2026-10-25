@@ -110,7 +110,7 @@ const AnnotationDiscussion = ({
           <div ref={composerRef}>
             <MarkdownEditor
               key={resetKey}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.currentTarget.value)}
               placeholder={t("comment-placeholder")}
               aria-label={t("comment-placeholder")}
               rows={3}

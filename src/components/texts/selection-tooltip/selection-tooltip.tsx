@@ -28,7 +28,7 @@ const SelectionTooltip = ({ open, top, left, children, className }: SelectionToo
    * container, whose mouseup handler would otherwise clear the selection
    * before the annotate click can fire.
    */
-  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+  const stop = (e: React.MouseEvent<HTMLElement>) => e.stopPropagation();
 
   return createPortal(
     <Tooltip open={open}>

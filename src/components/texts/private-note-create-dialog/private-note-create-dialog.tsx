@@ -118,7 +118,7 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
         <Form id="create-private-note-form" onSubmit={handleSubmit}>
           <MarkdownEditor
             onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setBody(event.target.value)
+              setBody(event.currentTarget.value)
             }
             placeholder={t("private-note-placeholder")}
             aria-label={t("private-note-placeholder")}

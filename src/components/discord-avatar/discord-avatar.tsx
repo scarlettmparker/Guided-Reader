@@ -1,7 +1,14 @@
 import { cn } from "@sun/components";
 import styles from "./discord-avatar.module.css";
 
-type DiscordAvatarProps = React.ImgHTMLAttributes<HTMLImageElement> & {
+type DiscordAvatarProps = Omit<
+  React.ImgHTMLAttributes<HTMLImageElement>,
+  "alt" | "title" | "role" | "aria-label" | "aria-labelledby"
+> & {
+  /**
+   * Alternative text for the avatar. Defaults to decorative (empty).
+   */
+  alt?: string;
   /**
    * Discord user id used to build the CDN URL.
    */
@@ -63,11 +70,13 @@ const DiscordAvatar = ({
   avatar,
   size = 32,
   className,
+  alt = "",
   ...rest
 }: DiscordAvatarProps) => {
   return (
     <img
       {...rest}
+      alt={alt}
       className={cn(styles.avatar, className)}
       src={avatarUrl(discordId, avatar, size)}
       width={size}

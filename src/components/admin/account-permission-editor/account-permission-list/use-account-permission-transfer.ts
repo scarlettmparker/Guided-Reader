@@ -78,7 +78,7 @@ export function useAccountPermissionTransfer(
   /**
    * Handles mouse down on available.
    */
-  const onAvailableMouseDown = (value: string) => (e: React.MouseEvent) => {
+  const onAvailableMouseDown = (value: string) => (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const target = !selectedAvailable.has(value);
     setDrag({ active: true, target });
@@ -95,7 +95,7 @@ export function useAccountPermissionTransfer(
   /**
    * Handles mouse down on assigned.
    */
-  const onAssignedMouseDown = (value: string) => (e: React.MouseEvent) => {
+  const onAssignedMouseDown = (value: string) => (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const target = !selectedAssigned.has(value);
     setDrag({ active: true, target });
@@ -163,7 +163,8 @@ export function useAccountPermissionTransfer(
   /**
    * Handles drag start for available.
    */
-  const handleDragStartAvailable = (value: string) => (e: React.DragEvent) => {
+  const handleDragStartAvailable = (value: string) => (e: React.DragEvent<HTMLElement>) => {
+    if (!e.dataTransfer) return;
     const toDrag = selectedAvailable.has(value) ? [...selectedAvailable] : [value];
     e.dataTransfer.setData("application/json", JSON.stringify(toDrag));
   };
@@ -171,7 +172,8 @@ export function useAccountPermissionTransfer(
   /**
    * Handles drag start for assigned.
    */
-  const handleDragStartAssigned = (value: string) => (e: React.DragEvent) => {
+  const handleDragStartAssigned = (value: string) => (e: React.DragEvent<HTMLElement>) => {
+    if (!e.dataTransfer) return;
     const toDrag = selectedAssigned.has(value) ? [...selectedAssigned] : [value];
     e.dataTransfer.setData("application/json", JSON.stringify(toDrag));
   };
@@ -179,8 +181,9 @@ export function useAccountPermissionTransfer(
   /**
    * Handles drop to assigned.
    */
-  const handleDropToAssigned = (e: React.DragEvent) => {
+  const handleDropToAssigned = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
+    if (!e.dataTransfer) return;
     try {
       const raw =
         e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");
@@ -197,8 +200,9 @@ export function useAccountPermissionTransfer(
   /**
    * Handles drop to available.
    */
-  const handleDropToAvailable = (e: React.DragEvent) => {
+  const handleDropToAvailable = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
+    if (!e.dataTransfer) return;
     try {
       const raw =
         e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");

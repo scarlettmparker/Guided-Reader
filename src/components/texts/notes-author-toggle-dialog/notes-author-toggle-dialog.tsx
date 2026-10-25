@@ -84,7 +84,7 @@ const NotesAuthorToggleDialog = (props: NotesAuthorToggleDialogProps) => {
                 <Checkbox
                   checked={checked}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    onToggle(authorId, e.target.checked)
+                    onToggle(authorId, e.currentTarget.checked)
                   }
                 />
                 {group.profile && (

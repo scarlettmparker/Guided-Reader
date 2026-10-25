@@ -41,11 +41,11 @@ type PermissionColumnProps = {
   /**
    * Drag start.
    */
-  onDragStart: (value: string) => (e: React.DragEvent) => void;
+  onDragStart: (value: string) => (e: React.DragEvent<HTMLElement>) => void;
   /**
    * Mouse down for paint.
    */
-  onMouseDown: (value: string) => (e: React.MouseEvent) => void;
+  onMouseDown: (value: string) => (e: React.MouseEvent<HTMLElement>) => void;
   /**
    * Mouse enter for paint.
    */
@@ -53,8 +53,8 @@ type PermissionColumnProps = {
   /**
    * Drop handler.
    */
-  onDrop: (e: React.DragEvent) => void;
-} & Omit<React.HTMLAttributes<HTMLElement>, "onDragStart">;
+  onDrop: (e: React.DragEvent<HTMLElement>) => void;
+} & Omit<React.HTMLAttributes<HTMLFieldSetElement>, "onDragStart" | "role">;
 
 /**
  * Single permission column.

@@ -68,7 +68,7 @@ const RolePermissionList = (props: RolePermissionListProps) => {
         <div className={styles.input_row}>
           <Input
             value={input}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setInput(event.target.value)}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setInput(event.currentTarget.value)}
             placeholder={t("permission-placeholder")}
             aria-label={t("permission-placeholder")}
           />

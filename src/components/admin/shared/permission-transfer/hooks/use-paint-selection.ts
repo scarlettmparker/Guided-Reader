@@ -16,7 +16,7 @@ export function usePaintSelection() {
   /**
    * Handles mouse down on an item.
    */
-  const onMouseDown = (value: string) => (_event: React.MouseEvent) => {
+  const onMouseDown = (value: string) => (_event: React.MouseEvent<HTMLElement>) => {
     const target = !selected.has(value);
     setDrag({ active: true, target });
     setSelected((prev) => {

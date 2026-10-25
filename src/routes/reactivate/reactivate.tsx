@@ -109,7 +109,7 @@ const Reactivate = () => {
                     type="email"
                     placeholder={t("email-placeholder")}
                     value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.currentTarget.value)}
                     required
                     autoFocus
                   />
