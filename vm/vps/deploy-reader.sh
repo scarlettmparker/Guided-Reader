@@ -89,7 +89,7 @@ deploy() {
     package.json tsconfig.json bunfig.toml bun.lock .bun-version routes messages src
 
   remote "sudo lxc exec '$CONTAINER' -- mkdir -p /opt/guided-reader"
-  remote "sudo lxc exec '$CONTAINER' -- bash -c 'find /opt/guided-reader -mindepth 1 -maxdepth 1 ! -name node_modules -exec rm -rf {} +'"
+  remote "sudo lxc exec '$CONTAINER' -- bash -c 'find /opt/guided-reader -mindepth 1 -maxdepth 1 ! -name node_modules ! -name .env.production -exec rm -rf {} +'"
   rsync -az -e "ssh -i $SSH_KEY" "$app_tar" "$VPS:$REMOTE_TMP/reader.tgz"
   remote "sudo lxc exec '$CONTAINER' -- rm -f /tmp/reader.tgz /tmp/reader-deps.tgz"
   remote "sudo lxc file push -q -p --mode 0644 '$REMOTE_TMP/reader.tgz' '$CONTAINER/tmp/reader.tgz'"
