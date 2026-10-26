@@ -1,35 +1,8 @@
 import { request } from "@playwright/test";
+import { LoginDocument, type LoginMutation } from "../../src/generated/graphql";
 
-import { APP_URL, BACKEND_URL } from "./env";
-
-type LoginResponse = {
-  /**
-   * GraphQL errors returned by the backend.
-   */
-  errors?: Array<{ message: string }>;
-  /**
-   * Successful login payload.
-   */
-  data?: {
-    /**
-     * Gaia mutation result.
-     */
-    gaiaMutations: {
-      /**
-       * Issued JWT, or null when the credentials were rejected.
-       */
-      login: { token: string } | null;
-    };
-  };
-};
-
-const LOGIN_MUTATION = `mutation E2eLogin($username: String!, $password: String!) {
-  gaiaMutations {
-    login(input: { username: $username, password: $password }) {
-      token
-    }
-  }
-}`;
+import { APP_URL } from "./env";
+import { executeGraphql } from "./graphql";
 
 /**
  * Signs in through Gaia and returns the JWT.
@@ -39,22 +12,12 @@ const LOGIN_MUTATION = `mutation E2eLogin($username: String!, $password: String!
  * @returns the backend JWT
  */
 export async function loginAs(username: string, password: string): Promise<string> {
-  const response = await fetch(`${BACKEND_URL}/graphql`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      query: LOGIN_MUTATION,
-      variables: { username, password },
-    }),
+  const data = await executeGraphql<LoginMutation>(LoginDocument, {
+    input: { username, password },
   });
-  const payload = (await response.json()) as LoginResponse;
-
-  if (payload.errors?.length) {
-    throw new Error(payload.errors.map((error) => error.message).join(", "));
-  }
-  const token = payload.data?.gaiaMutations.login?.token;
+  const token = data.gaiaMutations.login?.token;
   if (!token) {
-    throw new Error(`Login failed with ${response.status}`);
+    throw new Error("Login failed");
   }
 
   return token;
