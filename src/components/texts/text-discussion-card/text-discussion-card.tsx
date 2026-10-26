@@ -10,14 +10,13 @@ import {
   MarkdownEditor,
 } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
-import { patchPageData } from "@sun/ssr";
+import { makeCacheKey, patchPageData, revalidatePageData } from "@sun/ssr";
 import { createPost, createThread } from "~/server/actions/forum";
-import type { ListPostsQuery, ThreadsForQuery } from "~/generated/graphql";
+import type { ThreadsForQuery } from "~/generated/graphql";
 import ThreadPosts from "../thread-posts";
 import styles from "./text-discussion-card.module.css";
 
 type Thread = ThreadsForQuery["icarusQueries"]["threadsFor"]["items"][number];
-type Post = ListPostsQuery["icarusQueries"]["posts"]["items"][number];
 
 /**
  * Title stored on the single thread backing a text discussion. Never shown to
@@ -70,15 +69,12 @@ const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
       }
       if (!id) return;
       try {
-        const response = await createPost({
+        await createPost({
           threadId: id,
           parentId: null,
           body: trimmed,
         });
-        patchPageData<Post[]>("posts", "threads/:threadId", { threadId: id }, (current) => [
-          ...(current ?? []),
-          response.post,
-        ]);
+        revalidatePageData([makeCacheKey("threads/:threadId", { threadId: id })]);
       } catch {
         return;
       }

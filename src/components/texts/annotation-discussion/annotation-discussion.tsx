@@ -55,6 +55,7 @@ const AnnotationDiscussion = ({
   const { t } = useTranslation("texts");
   const [body, setBody] = useState("");
   const [resetKey, setResetKey] = useState(0);
+  const [repliesOpen, setRepliesOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const composerRef = useRef<HTMLDivElement>(null);
 
@@ -88,6 +89,7 @@ const AnnotationDiscussion = ({
         );
         setBody("");
         setResetKey((key) => key + 1);
+        setRepliesOpen(true);
         onComposerOpenChange(false);
       } catch {
         return;
@@ -123,7 +125,7 @@ const AnnotationDiscussion = ({
         </Form>
       )}
       {replyCount > 0 && (
-        <Accordion defaultOpen={false}>
+        <Accordion open={repliesOpen} onOpenChange={setRepliesOpen}>
           <AccordionTrigger>{t("replies", { count: replyCount })}</AccordionTrigger>
           <AccordionContent>
             <Suspense fallback={<RepliesSkeleton count={replyCount} />}>

@@ -90,7 +90,17 @@ const ForumPostItem = ({ post, profile, threadId }: ForumPostItemProps) => {
     onSuccess: (response) => {
       const entity = response.post;
       patchPageData<Post[]>("posts", "threads/:threadId", { threadId }, (current) =>
-        (current ?? []).map((item) => (item.id === entity.id ? { ...item, ...entity } : item)),
+        (current ?? []).map((item) =>
+          item.id === entity.id
+            ? {
+                ...item,
+                myVote: entity.myVote,
+                netScore: entity.netScore,
+                upvotes: entity.upvotes,
+                downvotes: entity.downvotes,
+              }
+            : item,
+        ),
       );
     },
   });
