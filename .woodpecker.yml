@@ -21,3 +21,14 @@ steps:
     commands:
       - printf 'Host *\n  BatchMode yes\n  IdentitiesOnly yes\n' > ~/.ssh/config
       - ./vm/vps/deploy-reader.sh --skip-build
+
+  e2e:
+    image: alpine:3.21
+    environment:
+      E2E_RUNNER_URL:
+        from_secret: e2e_runner_url
+      E2E_RUNNER_TOKEN:
+        from_secret: e2e_runner_token
+    commands:
+      - apk add --no-cache curl bash
+      - bash ./e2e/trigger.sh Guided-Reader "$CI_COMMIT_SHA"
