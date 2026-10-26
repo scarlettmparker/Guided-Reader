@@ -9,4 +9,11 @@ test.describe("smoke", () => {
     await expect(page.getByRole("heading", { name: "Continue reading" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Texts" })).toBeVisible();
   });
+
+  test("keeps the session after a reload", async ({ page }) => {
+    await page.goto("/");
+    await page.reload();
+
+    await expect(page.getByRole("heading", { name: "Continue reading" })).toBeVisible();
+  });
 });

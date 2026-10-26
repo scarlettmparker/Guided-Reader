@@ -9,6 +9,10 @@ type E2eFixtures = {
    * Account and credentials seeded for the suite.
    */
   e2e: E2eFixture;
+  /**
+   * Clears reader data and SSR caches before each test.
+   */
+  reset: void;
 };
 
 type E2eWorkerFixtures = {
@@ -30,10 +34,14 @@ export const test = base.extend<E2eFixtures, E2eWorkerFixtures>({
     },
     { scope: "worker" },
   ],
-});
-
-test.beforeEach(async ({ request }) => {
-  await resetAppCache(request);
+  reset: [
+    async ({ db, request }, use) => {
+      await db.resetReaderData();
+      await resetAppCache(request);
+      await use();
+    },
+    { auto: true },
+  ],
 });
 
 export { expect };
