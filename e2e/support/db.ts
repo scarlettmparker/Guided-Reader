@@ -65,17 +65,18 @@ export async function createDb(): Promise<Db> {
          VALUES ($1, 'E2E', 'Reader', $2, $3)`,
         [personId, username, `${username}@example.com`],
       );
+      const discordId = `e2e-${username}`;
       await query(
         `INSERT INTO gaia_accounts
-           (id, account_type, password_hash, person_id, status, username, provider)
-         VALUES ($1, 'HUMAN', $2, $3, 'ACTIVE', $4, 'local')`,
-        [accountId, bcrypt.hashSync(E2E_PASSWORD, 10), personId, username],
+           (id, account_type, password_hash, person_id, status, username, provider, provider_id)
+         VALUES ($1, 'HUMAN', $2, $3, 'ACTIVE', $4, 'discord', $5)`,
+        [accountId, bcrypt.hashSync(E2E_PASSWORD, 10), personId, username, discordId],
       );
       await query(
         `INSERT INTO hades_reader_accounts
            (id, discord_id, discord_username, global_name, gaia_account_id)
          VALUES ($1, $2, $3, $3, $4)`,
-        [crypto.randomUUID(), `e2e-${username}`, username, accountId],
+        [crypto.randomUUID(), discordId, username, accountId],
       );
 
       return accountId;

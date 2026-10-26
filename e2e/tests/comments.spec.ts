@@ -28,7 +28,7 @@ test.describe("comments", () => {
 
     const replies = list.getByRole("button", { name: "2 replies" });
     await expect(replies).toBeVisible();
-    await replies.click();
+    await expect(replies).toHaveAttribute("aria-expanded", "true");
 
     const replyList = list.locator("ul").last();
     const reply = replyList.locator("li").filter({ hasText: body });
