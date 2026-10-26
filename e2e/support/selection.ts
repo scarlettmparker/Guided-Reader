@@ -28,3 +28,4 @@ export async function selectTextRange(
     element.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
   }, length);
 }
+

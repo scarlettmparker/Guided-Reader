@@ -50,6 +50,42 @@ test.describe("comments", () => {
       .toBe(1);
   });
 
+  test("votes on a reply and keeps the vote after reload", async ({ page, db, e2e }) => {
+    const text = await seedText(db);
+    const body = "Vote on this reply";
+    const { annotationId, positionId } = await seedAnnotation(db, text.id, e2e.accountId, {
+      body: "Opening phrase",
+      startOffset: 0,
+      endOffset: 22,
+    });
+    await seedComment(db, annotationId, e2e.accountId, { body });
+
+    await page.goto(`/texts/${text.id}?annotation=${positionId}`);
+
+    let list = page.getByRole("dialog");
+    await list.getByRole("button", { name: "1 reply" }).click();
+
+    let reply = list.locator("ul").last().locator("li").filter({ hasText: body });
+    await expect(reply).toBeVisible();
+    await reply.getByRole("button", { name: "Vote up" }).click();
+    await expect(reply.getByRole("button", { name: "Vote up" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(reply.getByText("1", { exact: true })).toBeVisible();
+
+    await page.reload();
+
+    list = page.getByRole("dialog");
+    await list.getByRole("button", { name: "1 reply" }).click();
+    reply = list.locator("ul").last().locator("li").filter({ hasText: body });
+    await expect(reply.getByRole("button", { name: "Vote up" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(reply.getByText("1", { exact: true })).toBeVisible();
+  });
+
   test("deletes a reply from an annotation", async ({ page, db, e2e }) => {
     const text = await seedText(db);
     const body = "Delete this reply";

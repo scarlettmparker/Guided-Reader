@@ -11,13 +11,31 @@ test.describe("text discussion", () => {
     const discussion = page
       .getByRole("article")
       .filter({ hasText: "Text discussion" });
-    await discussion.locator('[contenteditable="true"]').fill(body);
+    await discussion.locator("[contenteditable]").fill(body);
     await discussion.getByRole("button", { name: "Comment" }).click();
 
     const post = discussion.locator("li").filter({ hasText: body });
     await expect(post).toBeVisible();
     await expect(post.getByText(e2e.username)).toBeVisible();
     await expect(post.getByRole("img", { name: e2e.username })).toBeVisible();
+
+    await post.getByRole("button", { name: "Vote up" }).click();
+    await expect(post.getByRole("button", { name: "Vote up" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(post.getByText("1", { exact: true })).toBeVisible();
+
+    await page.reload();
+
+    const reloaded = page.getByRole("article").filter({ hasText: "Text discussion" });
+    const reloadedPost = reloaded.locator("li").filter({ hasText: body });
+    await expect(reloadedPost.getByText(e2e.username)).toBeVisible();
+    await expect(reloadedPost.getByRole("button", { name: "Vote up" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(reloadedPost.getByText("1", { exact: true })).toBeVisible();
 
     await expect
       .poll(async () => {
