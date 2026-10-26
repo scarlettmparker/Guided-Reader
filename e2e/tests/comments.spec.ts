@@ -2,14 +2,21 @@ import { expect, test } from "@/support/fixtures";
 import { seedAnnotation, seedComment, seedText } from "@/support/seed";
 
 test.describe("comments", () => {
-  test("adds a reply to an annotation", async ({ page, db, e2e }) => {
+  test("adds a reply and shows its author", async ({ page, db, e2e }) => {
     const text = await seedText(db);
     const body = "I had the same thought";
-    const { positionId } = await seedAnnotation(db, text.id, e2e.accountId, {
-      body: "Opening phrase",
-      startOffset: 0,
-      endOffset: 22,
-    });
+    const existing = "An earlier reply";
+    const { annotationId, positionId } = await seedAnnotation(
+      db,
+      text.id,
+      e2e.accountId,
+      {
+        body: "Opening phrase",
+        startOffset: 0,
+        endOffset: 22,
+      },
+    );
+    await seedComment(db, annotationId, e2e.accountId, { body: existing });
 
     await page.goto(`/texts/${text.id}?annotation=${positionId}`);
 
@@ -18,6 +25,19 @@ test.describe("comments", () => {
     await list.getByText("Reply", { exact: true }).click();
     await list.locator('[contenteditable="true"]').fill(body);
     await list.getByRole("button", { name: "Comment" }).click();
+
+    const replies = list.getByRole("button", { name: "2 replies" });
+    await expect(replies).toBeVisible();
+    await replies.click();
+
+    const replyList = list.locator("ul").last();
+    const reply = replyList.locator("li").filter({ hasText: body });
+    await expect(reply).toBeVisible();
+    await expect(reply.getByText(e2e.username)).toBeVisible();
+    await expect(reply.getByRole("img", { name: e2e.username })).toBeVisible();
+    await expect(
+      replyList.locator("li").filter({ hasText: existing }),
+    ).toBeVisible();
 
     await expect
       .poll(async () => {
@@ -33,11 +53,16 @@ test.describe("comments", () => {
   test("deletes a reply from an annotation", async ({ page, db, e2e }) => {
     const text = await seedText(db);
     const body = "Delete this reply";
-    const { annotationId, positionId } = await seedAnnotation(db, text.id, e2e.accountId, {
-      body: "Opening phrase",
-      startOffset: 0,
-      endOffset: 22,
-    });
+    const { annotationId, positionId } = await seedAnnotation(
+      db,
+      text.id,
+      e2e.accountId,
+      {
+        body: "Opening phrase",
+        startOffset: 0,
+        endOffset: 22,
+      },
+    );
     await seedComment(db, annotationId, e2e.accountId, { body });
 
     await page.goto(`/texts/${text.id}?annotation=${positionId}`);
@@ -47,7 +72,11 @@ test.describe("comments", () => {
     await expect(list.getByText(body)).toBeVisible();
     await list.getByLabel("Comment actions").click();
     await page.getByRole("menuitem", { name: "Delete" }).click();
-    await page.getByRole("dialog").last().getByRole("button", { name: "Delete" }).click();
+    await page
+      .getByRole("dialog")
+      .last()
+      .getByRole("button", { name: "Delete" })
+      .click();
 
     await expect
       .poll(async () => {

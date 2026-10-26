@@ -122,6 +122,7 @@ export async function createDb(): Promise<Db> {
       `);
       await query(
         `TRUNCATE TABLE
+           hades_private_notes,
            hades_reader_comments,
            hades_reader_annotations,
            hades_reader_positions,
