@@ -10,7 +10,12 @@ import {
   MarkdownEditor,
 } from "@sun/components";
 import { usePageData } from "@sun/ssr/react";
-import { makeCacheKey, patchPageData, revalidatePageData } from "@sun/ssr";
+import {
+  invalidateCacheKeys,
+  makeCacheKey,
+  patchPageData,
+  revalidatePageData,
+} from "@sun/ssr";
 import { createPost, createThread } from "~/server/actions/forum";
 import type { ThreadsForQuery } from "~/generated/graphql";
 import ThreadPosts from "../thread-posts";
@@ -74,7 +79,9 @@ const TextDiscussionCard = ({ textId }: TextDiscussionCardProps) => {
           parentId: null,
           body: trimmed,
         });
-        revalidatePageData([makeCacheKey("threads/:threadId", { threadId: id })]);
+        const postsKey = makeCacheKey("threads/:threadId", { threadId: id });
+        invalidateCacheKeys([postsKey]);
+        revalidatePageData([postsKey]);
       } catch {
         return;
       }
