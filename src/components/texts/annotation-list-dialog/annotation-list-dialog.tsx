@@ -142,7 +142,17 @@ const AnnotationListDialog = ({
       const entity = response.annotation;
       if (entity == null) return;
       patchPageData<Annotation[]>("annotations", "texts/:id", { id: textId }, (current) =>
-        (current ?? []).map((item) => (item.id === entity.id ? { ...item, ...entity } : item)),
+        (current ?? []).map((item) =>
+          item.id === entity.id
+            ? {
+                ...item,
+                myVote: entity.myVote,
+                netScore: entity.netScore,
+                upvotes: entity.upvotes,
+                downvotes: entity.downvotes,
+              }
+            : item,
+        ),
       );
     },
   });

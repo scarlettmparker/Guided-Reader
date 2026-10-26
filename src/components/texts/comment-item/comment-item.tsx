@@ -96,7 +96,17 @@ const CommentItem = ({ comment, annotationId, textId }: CommentItemProps) => {
         "annotations/:annotationId",
         { annotationId },
         (current) =>
-          (current ?? []).map((item) => (item.id === entity.id ? { ...item, ...entity } : item)),
+          (current ?? []).map((item) =>
+            item.id === entity.id
+              ? {
+                  ...item,
+                  myVote: entity.myVote,
+                  netScore: entity.netScore,
+                  upvotes: entity.upvotes,
+                  downvotes: entity.downvotes,
+                }
+              : item,
+          ),
       );
     },
   });

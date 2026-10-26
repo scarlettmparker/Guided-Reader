@@ -10,15 +10,12 @@ import {
   Form,
   MarkdownEditor,
 } from "@sun/components";
-import { patchPageData } from "@sun/ssr";
+import { makeCacheKey, revalidatePageData } from "@sun/ssr";
 import { createPrivateNote } from "~/server/actions/private-note";
 import { centeredDialogPosition } from "~/utils/dialog-position";
-import type { PrivateNotesQuery } from "~/generated/graphql";
 import styles from "./private-note-create-dialog.module.css";
 
 import type { AnnotationSelection } from "../annotation-create-dialog";
-
-type PrivateNote = PrivateNotesQuery["hadesQueries"]["privateNotes"]["items"][number];
 
 export type PrivateNoteCreateState = {
   /**
@@ -88,12 +85,7 @@ const PrivateNoteCreateDialog = (props: PrivateNoteCreateDialogProps) => {
           endOffset,
           body: trimmed,
         });
-        patchPageData<PrivateNote[]>(
-          "privateNotes",
-          "privateNotes/:textId",
-          { textId },
-          (current) => [...(current ?? []), response.note],
-        );
+        revalidatePageData([makeCacheKey("privateNotes/:textId", { textId })]);
         setBody("");
         onOpenChange(false);
         onCreated?.(response.note.id);

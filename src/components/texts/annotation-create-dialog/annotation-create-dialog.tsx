@@ -10,13 +10,10 @@ import {
   Form,
   MarkdownEditor,
 } from "@sun/components";
-import { patchPageData } from "@sun/ssr";
+import { makeCacheKey, revalidatePageData } from "@sun/ssr";
 import { createAnnotation } from "~/server/actions/annotation";
 import { centeredDialogPosition } from "~/utils/dialog-position";
-import type { ListAnnotationsQuery } from "~/generated/graphql";
 import styles from "./annotation-create-dialog.module.css";
-
-type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
 
 const TITLE_SNIPPET_LIMIT = 60;
 
@@ -126,10 +123,7 @@ const AnnotationCreateDialog = ({
           endOffset,
           body: trimmed,
         });
-        patchPageData<Annotation[]>("annotations", "texts/:id", { id: textId }, (current) => [
-          ...(current ?? []),
-          response.annotation,
-        ]);
+        revalidatePageData([makeCacheKey("texts/:id", { id: textId })]);
         setBody("");
         onOpenChange(false);
         onCreated?.(response.annotation.id);

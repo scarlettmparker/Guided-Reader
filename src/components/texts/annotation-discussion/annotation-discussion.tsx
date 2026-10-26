@@ -8,15 +8,14 @@ import {
   Form,
   MarkdownEditor,
 } from "@sun/components";
-import { patchPageData } from "@sun/ssr";
+import { makeCacheKey, patchPageData, revalidatePageData } from "@sun/ssr";
 import { addComment } from "~/server/actions/annotation";
-import type { ListAnnotationsQuery, ListCommentsQuery } from "~/generated/graphql";
+import type { ListAnnotationsQuery } from "~/generated/graphql";
 import AnnotationReplies from "../annotation-replies";
 import RepliesSkeleton from "./skeletons/replies-skeleton";
 import styles from "./annotation-discussion.module.css";
 
 type Annotation = ListAnnotationsQuery["hadesQueries"]["annotations"]["items"][number];
-type Comment = ListCommentsQuery["hadesQueries"]["comments"]["items"][number];
 
 type AnnotationDiscussionProps = {
   /**
@@ -74,17 +73,14 @@ const AnnotationDiscussion = ({
     if (!trimmed) return;
     startTransition(async () => {
       try {
-        const response = await addComment({
+        await addComment({
           annotationId,
           parentId: null,
           body: trimmed,
         });
-        patchPageData<Comment[]>(
-          "comments",
-          "annotations/:annotationId",
-          { annotationId },
-          (current) => [...(current ?? []), response.comment],
-        );
+        revalidatePageData([
+          makeCacheKey("annotations/:annotationId", { annotationId }),
+        ]);
         patchPageData<Annotation[]>("annotations", "texts/:id", { id: textId }, (current) =>
           (current ?? []).map((item) =>
             item.id === annotationId ? { ...item, replyCount: item.replyCount + 1 } : item,
