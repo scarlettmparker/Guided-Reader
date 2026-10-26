@@ -4,10 +4,10 @@ node_modules
 dist
 coverage
 stats.html
-cypress
-cypress-results
+e2e/.auth
+e2e/node_modules
+e2e/test-results
+e2e/playwright-report
 *.md
-e2e.sh
-docker-compose.e2e.yml
 .env*
 *.log

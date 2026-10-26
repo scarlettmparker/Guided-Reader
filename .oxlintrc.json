@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": ["**/dist/**", "**/coverage/**", "**/vm/**", "**/cypress/**"],
+  "ignorePatterns": ["**/dist/**", "**/coverage/**", "**/vm/**", "**/e2e/node_modules/**"],
   "rules": {
     "no-unused-vars": [
       "warn",
@@ -11,6 +11,7 @@
       }
     ],
     "unicorn/no-useless-spread": "off",
-    "unicorn/no-empty-file": "off"
+    "unicorn/no-empty-file": "off",
+    "no-empty-pattern": "off"
   }
 }
